@@ -1,0 +1,53 @@
+================================================================================
+  FINISH RENDER — 4 CLICKS (you are almost done)
+================================================================================
+
+GitHub: DONE  https://github.com/shyam1-jpg/aurafx-elite
+Render: NOT LIVE YET (404)
+Domain: DNS not set yet
+
+================================================================================
+ON THE RENDER PAGE RIGHT NOW — DO EXACTLY THIS:
+================================================================================
+
+CLICK 1 — Sign in
+  Click the big  [ GitHub ]  button
+  (Use your shyam1-jpg GitHub account)
+
+CLICK 2 — After login, if asked to install Render on GitHub
+  Click  Authorize Render  or  Install
+
+CLICK 3 — Connect repository
+  Find:  shyam1-jpg / aurafx-elite
+  Click  Connect  (or tick box + Continue)
+
+CLICK 4 — Deploy
+  You should see: Service aurafx-elite, root website, npm install, npm start
+  Click  Apply  (blue button, bottom right)
+
+WAIT 3-5 minutes until badge says  LIVE  (green)
+
+TEST: https://aurafx-elite.onrender.com
+  Good = AuraFX home page
+  Bad  = still 404 = Blueprint not applied yet
+
+================================================================================
+THEN — Custom domain (Render)
+================================================================================
+  Your service → Settings → Custom Domains → Add:
+    aurafxelite.com
+    www.aurafxelite.com
+
+================================================================================
+THEN — GoDaddy DNS
+================================================================================
+  https://dcc.godaddy.com/manage/aurafxelite.com/dns
+
+  A      @     216.24.57.1
+  CNAME  www   aurafx-elite.onrender.com
+
+  SAVE ALL
+
+================================================================================
+Reply "live" when Render shows green LIVE — I will check the site for you.
+================================================================================

@@ -1,0 +1,13 @@
+{
+  "name": "aurafx-elite",
+  "private": true,
+  "version": "1.0.0",
+  "description": "AuraFX Elite — Render deploy entry (works even if root directory is not set to website)",
+  "scripts": {
+    "postinstall": "npm install --prefix website",
+    "start": "node website/simple-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

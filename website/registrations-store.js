@@ -10,9 +10,10 @@ const REG_FILE = path.join(DATA_DIR, 'registrations.json');
 
 let sql = null;
 let initPromise = null;
+let neonDisabled = false;
 
 function useNeon() {
-  return !!DATABASE_URL;
+  return !!DATABASE_URL && !neonDisabled;
 }
 
 function ensureDataDir() {
@@ -42,32 +43,38 @@ function rowFromDb(r) {
 }
 
 async function initNeon() {
-  const { neon } = require('@neondatabase/serverless');
-  sql = neon(DATABASE_URL);
-  await sql`
-    CREATE TABLE IF NOT EXISTS registrations (
-      id TEXT PRIMARY KEY,
-      email TEXT NOT NULL UNIQUE,
-      verify_token TEXT,
-      data JSONB NOT NULL,
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `;
-  await sql`
-    CREATE INDEX IF NOT EXISTS idx_registrations_verify_token
-    ON registrations (verify_token)
-    WHERE verify_token IS NOT NULL
-  `;
+  try {
+    const { neon } = require('@neondatabase/serverless');
+    sql = neon(DATABASE_URL);
+    await sql`
+      CREATE TABLE IF NOT EXISTS registrations (
+        id TEXT PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        verify_token TEXT,
+        data JSONB NOT NULL,
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS idx_registrations_verify_token
+      ON registrations (verify_token)
+      WHERE verify_token IS NOT NULL
+    `;
 
-  const [{ count }] = await sql`SELECT COUNT(*)::int AS count FROM registrations`;
-  if (count === 0) {
-    const local = readJsonFile();
-    if (local.length) {
-      for (const row of local) {
-        await upsertNeon(row);
+    const [{ count }] = await sql`SELECT COUNT(*)::int AS count FROM registrations`;
+    if (count === 0) {
+      const local = readJsonFile();
+      if (local.length) {
+        for (const row of local) {
+          await upsertNeon(row);
+        }
+        console.log('[AuraFX] Imported', local.length, 'registration(s) from JSON into Neon');
       }
-      console.log('[AuraFX] Imported', local.length, 'registration(s) from JSON into Neon');
     }
+  } catch (e) {
+    neonDisabled = true;
+    sql = null;
+    console.error('[AuraFX] Neon unavailable — using file storage:', e.message);
   }
 }
 

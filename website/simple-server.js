@@ -768,8 +768,8 @@ function startServer() {
 regStore.init()
   .then(startServer)
   .catch((e) => {
-    console.error('[AuraFX] Storage init failed:', e.message);
-    process.exit(1);
+    console.error('[AuraFX] Storage init warning (starting anyway):', e.message);
+    startServer();
   });
 
 server.on('error', (e) => {
