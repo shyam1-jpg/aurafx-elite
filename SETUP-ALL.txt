@@ -1,0 +1,55 @@
+================================================================================
+  SET UP ALL — 4 steps (you + me)
+================================================================================
+
+I HAVE ALREADY DONE ON YOUR PC:
+  ✓ Website built and tested locally
+  ✓ Live gold/forex prices (not old $3285)
+  ✓ PayPal security ready
+  ✓ Git committed on branch main
+  ✓ Render config (render.yaml) ready
+  ✓ Opened GitHub, Render, GoDaddy in your browser
+
+I CANNOT DO WITHOUT YOUR LOGIN (your accounts):
+  • GitHub — push code
+  • Render — host website
+  • GoDaddy — connect aurafxelite.com
+
+================================================================================
+DO THIS NOW (about 10 minutes total)
+================================================================================
+
+STEP 1 — GitHub (2 min)
+  Open Cursor Terminal (Ctrl+`) and paste:
+
+    cd "C:\Users\shyam prasad\OneDrive - Avanti Schools Trust\Desktop\AuraFX-Elite"
+    gh auth login -h github.com -p https -w
+
+  Browser opens → enter the 8-character code from terminal → Authorize
+
+STEP 2 — One click push (1 min)
+  Double-click on Desktop:
+
+    ONE-CLICK-LIVE-AURAFX.bat
+
+  (Or in AuraFX-Elite folder: ONE-CLICK-LIVE.bat)
+
+STEP 3 — Render (5 min)
+  Browser: Sign in with GitHub
+  New + → Blueprint → aurafx-elite → Apply
+  Wait until green LIVE
+  Settings → Custom Domains → add aurafxelite.com + www.aurafxelite.com
+
+STEP 4 — GoDaddy DNS (2 min)
+  https://dcc.godaddy.com/manage/aurafxelite.com/dns
+  A     @    216.24.57.1
+  CNAME www  aurafx-elite.onrender.com
+  Save All
+
+================================================================================
+THEN YOUR SITE IS LIVE:
+  https://aurafx-elite.onrender.com  (immediately after Render)
+  https://aurafxelite.com            (after DNS, 15-60 min)
+
+Reply "done step 2" and I will verify everything for you.
+================================================================================
