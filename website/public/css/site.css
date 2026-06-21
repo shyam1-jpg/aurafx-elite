@@ -59,6 +59,7 @@ a:hover { text-decoration: underline; }
 
 .hero { text-align: center; padding: 4rem 1.5rem 3rem; max-width: 900px; margin: 0 auto; }
 .hero-logo {
+  border-radius: 18px;
   width: 96px; height: 96px; margin: 0 auto 1rem; display: block;
   border-radius: 20px; box-shadow: 0 0 32px rgba(212, 175, 55, .25);
 }

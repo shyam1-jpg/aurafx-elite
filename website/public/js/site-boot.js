@@ -4,6 +4,7 @@
 (function () {
   var isFile = window.location.protocol === 'file:';
   window.AURAFX_API_BASE = isFile ? 'http://127.0.0.1:3847' : '';
+  var LOGO = '/assets/aura-icon-140.png';
 
   function assetUrl(path) {
     return (window.AURAFX_API_BASE || '') + path;
@@ -13,12 +14,12 @@
     if (!document.querySelector('link[data-aurafx-icon]')) {
       var link = document.createElement('link');
       link.rel = 'icon';
-      link.type = 'image/svg+xml';
-      link.href = assetUrl('/assets/aura-logo.svg');
+      link.type = 'image/png';
+      link.href = assetUrl(LOGO);
       link.setAttribute('data-aurafx-icon', '1');
       document.head.appendChild(link);
     }
-    var src = assetUrl('/assets/aura-logo.svg');
+    var src = assetUrl(LOGO);
     document.querySelectorAll('.logo, .nav-logo').forEach(function (el) {
       if (el.querySelector('.logo-img')) return;
       var img = document.createElement('img');
@@ -48,18 +49,29 @@
 
   (async function () {
     try {
-      var r = await fetch(window.AURAFX_API_BASE + '/api/status');
-      var d = await r.json();
+      var statusR = await fetch(window.AURAFX_API_BASE + '/api/status', { cache: 'no-store' });
+      var d = await statusR.json();
+      var goldLine = '';
+      try {
+        var quotesR = await fetch(window.AURAFX_API_BASE + '/api/quotes', { cache: 'no-store' });
+        if (quotesR.ok) {
+          var q = await quotesR.json();
+          if (q.metals && q.metals.XAUUSD) {
+            goldLine = ' · Gold $' + Number(q.metals.XAUUSD).toFixed(1);
+          }
+        }
+      } catch (_) { /* quotes optional */ }
       pill.className = 'live-pill online';
+      var nextEv = d.nextEvent && d.nextEvent.title ? d.nextEvent.title : (d.nextEvent || '');
       pill.innerHTML =
-        '<span class="dot"></span> LIVE — Mood: ' + d.mood +
-        (d.nextEvent ? ' · Next: ' + d.nextEvent : '');
+        '<span class="dot"></span> LIVE' + goldLine + ' · Mood: ' + (d.mood || '—') +
+        (nextEv ? ' · Next: ' + nextEv : '');
       var dn = document.getElementById('domainNote');
-      if (dn && window.location.hostname === 'aurafxelite.com') dn.classList.remove('hidden');
+      if (dn && window.location.hostname.indexOf('aurafxelite.com') >= 0) dn.classList.remove('hidden');
     } catch (e) {
       pill.textContent = isFile
         ? 'Start START-LIVE-WEBSITE.bat for live buttons & API'
-        : 'Start server: node website/simple-server.js';
+        : 'Market feed loading — refresh in a few seconds';
       pill.style.borderColor = '#e67e22';
       pill.style.color = '#e67e22';
     }

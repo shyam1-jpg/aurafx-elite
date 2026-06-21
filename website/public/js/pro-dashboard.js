@@ -1,6 +1,5 @@
 const API = window.AURAFX_API_BASE != null ? window.AURAFX_API_BASE : (window.location.protocol === 'file:' ? 'http://127.0.0.1:3847' : '');
-const JOURNAL_KEY = 'aurafx_pro_journal';
-const IS_FILE_MODE = window.location.protocol === 'file:';
+const IS_LIVE_HOST = window.location.protocol !== 'file:' && /aurafxelite\.com|onrender\.com/i.test(window.location.hostname || '');
 let forceDemo = IS_FILE_MODE;
 
 const $ = (id) => document.getElementById(id);
@@ -195,7 +194,9 @@ async function refresh() {
   } catch {
     forceDemo = true;
     applyData(getDemoData(), { mood: 'CAUTION', calendar: [], breakingNews: [] });
-    setStatus('demo', 'Run START-LIVE-WEBSITE.bat on your PC for live data');
+    setStatus('demo', window.location.hostname.indexOf('aurafxelite.com') >= 0 || window.location.hostname.indexOf('onrender.com') >= 0
+      ? 'Market feed loading — refresh page (server is live)'
+      : 'Run START-LIVE-WEBSITE.bat on your PC for live data');
   }
 }
 

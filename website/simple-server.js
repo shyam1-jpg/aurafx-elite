@@ -676,7 +676,14 @@ const server = http.createServer((req, res) => {
 
   if (url === '/api/health') return json(res, 200, { ok: true, mode: 'simple-server', port: PORT });
   if (url === '/api/wiring') return json(res, 200, apiWiring());
-  if (url === '/api/status') return json(res, 200, { website: 'online', mood: cache.mood });
+  if (url === '/api/status') {
+    return json(res, 200, {
+      website: 'online',
+      mood: cache.mood,
+      nextEvent: cache.nextEvent,
+      updatedAt: cache.updatedAt
+    });
+  }
   if (url === '/api/pro-summary') return json(res, 200, apiProSummary());
   if (url === '/api/risk-summary') {
     return json(res, 200, {
