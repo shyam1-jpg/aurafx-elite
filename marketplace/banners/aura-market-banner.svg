@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="AuraFX Elite Banner">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0c12"/>
+      <stop offset="100%" stop-color="#1a2240"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f4d67a"/>
+      <stop offset="100%" stop-color="#9a7b28"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1050" cy="120" r="180" fill="#d4af37" opacity="0.08"/>
+  <circle cx="150" cy="520" r="220" fill="#3498db" opacity="0.06"/>
+  <text x="80" y="200" fill="url(#gold)" font-family="Segoe UI, Arial, sans-serif" font-size="72" font-weight="700">AuraFX Elite</text>
+  <text x="80" y="270" fill="#e8eaf2" font-family="Segoe UI, Arial, sans-serif" font-size="32">Forex &amp; Gold Signals � Risk Guardian � MT5</text>
+  <text x="80" y="340" fill="#8b90a5" font-family="Segoe UI, Arial, sans-serif" font-size="22">BUY � SELL � COVER | Live News Warnings | Marketplace Edition</text>
+  <rect x="80" y="400" width="280" height="8" fill="#d4af37" opacity="0.6"/>
+  <rect x="80" y="430" width="200" height="50" rx="8" fill="none" stroke="#2ecc71" stroke-width="2"/>
+  <text x="105" y="462" fill="#2ecc71" font-family="Segoe UI" font-size="20">BUY</text>
+  <rect x="300" y="430" width="200" height="50" rx="8" fill="none" stroke="#e74c3c" stroke-width="2"/>
+  <text x="318" y="462" fill="#e74c3c" font-family="Segoe UI" font-size="20">SELL</text>
+  <rect x="520" y="430" width="200" height="50" rx="8" fill="none" stroke="#3498db" stroke-width="2"/>
+  <text x="530" y="462" fill="#3498db" font-family="Segoe UI" font-size="20">COVER</text>
+  <text x="80" y="560" fill="#8b90a5" font-family="Segoe UI" font-size="16">Not financial advice � Risk warning tool � MetaTrader 5</text>
+</svg>

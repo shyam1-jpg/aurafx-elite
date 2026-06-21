@@ -1,0 +1,72 @@
+AURAFX ELITE — HOW TO TEST IF WORKING
+=====================================
+
+PART A — WEB DASHBOARD (5 minutes)
+-----------------------------------
+1. Double-click: TEST-START.bat
+   (in folder: Desktop\AuraFX-Elite)
+
+2. Two browser tabs should open:
+   - pro-dashboard  (scores, checklist, journal)
+   - risk-dashboard (news, risk mood)
+
+3. WORKING if you see:
+   [OK] Bullish/Bearish percentage bars
+   [OK] Checklist with green checkmarks or red boxes
+   [OK] Session: London / Asian / New York (not "Offline" only)
+   [OK] Black/gold theme loads (not blank white page)
+
+4. If "Server Offline":
+   - Keep the black "AuraFX API" window open
+   - Or run manually:
+     cd news-risk-server
+     node test-server.js
+
+PART B — METATRADER 5 (10 minutes)
+----------------------------------
+1. Open MetaTrader 5
+
+2. File -> Open Data Folder
+
+3. Copy folder contents:
+   FROM: Desktop\AuraFX-Elite\MQL5\
+   TO:   <Data Folder>\MQL5\
+   (merge Indicators, Experts, Include, Presets)
+
+4. Press F4 (MetaEditor)
+
+5. Open and Compile (F7) — must show 0 errors:
+   - Indicators\AuraFX_Elite_Signals.mq5
+   - Indicators\AuraFX_Pro_Assistant.mq5
+   - Indicators\AuraFX_Risk_Guardian.mq5
+
+6. In MT5 Navigator:
+   Indicators -> Custom -> AuraFX_Pro_Assistant
+   Drag onto XAUUSD or EURUSD chart (H1)
+
+7. WORKING if you see:
+   [OK] Gold/black panel on chart "AURAFX PRO ASSISTANT"
+   [OK] Score number (0-100) and Bull/Bear %%
+   [OK] Checklist X/9 PASS or WAIT
+   [OK] Experts tab has no red errors
+
+PART C — DEMO SIGNAL TEST
+-------------------------
+1. Attach AuraFX_Elite_Signals on EURUSD H1
+2. Wait for new candles — arrows may appear (BUY green / SELL red)
+3. Enable Algo Trading only if testing EA on DEMO account
+
+PART D — COMMON PROBLEMS
+------------------------
+Problem: Compile error "cannot open AuraFX_Core.mqh"
+Fix: Copy AuraFX_Core.mqh to MQL5\Include\
+
+Problem: No calendar / news in MT5
+Fix: View -> Calendar in MT5, connect broker
+
+Problem: npm not found
+Fix: Use test-server.js (no npm needed):
+     node test-server.js
+
+=====================================
+Not financial advice. Test on DEMO first.

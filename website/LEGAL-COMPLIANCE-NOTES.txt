@@ -1,0 +1,37 @@
+AURAFX — LEGAL & COMPLIANCE CHECKLIST (OWNER)
+=============================================
+
+These pages are TEMPLATES to reduce common gaps. They are NOT a substitute for
+a qualified lawyer in your jurisdiction (UK FCA, EU MiFID, US SEC/CFTC, etc.).
+
+Pages added on the website:
+  terms.html              — Terms & Conditions (client contract)
+  privacy.html            — Privacy Policy (GDPR-style)
+  risk-warning.html       — Trading / CFD risk (FCA-style warnings)
+  responsible-trading.html — Addiction / “gambling-like” behaviour policy
+  regulatory.html         — Who regulates you (default: NOT FCA authorised)
+  refunds.html            — Refunds & cancellations
+  cookies.html            — Cookie policy
+
+Registration requires tick-box acceptance of all mandatory policies.
+
+YOU MUST CUSTOMISE:
+  1. legal/regulatory.html — Add your real company name, address, company number
+  2. If FCA authorised — update regulatory.html with FRN and permissions
+  3. If NOT regulated — keep clear “not regulated” wording (default)
+  4. PayPal / MQL5 refund rules in refunds.html
+  5. Data controller email in privacy.html
+  6. Restricted countries list if you block US/EEA etc.
+
+UK FCA (if you promote CFDs to UK retail):
+  — Typically need FCA authorisation or exemption; retail CFD promotion is restricted
+  — Risk warnings: % of retail lose money, leverage risks, etc. (see risk-warning.html)
+
+EU (MiFID II / ESMA):
+  — Product governance, appropriateness, marketing restrictions
+
+Gambling vs trading:
+  — This site sells SOFTWARE / education / signals — not casino gambling
+  — responsible-trading.html covers addictive trading behaviour (GamCare-style)
+
+Have a solicitor review before going live on a public domain.

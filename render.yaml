@@ -1,0 +1,28 @@
+# Render.com — deploy AuraFX website (aurafxelite.com)
+# Dashboard: New Blueprint or Web Service → connect repo, root: website
+
+services:
+  - type: web
+    name: aurafx-elite
+    runtime: node
+    rootDir: website
+    buildCommand: npm install
+    startCommand: npm start
+    plan: starter
+    envVars:
+      - key: SITE_URL
+        value: https://aurafxelite.com
+      - key: NODE_VERSION
+        value: "20"
+      - key: HOST
+        value: 0.0.0.0
+      - key: RENDER
+        value: "true"
+      - key: INSTITUTIONAL_MODE
+        value: demo
+      - key: EMAIL_AUTO_WELCOME
+        value: "0"
+      - key: QUOTES_CACHE_MS
+        value: "30000"
+      - key: AURAFX_OWNER_KEY
+        generateValue: true

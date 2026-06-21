@@ -1,0 +1,31 @@
+{
+  "product": "AuraFX_Elite_EA",
+  "symbol": "XAUUSD",
+  "timeframe": "H1",
+  "dateFrom": "2024-01-01",
+  "dateTo": "2025-12-31",
+  "model": "Every tick based on real ticks",
+  "preset": "AuraFX_EA_XAUUSD_H1.set",
+  "broker": "",
+  "netProfit": "",
+  "profitFactor": "",
+  "totalTrades": "",
+  "winRate": "",
+  "maxDrawdownPercent": "",
+  "sharpeRatio": "",
+  "expectedPayoff": "",
+  "recoveryFactor": "",
+  "perSymbol": [
+    { "symbol": "EURUSD", "timeframe": "H1", "trades": "", "winRate": "", "netProfit": "", "maxDD": "" },
+    { "symbol": "GBPUSD", "timeframe": "H1", "trades": "", "winRate": "", "netProfit": "", "maxDD": "" },
+    { "symbol": "XAUUSD", "timeframe": "H1", "trades": "", "winRate": "", "netProfit": "", "maxDD": "" }
+  ],
+  "riskGuardian": {
+    "newsWarnings": "",
+    "adverseWarnings": "",
+    "notes": ""
+  },
+  "testerNotes": "",
+  "marketplaceChecklist": [],
+  "disclaimer": "Past performance does not guarantee future results. Not financial advice."
+}

@@ -1,0 +1,50 @@
+================================================================================
+  MONDAY — Demo test before going live (AuraFX Elite)
+================================================================================
+
+GOAL: Prove signals + panel work on DEMO chart — not real money yet.
+
+PART A — Website (no MT5 needed)
+--------------------------------
+1. Double-click START-LIVE-WEBSITE.bat
+2. Open http://127.0.0.1:3847/
+3. Green LIVE pill on home = OK
+4. Open dashboard.html — news, mood, scores load
+5. Open hard-sell.html — BUY / SELL / COVER buttons work
+
+PART B — MetaTrader 5 (demo account)
+------------------------------------
+1. Download MT5: https://www.metatrader5.com/en/download
+   OR install from your broker (IC Markets, Pepperstone, etc.)
+2. Log in with DEMO account (not live money)
+3. Double-click INSTALL-MT5-AURAFX.bat (copies files)
+4. All .ex5 files are built by scripts\compile-mt5.ps1 (or DO-ALL-MONDAY.bat)
+   Confirmed: AuraFX_Elite_Signals.ex5, AuraFX_Elite_EA.ex5, Risk_Guardian, Pro_Assistant, Pro_EA
+5. Chart: XAUUSD or EURUSD, timeframe H1
+6. Navigator → Indicators → Custom → AuraFX_Elite_Signals → drag to chart
+7. You should see:
+   - Gold/dark panel on chart
+   - BUY / SELL / COVER arrows over time
+   - Win rate stats on panel
+
+PART C — Strategy Tester (optional, same day)
+---------------------------------------------
+1. View → Strategy Tester
+2. Expert: AuraFX_Elite_EA
+3. Symbol: XAUUSD, Period: H1, Deposit: 10000
+4. Start — check equity curve (demo backtest only)
+
+PART D — MQL5 Market listing (seller — you do in browser)
+---------------------------------------------------------
+1. Log in at https://www.mql5.com (change password if shared in chat!)
+2. Profile → Seller → Add product
+3. Copy text from MQL5-SELLER-SUBMIT.txt
+4. Upload logo: marketplace\icons\aura-icon-200.png
+5. Submit for moderation (can take days) — test locally first anyway
+
+PASS = you see panel + signals on demo chart Monday.
+FAIL = reply with screenshot of error (Experts tab or compile window).
+
+MT4: coming next week — use MT5 for Monday test.
+
+================================================================================

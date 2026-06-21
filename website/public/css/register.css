@@ -1,0 +1,71 @@
+.reg-section { max-width: 760px; }
+.reg-success-banner {
+  margin-bottom: 1.25rem; padding: 1rem 1.25rem; border-radius: 10px; text-align: left;
+  border: 1px solid rgba(46, 204, 113, 0.5); background: rgba(46, 204, 113, 0.12);
+}
+.reg-success-banner.warn {
+  border-color: rgba(230, 126, 34, 0.5); background: rgba(230, 126, 34, 0.1);
+}
+.reg-success-banner h3 { color: var(--bull); font-size: 1.05rem; margin-bottom: .5rem; }
+.reg-success-banner p { font-size: .88rem; color: var(--text); line-height: 1.55; margin: 0; }
+.reg-success-banner code { font-size: .78rem; color: var(--gold); }
+.reg-lead {
+  text-align: center; color: var(--muted); font-size: .92rem;
+  margin: 0 auto 1.25rem; max-width: 520px; line-height: 1.6;
+}
+.reg-steps {
+  display: flex; justify-content: center; gap: .5rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+}
+.reg-step {
+  font-size: .75rem; padding: .35rem .75rem; border-radius: 20px;
+  border: 1px solid #333; color: var(--muted);
+}
+.reg-step.active { border-color: var(--gold); color: var(--gold); background: rgba(212,175,55,.08); }
+.reg-step.done { border-color: var(--bull); color: var(--bull); }
+.reg-form { text-align: left; padding: 1.5rem; }
+.reg-panel[hidden] { display: none !important; }
+.reg-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem; margin-bottom: 1rem;
+}
+.reg-field label { display: block; font-size: .78rem; color: var(--muted); margin-bottom: .35rem; }
+.reg-field input, .reg-field select, .reg-field textarea {
+  width: 100%; padding: .55rem .65rem; background: #080c14;
+  border: 1px solid #333; border-radius: 8px; color: var(--text); font-size: .9rem; font-family: inherit;
+}
+.reg-field input:focus, .reg-field select:focus, .reg-field textarea:focus {
+  outline: none; border-color: var(--gold);
+}
+.reg-full { grid-column: 1 / -1; }
+.reg-check {
+  display: flex; align-items: flex-start; gap: .5rem;
+  font-size: .8rem; color: var(--muted); margin-bottom: 1rem; cursor: pointer;
+}
+.reg-actions { display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin-top: .5rem; }
+.reg-msg { text-align: center; font-size: .88rem; min-height: 1.25rem; margin: .75rem 0; }
+.reg-msg.ok { color: var(--bull); }
+.reg-msg.err { color: var(--bear); }
+.reg-note { text-align: center; font-size: .78rem; color: var(--muted); margin-top: 1.25rem; }
+.reg-note a { color: var(--gold); }
+
+.plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.plan-card {
+  border: 1px solid #333; border-radius: 10px; padding: 1rem; cursor: pointer;
+  text-align: center; transition: border-color .2s, background .2s;
+}
+.plan-card:hover { border-color: var(--gold); }
+.plan-card.selected { border-color: var(--gold); background: rgba(212,175,55,.1); box-shadow: 0 0 20px rgba(212,175,55,.12); }
+.plan-card h4 { color: var(--gold); font-size: .9rem; margin-bottom: .35rem; }
+.plan-price { font-size: 1.35rem; font-weight: 700; margin-bottom: .25rem; }
+.plan-card p { font-size: .72rem; color: var(--muted); }
+
+.reg-pay-summary {
+  background: #080c14; border: 1px solid #333; border-radius: 8px;
+  padding: .75rem 1rem; font-size: .88rem; margin-bottom: 1rem;
+}
+.reg-paypal-box { min-height: 52px; margin-bottom: 1rem; }
+.reg-paypal-note {
+  font-size: .8rem; color: #e67e22; background: rgba(230,126,34,.1);
+  border: 1px solid rgba(230,126,34,.3); padding: .6rem; border-radius: 8px; margin-bottom: 1rem;
+}
+.reg-paypal-fallback { text-align: center; margin-bottom: 1rem; }

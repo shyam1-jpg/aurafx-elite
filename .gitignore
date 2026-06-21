@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+.DS_Store
+Thumbs.db
+website/node_modules/
+website/.env
+website/data/registrations.json

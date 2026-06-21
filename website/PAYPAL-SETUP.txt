@@ -1,0 +1,71 @@
+AURAFX — PAYPAL SETUP FOR CLIENT PAYMENTS
+=========================================
+
+WHY YOUR TEST FAILED
+--------------------
+PayPal showed "things don't appear to be working" because:
+  • No website/.env file with PayPal keys on your PC
+  • Backup link used placeholder email YOUR_PAYPAL_EMAIL
+  • Server could not verify payments (no Client Secret)
+
+SETUP (15 minutes)
+------------------
+
+1. PayPal Business account: https://www.paypal.com/business
+
+2. Developer Dashboard → Sandbox (for testing):
+   https://developer.paypal.com/dashboard/applications/sandbox
+   Create App → copy:
+     • Client ID
+     • Secret (click Show)
+
+3. Create website/.env (copy from .env.example):
+
+   PAYPAL_CLIENT_ID=your_sandbox_client_id
+   PAYPAL_CLIENT_SECRET=your_sandbox_secret
+   PAYPAL_MODE=sandbox
+   PAYPAL_BUSINESS_EMAIL=your-sandbox-business@email.com
+
+   # Local testing only — lets you click "I completed payment" without PayPal
+   ALLOW_MANUAL_PAYMENT_CONFIRM=1
+
+   # Optional — encrypt phone/address in database (generate 64 hex chars):
+   # DATA_ENCRYPTION_KEY=
+
+4. Restart server:
+   cd website
+   npm install
+   node simple-server.js
+
+5. Test registration:
+   http://127.0.0.1:3847/register.html?plan=mt5_rent
+
+6. Sandbox buyer account (PayPal Developer → Sandbox → Accounts):
+   Use Personal test account email/password in PayPal popup.
+
+SECURITY (how payments are protected)
+-------------------------------------
+  • Card numbers NEVER stored on AuraFX — PayPal processes them (PCI compliant)
+  • HTTPS on live site (Render provides TLS encryption in transit)
+  • Server verifies every PayPal order ID with PayPal API before marking "paid"
+  • Client Secret stays on server only — never in browser
+  • Optional AES-256 encryption for phone/address in registrations (DATA_ENCRYPTION_KEY)
+  • Security headers: HSTS, X-Frame-Options, nosniff on all responses
+  • Manual "I paid" button DISABLED in production (no ALLOW_MANUAL_PAYMENT_CONFIRM)
+
+GO LIVE
+-------
+  • Create LIVE app in PayPal Developer
+  • PAYPAL_MODE=live
+  • Use Live Client ID + Secret on Render environment
+  • Remove ALLOW_MANUAL_PAYMENT_CONFIRM (or set to 0)
+  • Set DATA_ENCRYPTION_KEY on Render (run: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+
+CUSTOMER JOURNEY
+----------------
+  See CUSTOMER-JOURNEY.txt in project root.
+
+VIEW PAID CLIENTS
+-----------------
+  http://127.0.0.1:3847/owner-leads.html
+  Key: AURAFX_OWNER_KEY from .env

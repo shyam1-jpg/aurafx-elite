@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify email — AuraFX Elite</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/register.css" />
+  <link rel="icon" href="assets/aura-logo.svg" type="image/svg+xml" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
+  </nav>
+  <section class="section reg-section" style="max-width:520px;text-align:center">
+    <div id="verifyBox" class="card reg-form">
+      <p>Verifying your email…</p>
+    </div>
+    <p style="margin-top:1rem"><a href="register.html">Back to registration</a> · <a href="dashboard.html">Dashboard</a></p>
+  </section>
+  <footer class="footer"><p>© AuraFX Elite</p></footer>
+  <script src="js/site-boot.js"></script>
+  <script>
+  (function () {
+    var API = window.AURAFX_API_BASE || '';
+    var box = document.getElementById('verifyBox');
+    var token = new URLSearchParams(location.search).get('token');
+    if (!token) {
+      box.innerHTML = '<h2 style="color:var(--bear)">Invalid link</h2><p>No verification token. Open the link from your email.</p>';
+      return;
+    }
+    fetch(API + '/api/verify-email?token=' + encodeURIComponent(token))
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (x) {
+        if (x.ok) {
+          box.innerHTML =
+            '<div class="reg-success-banner verified" style="margin:0">' +
+            '<h3>✓ Email verified!</h3>' +
+            '<p>Thank you, <strong>' + (x.d.fullName || 'trader') + '</strong>. Your registration is complete.</p></div>' +
+            '<a href="dashboard.html" class="btn btn-gold" style="margin-top:1.25rem">Open dashboard</a>';
+          try {
+            var c = JSON.parse(localStorage.getItem('aurafx_client') || '{}');
+            c.emailVerified = true;
+            localStorage.setItem('aurafx_client', JSON.stringify(c));
+          } catch (e) { /* ignore */ }
+        } else {
+          box.innerHTML =
+            '<h2 style="color:var(--bear)">Verification failed</h2>' +
+            '<p>' + (x.d.error || 'Link expired or already used.') + '</p>' +
+            '<p style="margin-top:1rem;font-size:.85rem">Register again or contact support@aurafxelite.com</p>';
+        }
+      })
+      .catch(function () {
+        box.innerHTML = '<p style="color:var(--bear)">Cannot reach server. Run START-LIVE-WEBSITE.bat first.</p>';
+      });
+  })();
+  </script>
+</body>
+</html>

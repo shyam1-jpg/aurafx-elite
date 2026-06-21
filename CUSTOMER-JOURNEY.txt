@@ -1,0 +1,92 @@
+================================================================================
+  AuraFX Elite — HOW CUSTOMERS REGISTER, PAY, LEARN & USE MT5
+================================================================================
+
+This is the full journey from sign-up to trading on MetaTrader 5.
+
+--------------------------------------------------------------------------------
+CHANNEL A — Website subscription (aurafxelite.com)
+--------------------------------------------------------------------------------
+
+STEP 1 — DISCOVER
+  Customer visits https://aurafxelite.com
+  Reads plans: Free dashboard, MT5 bundle ($99), monthly rent ($15), MT4 waitlist
+
+STEP 2 — REGISTER (3 steps on register.html)
+  1. Name, email, phone, country, broker, experience
+  2. Choose plan + accept legal policies (terms, privacy, risk warning)
+  3. Pay with PayPal (or Free plan → skip payment)
+
+STEP 3 — PAY (PayPal — secure, encrypted by PayPal)
+  • Card/bank details NEVER touch your AuraFX server
+  • PayPal handles payment with bank-level encryption (TLS + PCI)
+  • Your server VERIFIES the payment with PayPal before marking "paid"
+  • Customer sees success → redirected to dashboard.html
+
+STEP 4 — EMAIL VERIFICATION
+  • Verification link sent to their email (when RESEND_API_KEY is set)
+  • Confirms they own the email address
+
+STEP 5 — WEB DASHBOARD (immediate — no MT5 required)
+  dashboard.html gives:
+  • Live news & economic calendar
+  • Market mood / risk warnings
+  • Journal, screenshots, learning tools
+  • Links to MT5 install guide
+
+STEP 6 — GET MT5 SOFTWARE (two ways)
+
+  Option A — MQL5 Market (recommended for paying customers)
+    1. Install MetaTrader 5 from broker (free)
+    2. Tools → Market → search "AuraFX"
+    3. Buy/rent product → Install (MetaQuotes handles licence)
+    4. Navigator → Indicators → drag AuraFX onto chart
+
+  Option B — Website bundle ($99 plan)
+    After payment you (owner) can:
+    • Send MQL5 Market voucher / invite, OR
+    • Email install link to mt5-install.html on your site
+    Customer follows mt5-install.html steps
+
+STEP 7 — LEARN & USE ON CHART
+  • Open DEMO account first (not real money)
+  • Chart: XAUUSD or EURUSD, H1 recommended
+  • Attach AuraFX_Elite_Signals indicator
+  • Panel shows BUY / SELL / COVER signals + risk stats
+  • Optional: AuraFX_Elite_EA in Strategy Tester (backtest)
+  • Risk Guardian warns before high-impact news
+
+STEP 8 — "EARNING" (realistic expectations)
+  • Software shows signals and risk tools — NOT guaranteed profit
+  • Customer trades their own broker account
+  • They control lot size, stop loss, and when to trade
+  • AuraFX does not hold customer funds (broker does)
+  • Past performance ≠ future results (stated in legal pages)
+
+--------------------------------------------------------------------------------
+CHANNEL B — MQL5 Market only (no website registration)
+--------------------------------------------------------------------------------
+
+  Customer finds AuraFX on mql5.com → pays MetaQuotes/PayPal there
+  → downloads into MT5 automatically
+  → website dashboard is optional (free tier still available)
+
+--------------------------------------------------------------------------------
+WHAT YOU (OWNER) SEE
+--------------------------------------------------------------------------------
+
+  owner-leads.html — paid registrations (owner key required)
+  PayPal business account — actual money received
+  MQL5 seller dashboard — marketplace sales
+
+--------------------------------------------------------------------------------
+WHY PAYPAL TEST FAILED FOR YOU
+--------------------------------------------------------------------------------
+
+  PayPal is NOT configured on your server yet:
+  • No website/.env file with PAYPAL_CLIENT_ID + PAYPAL_CLIENT_SECRET
+  • Fallback link used placeholder YOUR_PAYPAL_EMAIL → PayPal error page
+
+  FIX: See PAYPAL-SETUP.txt — create Sandbox app, add keys to .env, restart server
+
+================================================================================

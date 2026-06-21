@@ -1,0 +1,7 @@
+; AuraFX Elite — GBPUSD H1 (higher volatility)
+InpTargetWinRate=75.0
+InpRsiBuyMax=61.0
+InpRsiSellMin=39.0
+InpAtrMultMin=0.38
+InpAlertsEnabled=true
+InpShowPanel=true

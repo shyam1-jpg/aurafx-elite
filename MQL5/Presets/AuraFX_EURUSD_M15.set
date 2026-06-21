@@ -1,0 +1,7 @@
+; AuraFX Elite — EURUSD M15
+InpTargetWinRate=74.0
+InpRsiBuyMax=60.0
+InpRsiSellMin=40.0
+InpAtrMultMin=0.40
+InpAlertsEnabled=true
+InpShowPanel=true

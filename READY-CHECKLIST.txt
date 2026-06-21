@@ -1,0 +1,50 @@
+================================================================================
+  AuraFX Elite — READY CHECKLIST (updated today)
+================================================================================
+
+DONE FOR YOU (automated)
+------------------------
+[OK] Website — all main pages return 200 locally (port 3847)
+[OK] hard-sell.html + aura-lite signals preview fixed
+[OK] MT5 files installed to your MetaTrader 5 data folder
+[OK] ALL 5 products compiled to .ex5 (upload these to MQL5 Market):
+     • Indicators\AuraFX_Elite_Signals.ex5
+     • Indicators\AuraFX_Risk_Guardian.ex5
+     • Indicators\AuraFX_Pro_Assistant.ex5
+     • Experts\AuraFX_Elite_EA.ex5
+     • Experts\AuraFX_Pro_EA.ex5
+[OK] MQL5 calendar API fix (AuraFX_NewsRisk.mqh)
+[OK] Git repo initialized in this folder
+[OK] render.yaml fixed (build: npm install)
+[OK] Marketplace PNG: marketplace\icons\aura-icon-200.png
+
+YOU MUST DO (I cannot log in as you)
+------------------------------------
+1. RENDER HOSTING
+   Double-click: DEPLOY-GITHUB-RENDER.bat
+   → gh auth login → push to GitHub → connect Render Blueprint
+   → wait until https://aurafx-elite.onrender.com shows your site
+
+2. GODADDY DNS (after Render is Live)
+   Double-click: OPEN-GODADDY-DNS.bat
+   • A record @ → 216.24.57.1
+   • CNAME www → aurafx-elite.onrender.com
+   • Click SAVE ALL (must not be greyed out)
+   Details: GODADDY-DNS-RECORDS.txt
+
+3. MQL5 MARKET SELLER
+   Double-click: OPEN-MQL5-SELLER.bat
+   Log in as shyam108 in YOUR browser (change password!)
+   Paste listing from MQL5-FILL-FORM.txt
+   Upload .ex5 files from MT5 folder (see paths above)
+
+4. MONDAY DEMO
+   Double-click: DO-ALL-MONDAY.bat
+   MT5 → XAUUSD H1 → drag AuraFX_Elite_Signals onto chart
+   Guide: MONDAY-DEMO-TEST.txt
+
+QUICK TEST NOW
+--------------
+START-LIVE-WEBSITE.bat → http://127.0.0.1:3847/
+
+================================================================================

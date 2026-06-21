@@ -1,0 +1,7 @@
+; AuraFX Elite — USDJPY H1
+InpTargetWinRate=75.0
+InpRsiBuyMax=63.0
+InpRsiSellMin=37.0
+InpAtrMultMin=0.36
+InpAlertsEnabled=true
+InpShowPanel=true

@@ -1,0 +1,69 @@
+================================================================================
+  AURAFX — PAY FOR HOSTING + DOMAIN (SIMPLE PLAN)
+================================================================================
+
+RECOMMENDED (easy, works with your app):
+
+  1. DOMAIN     Cloudflare.com or Namecheap.com
+                ~ $10-12 for 1 year (.com name)
+                Examples: aurafxelite.com, aurafxgold.com
+
+  2. SERVER     Render.com — Starter plan
+                ~ $7 per month (always online, no sleep)
+                NO cold start like free tier
+
+  3. SSL        Included free (https://)
+
+TOTAL TODAY:  about $18  ($11 domain + $7 first month)
+EACH MONTH:   about $7
+6 MONTHS:     about $53 total hosting + domain
+
+================================================================================
+ORDER TO DO IT (today)
+================================================================================
+
+[1] Buy domain (10 min)
+    → cloudflare.com OR namecheap.com
+    → search name → pay
+
+[2] GitHub (10 min) — FREE
+    → github.com → new repo "aurafx-elite"
+    → upload Desktop\AuraFX-Elite folder
+
+[3] Render paid server (15 min)
+    → render.com → sign up
+    → New Web Service → connect GitHub
+    → Root Directory: website
+    → Build: npm install
+    → Start: npm start
+    → Instance: STARTER ($7)  ← NOT Free
+    → Add credit card in Billing
+
+[4] Connect domain (15 min)
+    → Render → Settings → Custom Domains
+    → Add www.yourdomain.com
+    → Copy DNS records to Cloudflare
+    → Wait for green HTTPS lock
+
+[5] Test
+    → https://www.yourdomain.com
+    → https://www.yourdomain.com/dashboard.html
+
+Full guide: website\PAID-HOSTING-SETUP.md
+
+================================================================================
+DO NOT BUY (wrong for this app)
+================================================================================
+  × GoDaddy $3 "website builder" — not Node.js
+  × Hostinger shared hosting — PHP only
+  × Random "lifetime $20 hosting" ads — scams
+
+================================================================================
+MT5 / MT4 (next week) — still FREE from broker
+================================================================================
+  MetaTrader platform = $0
+  You only pay broker when you TRADE
+
+MQL5 Market when you sell product = $0 to list, fee per sale
+
+================================================================================

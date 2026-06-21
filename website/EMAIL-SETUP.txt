@@ -1,0 +1,65 @@
+AURAFX — AUTO EMAIL TO CLIENTS (100–2000+)
+============================================
+
+WHAT YOU GET
+------------
+1. Client registers → "Registration successful" on screen + verification email with link
+2. Client clicks link → verify-email.html → email marked verified in owner leads
+3. Client registers + ticks "marketing opt-in" → welcome after verified (optional)
+2. Owner page: generate daily forecast draft (date, mood, news from your server)
+3. Optional AI polish (OpenAI key)
+4. Preview fancy HTML email
+5. One click → same email to ALL opted-in clients (runs in background)
+
+OWNER PAGE (private — do not link on public home):
+  http://127.0.0.1:3847/owner-email.html
+
+SETUP (15 minutes)
+------------------
+1. Sign up: https://resend.com (free tier ~100 emails/day; paid for 2000+)
+
+2. Verify your domain on Resend (after GoDaddy DNS):
+   - Add DNS records Resend gives you in GoDaddy DNS for aurafxelite.com
+
+3. Create API key in Resend dashboard
+
+4. Before starting server (Windows CMD):
+   set RESEND_API_KEY=re_xxxxxxxx
+   set EMAIL_FROM=AuraFX Elite <hello@aurafxelite.com>
+   set EMAIL_REPLY_TO=support@aurafxelite.com
+   set SITE_URL=https://aurafxelite.com
+   set EMAIL_AUTO_WELCOME=1
+   set AURAFX_OWNER_KEY=your_secret_key
+
+   Optional AI drafts:
+   set OPENAI_API_KEY=sk-...
+   set OPENAI_MODEL=gpt-4o-mini
+
+5. node simple-server.js  (or START-LIVE-WEBSITE.bat after adding env to bat)
+
+SEND A FORECAST TO EVERYONE
+---------------------------
+1. Open owner-email.html
+2. Enter owner key
+3. Click "Generate draft"
+4. Edit subject/body if needed
+5. Tick "Dry run" → Send (see count)
+6. Untick dry run → Send (real)
+
+2000 CLIENTS
+------------
+- Resend paid plan required for high volume
+- Server sends 50 emails per batch (~1 sec pause between batches)
+- Keep server window OPEN until campaign finishes
+- Check log on owner-email page
+
+LEGAL
+-----
+- Only email clients who ticked marketing on register.html
+- Include risk disclaimer (template already does)
+- For UK: comply with PECR / GDPR — opt-in + unsubscribe
+
+UNSUBSCRIBE
+-----------
+Clients can reply STOP; you manually remove from registrations.json
+or add unsubscribe link later.

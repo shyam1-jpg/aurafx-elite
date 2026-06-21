@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraFX Elite — Forex & Gold Signals for MT5</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <header class="hero">
+    <div class="badge">MetaTrader 5 Marketplace Edition</div>
+    <h1>AuraFX <span>Elite</span></h1>
+    <p class="tagline">Premium Forex &amp; Gold signals with elegant Sell + Cover protection</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <span class="stat-value">76%</span>
+        <span class="stat-label">Target accuracy</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">BUY · SELL · COVER</span>
+        <span class="stat-label">Signal types</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">XAU + FX</span>
+        <span class="stat-label">Multi-asset</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card signal-card">
+      <h2>Live Signal Panel</h2>
+      <div class="panel-mock">
+        <div class="panel-title">AuraFX ELITE</div>
+        <div class="panel-row muted">EURUSD | FOREX</div>
+        <div class="panel-row signal sell" id="liveSignal">Signal: SELL</div>
+        <div class="panel-row">Win Rate: <span id="winRate">76.2</span>% / Target 76%</div>
+        <div class="panel-row muted">Wins: 78 · Losses: 24 · Total: 102</div>
+        <div class="panel-row accent">Sell + Cover protection enabled</div>
+      </div>
+      <div class="signal-buttons">
+        <button type="button" data-sig="buy" class="btn buy">BUY</button>
+        <button type="button" data-sig="sell" class="btn sell active">SELL</button>
+        <button type="button" data-sig="cover" class="btn cover">COVER</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Why traders choose AuraFX</h2>
+      <ul class="features">
+        <li><strong>Gold-optimized engine</strong> — Auto-tuned EMA, RSI &amp; MACD for XAUUSD</li>
+        <li><strong>Forex pairs</strong> — EURUSD, GBPUSD, USDJPY and all majors</li>
+        <li><strong>Cover alerts</strong> — Protect shorts and exit extended moves</li>
+        <li><strong>On-chart HUD</strong> — Obsidian + gold luxury panel in MT5</li>
+        <li><strong>Expert Advisor</strong> — Optional auto-execution with risk controls</li>
+        <li><strong>Marketplace ready</strong> — Full install guide &amp; listing copy included</li>
+      </ul>
+    </section>
+
+    <section class="card chart-card">
+      <h2>Signal visualization</h2>
+      <div class="chart-mock" aria-hidden="true">
+        <div class="candle up"></div>
+        <div class="candle down"></div>
+        <div class="candle up"></div>
+        <div class="arrow buy-a">▲</div>
+        <div class="candle down"></div>
+        <div class="arrow sell-a">▼</div>
+        <div class="candle up"></div>
+        <div class="arrow cover-a">◆</div>
+        <div class="candle up"></div>
+      </div>
+      <p class="footnote">Green ▲ Buy · Red ▼ Sell · Blue ◆ Cover</p>
+    </section>
+
+    <section class="card install-card">
+      <h2>Install in MetaTrader 5</h2>
+      <ol>
+        <li>Copy <code>MQL5</code> folder into your MT5 data directory</li>
+        <li>Open MetaEditor → Compile Indicator &amp; EA</li>
+        <li>Attach <code>AuraFX_Elite_Signals</code> to chart</li>
+        <li>Optional: Enable <code>AuraFX_Elite_EA</code> for automation</li>
+      </ol>
+      <p class="disclaimer">Trading involves risk. Past performance does not guarantee future results. Always test on demo first.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2026 AuraFX Labs · Built for MetaTrader 5 Market</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AuraFX Elite — Strategy Tester Report</title>
+  <style>
+    :root { --bg:#0a0c12; --card:#12182a; --gold:#d4af37; --text:#e8eaf2; --muted:#8b90a5; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Segoe UI,Inter,sans-serif; background:var(--bg); color:var(--text); padding:2rem; line-height:1.5; }
+    h1 { color:var(--gold); font-size:1.6rem; }
+    h2 { color:var(--gold); font-size:1rem; margin:1.5rem 0 0.6rem; text-transform:uppercase; letter-spacing:.06em; }
+    .meta { color:var(--muted); font-size:.9rem; margin:.5rem 0 1.5rem; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; }
+    .card { background:var(--card); border:1px solid rgba(212,175,55,.2); border-radius:12px; padding:1rem; }
+    .card label { display:block; font-size:.72rem; color:var(--muted); margin-bottom:.25rem; }
+    .card input,.card select,textarea { width:100%; background:#080c14; border:1px solid #333; color:var(--text); padding:.45rem .5rem; border-radius:6px; font-size:.9rem; }
+    textarea { min-height:80px; resize:vertical; }
+    table { width:100%; border-collapse:collapse; margin-top:.75rem; font-size:.85rem; }
+    th,td { border:1px solid #2a3040; padding:.5rem .6rem; text-align:left; }
+    th { background:#1a2030; color:var(--gold); }
+    .disclaimer { margin-top:2rem; padding:1rem; border:1px solid var(--gold); border-radius:8px; font-size:.8rem; color:var(--muted); }
+    .actions { margin:1.5rem 0; display:flex; gap:.6rem; flex-wrap:wrap; }
+    button { background:transparent; border:1px solid var(--gold); color:var(--gold); padding:.5rem 1rem; border-radius:8px; cursor:pointer; }
+    button.primary { background:var(--gold); color:#0a0c12; font-weight:600; }
+    @media print { body{background:#fff;color:#111;} .card{border-color:#ccc;} button{display:none;} }
+  </style>
+</head>
+<body>
+  <h1>AuraFX Elite — Strategy Tester Report</h1>
+  <p class="meta">Fill after MT5 Strategy Tester run · For MQL5 Market screenshots & internal QA</p>
+
+  <div class="actions">
+    <button type="button" class="primary" onclick="loadSample()">Load sample</button>
+    <button type="button" onclick="exportJson()">Export JSON</button>
+    <button type="button" onclick="window.print()">Print / PDF</button>
+  </div>
+
+  <h2>Test configuration</h2>
+  <div class="grid">
+    <div class="card"><label>Expert / Indicator</label><input id="product" value="AuraFX_Elite_EA" /></div>
+    <div class="card"><label>Symbol</label><input id="symbol" value="XAUUSD" /></div>
+    <div class="card"><label>Timeframe</label><input id="tf" value="H1" /></div>
+    <div class="card"><label>Date from</label><input id="dateFrom" type="date" /></div>
+    <div class="card"><label>Date to</label><input id="dateTo" type="date" /></div>
+    <div class="card"><label>Model</label><input id="model" value="Every tick based on real ticks" /></div>
+    <div class="card"><label>Preset file</label><input id="preset" value="AuraFX_EA_XAUUSD_H1.set" /></div>
+    <div class="card"><label>Broker / Server</label><input id="broker" placeholder="e.g. IC Markets Demo" /></div>
+  </div>
+
+  <h2>Performance summary</h2>
+  <div class="grid">
+    <div class="card"><label>Net profit</label><input id="netProfit" placeholder="e.g. 1240.50" /></div>
+    <div class="card"><label>Profit factor</label><input id="profitFactor" placeholder="e.g. 1.42" /></div>
+    <div class="card"><label>Total trades</label><input id="totalTrades" placeholder="e.g. 186" /></div>
+    <div class="card"><label>Win rate %</label><input id="winRate" placeholder="e.g. 76.3" /></div>
+    <div class="card"><label>Max drawdown %</label><input id="maxDD" placeholder="e.g. 12.4" /></div>
+    <div class="card"><label>Sharpe ratio</label><input id="sharpe" placeholder="optional" /></div>
+    <div class="card"><label>Expected payoff</label><input id="payoff" placeholder="optional" /></div>
+    <div class="card"><label>Recovery factor</label><input id="recovery" placeholder="optional" /></div>
+  </div>
+
+  <h2>Per-symbol results (optional)</h2>
+  <table>
+    <thead><tr><th>Symbol</th><th>TF</th><th>Trades</th><th>Win %</th><th>Net profit</th><th>Max DD %</th></tr></thead>
+    <tbody id="symbolRows">
+      <tr><td><input value="EURUSD" /></td><td><input value="H1" /></td><td><input value="" /></td><td><input value="" /></td><td><input value="" /></td><td><input value="" /></td></tr>
+      <tr><td><input value="XAUUSD" /></td><td><input value="H1" /></td><td><input value="" /></td><td><input value="" /></td><td><input value="" /></td><td><input value="" /></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Risk Guardian check</h2>
+  <div class="grid">
+    <div class="card"><label>News warnings triggered</label><input id="newsWarn" placeholder="e.g. 14" /></div>
+    <div class="card"><label>Adverse move warnings</label><input id="adverseWarn" placeholder="e.g. 6" /></div>
+    <div class="card"><label>False alarm acceptable?</label><select id="falseAlarm"><option>Yes — documented</option><option>No — needs tuning</option></select></div>
+  </div>
+
+  <h2>Notes & conclusions</h2>
+  <div class="card"><label>Tester observations</label><textarea id="notes" placeholder="Spread, slippage, visual mode issues, best sessions..."></textarea></div>
+  <div class="card" style="margin-top:1rem"><label>Marketplace claim checklist</label><textarea id="claims">□ Screenshot: equity curve attached
+□ Win rate matches live panel logic (not guaranteed forward)
+□ Disclaimer included in listing
+□ Test used demo/real tick data where possible</textarea></div>
+
+  <p class="disclaimer">Past performance from Strategy Tester does not guarantee future results. This report is for documentation and MQL5 Market compliance only. Not financial advice.</p>
+
+  <script>
+    const fields = ['product','symbol','tf','dateFrom','dateTo','model','preset','broker','netProfit','profitFactor','totalTrades','winRate','maxDD','sharpe','payoff','recovery','newsWarn','adverseWarn','falseAlarm','notes','claims'];
+    function collect() {
+      const o = {};
+      fields.forEach(id => o[id] = document.getElementById(id).value);
+      return o;
+    }
+    function loadSample() {
+      document.getElementById('netProfit').value = '842.10';
+      document.getElementById('profitFactor').value = '1.38';
+      document.getElementById('totalTrades').value = '142';
+      document.getElementById('winRate').value = '76.1';
+      document.getElementById('maxDD').value = '11.2';
+      document.getElementById('notes').value = 'Sample data for layout preview only. Replace with your Strategy Tester export.';
+    }
+    function exportJson() {
+      const blob = new Blob([JSON.stringify(collect(), null, 2)], {type:'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'AuraFX_StrategyTester_Report.json';
+      a.click();
+    }
+  </script>
+</body>
+</html>

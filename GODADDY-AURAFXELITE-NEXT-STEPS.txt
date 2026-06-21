@@ -1,0 +1,93 @@
+================================================================================
+  aurafxelite.com — GO LIVE CHECKLIST (you registered on GoDaddy ✓)
+================================================================================
+
+Your domain order is on GoDaddy. The link you shared is YOUR private checkout —
+we cannot log in for you. Follow these steps on your PC.
+
+WHAT IS DONE IN THE PROJECT ALREADY
+---------------------------------
+✓ Legal pages use aurafxelite.com and support@aurafxelite.com
+✓ Email system uses SITE_URL=https://aurafxelite.com
+✓ Server ready for Render (npm start → simple-server.js)
+✓ Register, PayPal, owner email campaigns all in one server
+
+WHAT YOU DO NEXT (order matters)
+--------------------------------
+
+STEP 1 — Finish GoDaddy (if not 100% done)
+  • GoDaddy → My Products → Domains → aurafxelite.com → Active
+  • Skip expensive "Website Builder" hosting — you only need the DOMAIN
+  • Optional: GoDaddy Email → create support@aurafxelite.com (or use Resend only)
+
+STEP 2 — Put code on GitHub (free)
+  • github.com → New repository → aurafx-elite
+  • Upload folder: Desktop\AuraFX-Elite
+
+STEP 3 — Deploy on Render.com (~$7/month)
+  • render.com → Sign up → New → Web Service → connect GitHub repo
+  • Root Directory: website
+  • Runtime: Node
+  • Build Command: (leave empty) or npm install
+  • Start Command: npm start
+  • Instance: Starter ($7) — NOT Free tier
+  • Environment variables (copy from website\.env.example):
+      SITE_URL=https://aurafxelite.com
+      AURAFX_OWNER_KEY=pick_a_long_secret_not_aurafx-owner
+      RESEND_API_KEY=re_xxxx (from resend.com)
+      EMAIL_FROM=AuraFX Elite <hello@aurafxelite.com>
+      EMAIL_REPLY_TO=support@aurafxelite.com
+      EMAIL_AUTO_WELCOME=1
+      PAYPAL_CLIENT_ID=... (when ready)
+      PAYPAL_MODE=sandbox
+  • Deploy → wait for green "Live"
+  • Test: https://YOUR-SERVICE.onrender.com/register.html
+
+STEP 4 — Connect aurafxelite.com in Render
+  • Render → your service → Settings → Custom Domains
+  • Add: aurafxelite.com
+  • Add: www.aurafxelite.com
+  • Render shows DNS records (copy them)
+
+STEP 5 — GoDaddy DNS (point domain to Render)
+  • GoDaddy → aurafxelite.com → DNS → Manage DNS
+  • Delete conflicting A/CNAME for @ and www if old parking page exists
+  • Add records Render gave you, typically:
+      Type CNAME  Name www   Value → xxxxx.onrender.com
+      Type ALIAS or A  Name @   Value → (Render root record)
+  • Save → wait 15 min to 48 hours
+
+STEP 6 — Resend email (for client forecasts)
+  • resend.com → Add domain aurafxelite.com
+  • Copy DNS records (SPF, DKIM) into GoDaddy DNS
+  • Verify domain → paste RESEND_API_KEY into Render env
+
+STEP 7 — Test live site
+  • https://aurafxelite.com
+  • https://aurafxelite.com/register.html
+  • https://aurafxelite.com/dashboard.html
+  • Owner only (do not advertise publicly yet):
+      https://aurafxelite.com/owner-email.html
+      https://aurafxelite.com/owner-leads.html
+
+STEP 8 — PayPal live (when selling)
+  • developer.paypal.com → Live app → Client ID
+  • Render env: PAYPAL_MODE=live
+
+PAGES TO KEEP PRIVATE UNTIL READY
+---------------------------------
+  owner-email.html
+  owner-leads.html
+  owner-preview.html
+  system-status.html
+
+SUPPORT EMAILS (create in GoDaddy Email or forward to Gmail)
+----------------------------------------------------------------
+  support@aurafxelite.com
+  privacy@aurafxelite.com
+  refunds@aurafxelite.com
+  complaints@aurafxelite.com
+
+Need help? Open GODADDY-AURAFXELITE-NEXT-STEPS.txt in Cursor and ask step by step.
+
+================================================================================

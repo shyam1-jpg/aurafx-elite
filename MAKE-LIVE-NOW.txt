@@ -1,0 +1,38 @@
+================================================================================
+  MAKE aurafxelite.com LIVE — 3 steps (about 20 minutes)
+================================================================================
+
+STEP 1 — GITHUB (push your code)
+--------------------------------
+  A. Double-click: DEPLOY-GITHUB-RENDER.bat
+  B. When asked, log into GitHub in the terminal (browser opens)
+  C. Create repo name: aurafx-elite (private is OK)
+  D. Command to run after login:
+       gh repo create aurafx-elite --private --source=. --remote=origin --push
+
+STEP 2 — RENDER (host the website)
+----------------------------------
+  A. Open https://dashboard.render.com
+  B. Sign up / log in (use "Sign in with GitHub")
+  C. New + → Blueprint
+  D. Connect repository: aurafx-elite
+  E. Render reads render.yaml automatically → Apply
+  F. Wait until status = Live (green)
+  G. Test: https://aurafx-elite.onrender.com
+
+STEP 3 — GODADDY DNS (connect your domain)
+------------------------------------------
+  A. In Render: aurafx-elite service → Settings → Custom Domains
+  B. Add: aurafxelite.com and www.aurafxelite.com
+  C. Double-click: OPEN-GODADDY-DNS.bat
+  D. Set records:
+       A     @      216.24.57.1
+       CNAME www    aurafx-elite.onrender.com
+  E. Save All — wait 15–60 minutes for DNS
+
+OPTIONAL (add later in Render → Environment)
+  PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_MODE=live
+  RESEND_API_KEY (verification emails)
+  DATABASE_URL (Neon — keeps registrations after redeploy)
+
+================================================================================

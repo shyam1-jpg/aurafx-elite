@@ -1,0 +1,17 @@
+; AuraFX Pro EA — XAUUSD H1 full protection
+InpRiskPct=1.0
+InpMinRR=2.0
+InpDailyLossLimit=3.0
+InpWeeklyLossLimit=6.0
+InpMaxDrawdownLock=10.0
+InpNewsBlockMin=30
+InpMinScore=80
+InpMinMTFAgree=4
+InpRequireChecklist=true
+InpMagic=202606
+InpRsiBuyMax=60.0
+InpRsiSellMin=40.0
+InpAtrMultMin=0.40
+InpAllowCover=true
+InpOneTradePerBar=true
+InpShowProPanel=true

@@ -1,0 +1,19 @@
+; AuraFX Elite EA — XAUUSD Gold H1
+InpLots=0.05
+InpRiskPercent=1.0
+InpAutoLots=true
+InpSlPoints=450
+InpTpPoints=900
+InpMagic=202605
+InpTargetWinRate=78.0
+InpRsiBuyMax=60.0
+InpRsiSellMin=40.0
+InpAtrMultMin=0.40
+InpAllowCover=true
+InpOneTradePerBar=true
+InpShowPanel=true
+InpEnableNewsGuard=true
+InpWarnMinutesBefore=90
+InpBlockNewTradesOnNews=true
+InpSoundRiskAlerts=true
+InpShowRiskDashboard=true

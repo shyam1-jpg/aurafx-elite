@@ -1,0 +1,101 @@
+================================================================================
+  aurafxelite.com — GoDaddy DNS → AuraFX Elite (Render)
+================================================================================
+
+CURRENT STATUS (checked today)
+  • Domain resolves but shows GoDaddy parking (not your app yet)
+  • Render app must be Live BEFORE DNS will work
+  • I cannot sign into GoDaddy for you — you do Step 1–3 below
+
+================================================================================
+BEFORE DNS — Render must be live
+================================================================================
+
+1. render.com → your web service → must show green "Live"
+2. Test: https://aurafx-elite.onrender.com  (name may differ)
+3. Render → Settings → Custom Domains → Add:
+     aurafxelite.com
+     www.aurafxelite.com
+4. Copy the hostname Render shows (e.g. aurafx-elite.onrender.com)
+
+================================================================================
+STEP 1 — Open GoDaddy DNS
+================================================================================
+
+Double-click:  OPEN-GODADDY-DNS.bat
+
+Or open:
+  https://dcc.godaddy.com/manage/aurafxelite.com/dns
+
+Sign in → DNS → Manage DNS
+
+================================================================================
+STEP 2 — Remove parking / conflicts
+================================================================================
+
+DELETE or EDIT these if present:
+
+  • A record  @  → 13.248.243.5  or  76.223.105.230  (GoDaddy parking)
+  • Any AAAA records for @ or www
+  • Domain Forwarding / "Coming Soon" page (turn OFF in domain settings)
+  • GoDaddy Website Builder hosting (you only need the DOMAIN)
+
+Do NOT delete: NS, SOA, _domainconnect (unless you know why)
+
+================================================================================
+STEP 3 — Add these DNS records (GoDaddy)
+================================================================================
+
+Replace YOUR-SERVICE with your real Render hostname from Step "BEFORE DNS".
+
+| Type  | Name | Value                         | TTL    |
+|-------|------|-------------------------------|--------|
+| A     | @    | 216.24.57.1                   | 600    |
+| CNAME | www  | YOUR-SERVICE.onrender.com     | 1 hour |
+
+Example (if Render service is aurafx-elite):
+
+| Type  | Name | Value                       |
+|-------|------|-----------------------------|
+| A     | @    | 216.24.57.1                 |
+| CNAME | www  | aurafx-elite.onrender.com   |
+
+GoDaddy tips:
+  • "Name" for root = @ (or leave blank — GoDaddy shows @)
+  • CNAME "www" value = only the hostname, no https://
+  • Save each record
+
+================================================================================
+STEP 4 — Verify in Render
+================================================================================
+
+1. Wait 15–60 minutes (sometimes up to 48h)
+2. Render → Custom Domains → click Verify next to each domain
+3. When green, HTTPS certificate is issued automatically
+
+================================================================================
+STEP 5 — Test live site
+================================================================================
+
+  https://aurafxelite.com
+  https://aurafxelite.com/dashboard.html
+  https://aurafxelite.com/register.html
+
+Green LIVE pill on home = working.
+
+================================================================================
+OPTIONAL — Email (Resend) DNS (add later, do not remove Render records)
+================================================================================
+
+resend.com → Domains → aurafxelite.com → copy SPF + DKIM records
+Paste into GoDaddy DNS as new TXT/CNAME rows (Resend shows exact values).
+
+================================================================================
+STUCK?
+================================================================================
+
+Reply in Cursor with:
+  • "Render is live" + your onrender.com URL
+  • Screenshot of GoDaddy DNS page
+
+Full checklist: GODADDY-AURAFXELITE-NEXT-STEPS.txt

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraFX — System Status (Owner)</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/institutional.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="owner-preview.html">Live preview</a>
+      <a href="dashboard.html" class="btn btn-gold">Open dashboard</a>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top:2rem">
+    <h2>System status — owner check</h2>
+    <p style="text-align:center;color:var(--muted);max-width:640px;margin:0 auto 1rem;font-size:.9rem">
+      Verifies the Node server and APIs. Customers use the Pro dashboard only — not this page.
+    </p>
+    <div id="wiringSummary" class="card" style="max-width:800px;margin:0 auto 1rem;text-align:center">
+      <p>Running checks…</p>
+    </div>
+    <div id="wiringServer" class="card" style="max-width:800px;margin:0 auto 1rem"></div>
+    <div id="wiringApis" class="card" style="max-width:800px;margin:0 auto 1rem"></div>
+    <div id="wiringPages" class="card" style="max-width:800px;margin:0 auto 1rem"></div>
+    <div id="wiringModules" class="card" style="max-width:800px;margin:0 auto 1rem"></div>
+    <p style="text-align:center;margin-top:1rem">
+      <button type="button" id="btnRetest" class="btn btn-gold">Run again</button>
+      <a href="dashboard.html" class="btn btn-outline" style="margin-left:.5rem">Back to dashboard</a>
+    </p>
+  </section>
+
+  <footer class="footer">
+    <p>Auto-refresh every 10s · Keep START-LIVE-WEBSITE.bat open</p>
+  </footer>
+
+  <script src="js/site-boot.js"></script>
+  <script src="js/system-status.js?v=3"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraFX Pro — Live Dashboard</title>
+  <link rel="stylesheet" href="css/pro-dashboard.css" />
+  <link rel="stylesheet" href="css/institutional.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-logo">AuraFX <span>Pro</span></a>
+    <a href="index.html" class="nav-home">← Marketing home</a>
+    <a href="register.html" class="nav-home" style="margin-left:.75rem;color:var(--gold)">Register</a>
+  </nav>
+
+  <header class="header">
+    <h1>AuraFX <span>Pro</span> — Live Dashboard</h1>
+    <div id="statusBar" class="status-bar">Connecting…</div>
+    <div id="crashBanner" class="crash-banner hidden">🚨 HIGH MARKET RISK — CONSIDER PROTECTING OPEN POSITIONS</div>
+    <p class="platform-note">Live website · MT5 install next · MT4 coming soon · <a href="index.html">aurafx home</a></p>
+    <p class="disclaimer">Not financial advice. Assistant only. Final decision is yours.</p>
+    <div class="test-actions">
+      <button type="button" id="btnDemoLive" class="btn-test">Demo data</button>
+      <button type="button" id="btnTestCrash" class="btn-test">Test crash alert</button>
+      <button type="button" id="btnTestScore" class="btn-test">Test score 85</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card prob-card">
+      <h2>Probability dashboard</h2>
+      <div class="prob-bars">
+        <div class="prob-row"><span>Bullish</span><div class="bar"><div id="bullBar" class="fill bull"></div></div><strong id="bullPct">50%</strong></div>
+        <div class="prob-row"><span>Bearish</span><div class="bar"><div id="bearBar" class="fill bear"></div></div><strong id="bearPct">50%</strong></div>
+      </div>
+      <p id="scoreGrade" class="grade">Score: — | Confidence: —</p>
+      <p id="sentiment" class="sentiment">Sentiment: Neutral</p>
+      <p id="nextEventLine" class="muted" style="margin-top:.5rem">—</p>
+    </section>
+
+    <section class="card">
+      <h2>AI trade checklist</h2>
+      <ul id="checklist" class="checklist"></ul>
+      <p id="checkResult" class="check-result"></p>
+    </section>
+
+    <section class="card">
+      <h2>Session intelligence</h2>
+      <p id="sessionName" class="session-active">—</p>
+      <p id="sessionHint" class="muted">Best edge: London/NY overlap for gold & majors.</p>
+    </section>
+
+    <section class="card">
+      <h2>Portfolio protection</h2>
+      <ul class="stats">
+        <li>Exposure (lots) <strong id="exposure">0</strong></li>
+        <li>Correlated symbols <strong id="corr">0</strong></li>
+        <li>Daily P/L % <strong id="dailyPnl">0</strong></li>
+      </ul>
+    </section>
+
+    <section class="card news-card">
+      <h2>Live news & calendar</h2>
+      <ul id="calendarList" class="feed-list"></ul>
+      <h2 style="margin-top:1rem">Breaking news</h2>
+      <ul id="newsList" class="feed-list"></ul>
+    </section>
+
+    <section class="card journal-card">
+      <h2>AI trade journal</h2>
+      <form id="journalForm">
+        <input type="text" id="jSymbol" placeholder="Symbol" value="XAUUSD" />
+        <select id="jDir"><option>BUY</option><option>SELL</option></select>
+        <input type="number" id="jEntry" placeholder="Entry" step="0.00001" />
+        <input type="number" id="jExit" placeholder="Exit" step="0.00001" />
+        <input type="number" id="jEmotion" placeholder="Emotion 1-10" min="1" max="10" value="5" />
+        <input type="text" id="jReason" placeholder="Reason / setup" />
+        <button type="submit" class="btn-primary">Save trade</button>
+      </form>
+      <div id="journalInsights" class="insights"></div>
+      <ul id="journalList" class="journal-list"></ul>
+    </section>
+
+    <section class="card screenshot-card">
+      <h2>Screenshot analysis</h2>
+      <input type="file" id="chartUpload" accept="image/*" />
+      <canvas id="chartCanvas" width="640" height="360"></canvas>
+      <pre id="screenshotAnalysis" class="analysis-out">Upload a chart screenshot for trend, S/R, SL/TP overlay hints.</pre>
+    </section>
+
+    <div id="aurafx-inst-dash" class="inst-mount"></div>
+    <div id="aurafx-global-markets" class="inst-mount"></div>
+  </main>
+  <footer class="footer-mini">© AuraFX Elite · <a href="index.html">Home</a> · <a href="register.html">Register</a> ·
+    <a href="terms.html">Terms</a> · <a href="risk-warning.html">Risk</a> · <a href="regulatory.html">Regulatory</a></footer>
+  <div id="fileModeBanner" class="file-mode-banner hidden" role="alert"></div>
+  <script src="js/site-boot.js"></script>
+  <script src="js/market-price-bases.js"></script>
+  <script src="js/live-quotes.js"></script>
+  <script src="js/live-price-ticker.js"></script>
+  <script src="js/pro-dashboard.js"></script>
+  <script src="js/institutional-data.js"></script>
+  <script src="js/institutional.js"></script>
+  <script src="js/markets-universe.js"></script>
+  <script src="js/global-markets.js"></script>
+</body>
+</html>

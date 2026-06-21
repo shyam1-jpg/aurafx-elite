@@ -1,0 +1,53 @@
+AURAFX — WHAT YOU ARE LOOKING AT
+================================
+
+1) BROWSER PAGE (what you opened)
+   file:///.../pro-dashboard/index.html
+
+   This is a COMPANION dashboard only (journal, scores, checklist).
+   It does NOT install into MetaTrader by itself.
+   It is NOT MT4.
+
+2) METATRADER 5 CHART APP (real trading tools)
+   Files in: AuraFX-Elite\MQL5\
+
+   Install into MetaTrader 5 ONLY (NOT MetaTrader 4).
+   Language is MQL5 (.mq5 files) — MT4 cannot run these.
+
+HOW TO TEST THE BROWSER PAGE
+----------------------------
+Open: pro-dashboard\index.html
+
+You should see gold/black theme and a status bar at top.
+
+Click these to test each feature:
+  [Use demo data]     - refreshes demo numbers
+  [Test crash alert]  - red warning banner
+  [Test high score]   - score 85, checklist PASS
+
+Journal section:
+  - Enter symbol, entry, exit, click Save trade
+  - Trade should appear in list below
+
+Screenshot section:
+  - Choose any chart image file
+  - Green/red zones should appear on canvas
+
+Status bar says:
+  DEMO MODE = page works; optional server not running
+  LIVE API  = news server connected (TEST-START.bat)
+
+HOW TO TEST ON METATRADER 5
+---------------------------
+See TEST-GUIDE.txt — copy MQL5 folder, compile, attach indicator.
+
+MT4 vs MT5
+----------
+  MT4  = OLD platform  — AuraFX will NOT work
+  MT5  = REQUIRED     — AuraFX is built for this
+
+Cost
+----
+  Your own copy on PC     = FREE
+  MetaTrader 5 from broker = FREE
+  Selling on MQL5 Market  = you set price ($49-$149 typical)

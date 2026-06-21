@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraFX — MetaTrader 5</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="dashboard.html" class="btn btn-gold">Open Dashboard</a>
+    </div>
+  </nav>
+
+  <section class="section" style="padding-top:2rem">
+    <h2>MetaTrader 5 — AuraFX</h2>
+    <p style="text-align:center;color:var(--muted);max-width:560px;margin:0 auto 1.5rem;font-size:.92rem">
+      Most traders install from <strong>MQL5 Market</strong> inside MT5 (no file copying).
+      The steps below are only if you received the full <strong>AuraFX-Elite</strong> folder on your PC.
+    </p>
+
+    <div class="card" style="max-width:720px;margin:0 auto 1rem;text-align:left">
+      <h3 style="color:var(--gold)">For customers — bought on MQL5 Market</h3>
+      <ol style="color:var(--muted);font-size:.9rem;margin-left:1.25rem;line-height:1.8">
+        <li>Open <strong>MetaTrader 5</strong> from your broker (free).</li>
+        <li>Menu <strong>Tools → Market</strong> (or press <strong>Ctrl+M</strong>).</li>
+        <li>Search <strong>AuraFX</strong> → choose your product → <strong>Install</strong>.</li>
+        <li>In <strong>Navigator → Indicators → Market</strong>, drag the indicator onto your chart.</li>
+        <li>For the EA: enable <strong>Algo Trading</strong>, then attach from <strong>Expert Advisors</strong>.</li>
+      </ol>
+      <p style="margin-top:1rem;text-align:center">
+        <a href="https://www.mql5.com/en/market" class="btn btn-gold" target="_blank" rel="noopener">Open MQL5 Market</a>
+      </p>
+    </div>
+
+    <div class="card" style="max-width:720px;margin:0 auto;text-align:left">
+      <h3 style="color:var(--gold)">Web dashboard (no MT5 needed)</h3>
+      <p style="color:var(--muted);font-size:.9rem">News, calendar, journal, and live terminal work in your browser — use this while MT5 installs or without MT5.</p>
+      <p style="margin-top:1rem;text-align:center">
+        <a href="dashboard.html" class="btn btn-gold">Open live dashboard</a>
+      </p>
+    </div>
+
+    <details class="card" style="max-width:720px;margin:1rem auto 0;text-align:left">
+      <summary style="cursor:pointer;color:var(--gold);font-weight:600;font-size:.9rem">Advanced — manual install from AuraFX-Elite folder (owners / developers)</summary>
+      <div style="margin-top:1rem">
+        <h3>Step 1 — Copy files</h3>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:1rem">
+          In MT5: <strong>File → Open Data Folder</strong>. From your project folder on this PC
+          (<code>Desktop\AuraFX-Elite\MQL5\</code>), copy:
+        </p>
+        <ul style="color:var(--muted);font-size:.88rem;margin-left:1.25rem;line-height:1.7">
+          <li><code>Indicators\</code> → MT5 <code>MQL5\Indicators\</code></li>
+          <li><code>Experts\</code> → MT5 <code>MQL5\Experts\</code></li>
+          <li><code>Include\</code> → MT5 <code>MQL5\Include\</code></li>
+          <li><code>Presets\</code> → MT5 <code>MQL5\Presets\</code> (optional)</li>
+        </ul>
+        <h3 style="margin-top:1.25rem">Step 2 — Compile</h3>
+        <p style="color:var(--muted);font-size:.9rem">Press <strong>F4</strong> (MetaEditor) → open each <code>.mq5</code> → <strong>F7</strong> Compile. Expect 0 errors.</p>
+        <h3 style="margin-top:1.25rem">Step 3 — Attach</h3>
+        <p style="color:var(--muted);font-size:.9rem">
+          Navigator → <strong>Indicators → Custom</strong> → drag <strong>AuraFX_Elite_Signals</strong> or <strong>AuraFX_Pro_Assistant</strong> onto chart.
+        </p>
+      </div>
+    </details>
+
+    <p style="text-align:center;margin-top:1.5rem">
+      <a href="index.html#platforms" class="btn btn-outline">← Back to platforms</a>
+    </p>
+  </section>
+
+  <footer class="footer">
+    <p>© AuraFX Elite · MT5 platform is free from your broker · Not financial advice</p>
+  </footer>
+  <script src="js/site-boot.js"></script>
+</body>
+</html>

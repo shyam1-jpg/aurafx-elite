@@ -1,0 +1,19 @@
+; AuraFX Elite EA — EURUSD H1 backtest / live
+InpLots=0.10
+InpRiskPercent=1.0
+InpAutoLots=false
+InpSlPoints=250
+InpTpPoints=500
+InpMagic=202605
+InpTargetWinRate=76.0
+InpRsiBuyMax=62.0
+InpRsiSellMin=38.0
+InpAtrMultMin=0.35
+InpAllowCover=true
+InpOneTradePerBar=true
+InpShowPanel=true
+InpEnableNewsGuard=true
+InpWarnMinutesBefore=90
+InpBlockNewTradesOnNews=false
+InpSoundRiskAlerts=true
+InpShowRiskDashboard=true

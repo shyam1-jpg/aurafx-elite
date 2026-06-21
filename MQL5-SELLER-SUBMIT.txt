@@ -1,0 +1,64 @@
+================================================================================
+  MQL5 MARKET — copy/paste for new product (AuraFX Elite)
+  Seller area: https://www.mql5.com/en/market/seller
+================================================================================
+
+PRODUCT TITLE
+-------------
+AuraFX Elite — Forex & Gold Signals | Sell + Cover | 76% Target HUD
+
+SHORT DESCRIPTION (under 500 chars)
+-----------------------------------
+AuraFX Elite delivers elegant BUY, SELL, and COVER signals for Forex majors and XAUUSD Gold. Gold-optimized and Forex-tuned confluence engine (EMA + MACD + RSI + ATR filter). Luxury on-chart panel with live win-rate tracking toward 75–78% target. Includes Expert Advisor with risk-based lots, SL/TP, and cover protection. Test on demo before live. Not financial advice.
+
+FULL DESCRIPTION (paste in sections)
+------------------------------------
+Overview:
+AuraFX Elite is a professional signal system for MetaTrader 5 with an elegant gold-on-obsidian chart panel.
+
+Features:
+- Auto-detect Forex vs Gold (XAUUSD)
+- BUY, SELL, and COVER signals
+- On-chart HUD with win rate stats
+- Expert Advisor with SL/TP and risk lots
+- Presets for EURUSD H1 and XAUUSD H1/M15
+
+Included files:
+- AuraFX_Elite_Signals.mq5 (indicator)
+- AuraFX_Elite_EA.mq5 (expert advisor)
+- AuraFX_Core.mqh (library)
+- Preset files
+
+Recommended:
+- Gold: XAUUSD H1 or M15
+- Forex: EURUSD H1
+- Always test on demo first
+
+PRICING (suggested)
+-------------------
+One-time: $99 USD (bundle indicator + EA)
+Or rent: $15/month
+
+CATEGORY
+--------
+Experts / Indicators → Indicators (or Experts if selling EA bundle)
+
+LOGO / SCREENSHOTS
+------------------
+Logo: marketplace\icons\aura-icon-master.svg (save as 200x200 PNG)
+Banner: marketplace\banners\aura-market-banner.svg
+Screenshots needed: chart with panel, BUY arrow, SELL arrow, inputs dialog
+
+KEYWORDS
+--------
+forex signals, gold, XAUUSD, MetaTrader 5, trading indicator, expert advisor
+
+RISK DISCLAIMER (required)
+----------------------------
+Trading involves substantial risk. Past performance does not guarantee future results. This product is a decision-support tool, not financial advice.
+
+SUPPORT
+-------
+Support via MQL5 product comments. Website: aurafxelite.com
+
+================================================================================

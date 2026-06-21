@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": ".cursor/hooks/mark-dev-edits.ps1",
+        "matcher": "Write|StrReplace"
+      }
+    ],
+    "stop": [
+      {
+        "command": ".cursor/hooks/post-dev-test-reminder.ps1",
+        "loop_limit": 1
+      }
+    ]
+  }
+}

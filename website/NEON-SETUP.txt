@@ -1,0 +1,32 @@
+AuraFX — Neon Postgres (persistent registrations on Render)
+============================================================
+
+Why: Render’s disk is ephemeral. registrations.json is lost on redeploy.
+Neon keeps client sign-ups, PayPal status, and email verification across deploys.
+
+1) Create a Neon project
+   https://console.neon.tech → New project → copy connection string
+
+2) Connection string (Render → Environment)
+   DATABASE_URL=postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
+
+   Use the pooled connection string if Neon offers it (recommended for serverless).
+
+3) Deploy
+   Push to GitHub; Render runs npm install (pulls @neondatabase/serverless).
+   Restart the web service after adding DATABASE_URL.
+
+4) Verify
+   - Register a test client on https://your-app.onrender.com/register.html
+   - Owner leads: owner-leads.html with X-Owner-Key header
+   - GET /api/config → storage.backend should be "neon"
+   - Redeploy Render — registration should still appear
+
+5) Local dev (optional)
+   - Without DATABASE_URL: still uses website/data/registrations.json
+   - With DATABASE_URL: same Neon DB as production (use a separate Neon branch for dev)
+
+6) First boot
+   If Neon is empty but registrations.json has rows, the server imports them once automatically.
+
+Do not commit DATABASE_URL to git. Only set it in Render Environment.

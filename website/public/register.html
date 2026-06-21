@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AuraFX Elite — Register &amp; Pay</title>
+
+  <link rel="stylesheet" href="css/site.css" />
+
+  <link rel="stylesheet" href="css/register.css" />
+
+  <link rel="stylesheet" href="css/legal.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+</head>
+
+<body>
+
+  <nav class="nav">
+
+    <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
+
+    <div class="nav-links">
+
+      <a href="dashboard.html">Dashboard</a>
+
+      <a href="register.html" class="btn btn-gold">Register</a>
+
+    </div>
+
+  </nav>
+
+
+
+  <section class="section reg-section">
+
+    <h2>Client registration</h2>
+
+    <p class="reg-lead">Add your details · choose plan · pay with PayPal · agree to all legal policies</p>
+
+    <div id="regSuccessBanner" class="reg-success-banner" hidden role="status"></div>
+
+    <div class="reg-steps">
+
+      <span class="reg-step active" data-step="1">1 Details</span>
+
+      <span class="reg-step" data-step="2">2 Plan</span>
+
+      <span class="reg-step" data-step="3">3 PayPal</span>
+
+    </div>
+
+
+
+    <form id="regForm" class="card reg-form reg-panel active" data-panel="1">
+
+      <h3 style="color:var(--gold);font-size:.95rem;margin-bottom:1rem">Your contact details</h3>
+
+      <div class="reg-grid">
+
+        <div class="reg-field">
+
+          <label for="fullName">Full legal name *</label>
+
+          <input type="text" id="fullName" required autocomplete="name" />
+
+        </div>
+
+        <div class="reg-field">
+
+          <label for="email">Email *</label>
+
+          <input type="email" id="email" required autocomplete="email" />
+
+        </div>
+
+        <div class="reg-field">
+
+          <label for="phone">Phone / WhatsApp *</label>
+
+          <input type="tel" id="phone" required autocomplete="tel" />
+
+        </div>
+
+        <div class="reg-field">
+
+          <label for="country">Country *</label>
+
+          <select id="country" required>
+
+            <option value="">— Select country —</option>
+
+          </select>
+
+        </div>
+
+        <div class="reg-field">
+
+          <label for="city">City / town *</label>
+
+          <input type="text" id="city" required autocomplete="address-level2" />
+
+        </div>
+
+        <div class="reg-field">
+
+          <label for="postcode">Post / ZIP code</label>
+
+          <input type="text" id="postcode" autocomplete="postal-code" />
+
+        </div>
+
+        <div class="reg-field reg-full">
+
+          <label for="addressLine">Street address (optional)</label>
+
+          <input type="text" id="addressLine" autocomplete="street-address" />
+
+        </div>
+
+        <div class="reg-field">
+
+          <label for="experience">Trading experience *</label>
+
+          <select id="experience" required>
+
+            <option value="beginner">Beginner</option>
+
+            <option value="intermediate" selected>Intermediate</option>
+
+            <option value="advanced">Advanced</option>
+
+            <option value="professional">Professional</option>
+
+          </select>
+
+        </div>
+
+        <div class="reg-field">
+
+          <label for="interest">Main interest *</label>
+
+          <select id="interest" required>
+
+            <option value="website">Website dashboard</option>
+
+            <option value="mt5">MT5 indicators / EA</option>
+
+            <option value="mt4">MT4 (waitlist)</option>
+
+            <option value="signals">Signals only</option>
+
+            <option value="all">All products</option>
+
+          </select>
+
+        </div>
+
+        <div class="reg-field">
+
+          <label for="heardFrom">How did you find us? *</label>
+
+          <select id="heardFrom" required>
+
+            <option value="">— Select —</option>
+
+            <option value="google">Google search</option>
+
+            <option value="instagram">Instagram</option>
+
+            <option value="facebook">Facebook</option>
+
+            <option value="youtube">YouTube</option>
+
+            <option value="tiktok">TikTok</option>
+
+            <option value="x">X (Twitter)</option>
+
+            <option value="linkedin">LinkedIn</option>
+
+            <option value="telegram">Telegram</option>
+
+            <option value="whatsapp">WhatsApp</option>
+
+            <option value="mql5">MQL5 Market</option>
+
+            <option value="tradingview">TradingView</option>
+
+            <option value="forum">Trading forum / Reddit</option>
+
+            <option value="friend">Friend or referral</option>
+
+            <option value="email">Email / newsletter</option>
+
+            <option value="ad">Online ad</option>
+
+            <option value="other">Other</option>
+
+          </select>
+
+        </div>
+
+        <div class="reg-field reg-full" id="heardFromOtherWrap" hidden>
+
+          <label for="heardFromOther">Please specify</label>
+
+          <input type="text" id="heardFromOther" placeholder="e.g. podcast, influencer name, event…" maxlength="120" />
+
+        </div>
+
+        <div class="reg-field reg-full">
+
+          <label for="broker">Broker name &amp; account (optional)</label>
+
+          <input type="text" id="broker" placeholder="e.g. IC Markets — demo or live" />
+
+        </div>
+
+        <div class="reg-field reg-full">
+
+          <label for="message">Notes (optional)</label>
+
+          <textarea id="message" rows="2" placeholder="Questions or extra details (optional)"></textarea>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="reg-legal-block">
+
+        <h4>Legal agreements (all required)</h4>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreeAge" required />
+
+          I am 18 years or older (or legal age in my country).
+
+        </label>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreeTerms" required />
+
+          I accept the <a href="terms.html" target="_blank" rel="noopener">Terms &amp; Conditions</a>.
+
+        </label>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreePrivacy" required />
+
+          I have read the <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.
+
+        </label>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreeRisk" required />
+
+          I understand the <a href="risk-warning.html" target="_blank" rel="noopener">Risk Warning</a> — I may lose all capital; no profit guarantee.
+
+        </label>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreeResponsible" required />
+
+          I have read the <a href="responsible-trading.html" target="_blank" rel="noopener">Responsible Trading Policy</a> (not gambling; trade responsibly).
+
+        </label>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreeJurisdiction" required />
+
+          I confirm I may legally use trading software in my country and I am not using a VPN to bypass restrictions.
+
+        </label>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreeRegulatory" required />
+
+          I have read <a href="regulatory.html" target="_blank" rel="noopener">Regulatory disclosure</a> (AuraFX is not FCA-authorised unless stated otherwise).
+
+        </label>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreeRefunds" required />
+
+          I accept the <a href="refunds.html" target="_blank" rel="noopener">Refunds &amp; cancellations</a> policy.
+
+        </label>
+
+        <label class="reg-check">
+
+          <input type="checkbox" id="agreeMarketing" />
+
+          Optional: send me product updates and offers by email.
+
+        </label>
+
+      </div>
+
+
+
+      <div class="reg-actions">
+
+        <button type="button" class="btn btn-gold" id="btnStep1Next">Continue to plans →</button>
+
+      </div>
+
+    </form>
+
+
+
+    <div class="card reg-form reg-panel" data-panel="2" hidden>
+
+      <h3 style="color:var(--gold);font-size:1rem;margin-bottom:1rem">Choose your plan</h3>
+
+      <div class="plan-grid" id="planGrid"></div>
+
+      <div class="reg-actions">
+
+        <button type="button" class="btn btn-outline" id="btnStep2Back">← Back</button>
+
+        <button type="button" class="btn btn-gold" id="btnStep2Next">Continue to payment →</button>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="card reg-form reg-panel" data-panel="3" hidden>
+
+      <h3 style="color:var(--gold);font-size:1rem;margin-bottom:.5rem">Pay with PayPal</h3>
+
+      <p id="paySummary" class="reg-pay-summary"></p>
+
+      <div id="paypalSetupNote" class="reg-paypal-note" hidden></div>
+
+      <div id="paypal-button-container" class="reg-paypal-box"></div>
+
+      <div id="paypalFallback" class="reg-paypal-fallback" hidden>
+
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem">PayPal buttons not configured yet. Use the link below, then confirm payment.</p>
+
+        <a id="paypalLink" class="btn btn-gold" target="_blank" rel="noopener">Pay with PayPal →</a>
+
+        <button type="button" class="btn btn-outline" id="btnConfirmManual" style="margin-left:.5rem">I completed PayPal payment</button>
+
+      </div>
+
+      <p id="regMsg" class="reg-msg" role="status"></p>
+
+      <div class="reg-actions">
+
+        <button type="button" class="btn btn-outline" id="btnStep3Back">← Back</button>
+
+        <button type="button" class="btn btn-outline" id="btnFreeFinish" hidden>Finish free — open dashboard</button>
+
+      </div>
+
+    </div>
+
+
+
+    <p class="reg-note">
+
+      Payments via PayPal. Not financial advice. See
+
+      <a href="terms.html">Terms</a> · <a href="risk-warning.html">Risk</a> · <a href="regulatory.html">FCA / regulatory info</a>
+
+    </p>
+
+  </section>
+
+
+
+  <footer class="footer">
+
+    <p>© AuraFX Elite · <a href="index.html">Home</a> · <a href="owner-leads.html">Owner: leads</a></p>
+
+    <p style="margin-top:.35rem;font-size:.72rem">
+
+      <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="risk-warning.html">Risk</a> ·
+
+      <a href="responsible-trading.html">Responsible trading</a> · <a href="regulatory.html">Regulatory</a> ·
+
+      <a href="refunds.html">Refunds</a> · <a href="cookies.html">Cookies</a>
+
+    </p>
+
+  </footer>
+
+
+
+  <script src="js/site-boot.js"></script>
+
+  <script src="js/countries-list.js"></script>
+
+  <script src="js/cookie-consent.js"></script>
+
+  <script src="js/register.js"></script>
+
+</body>
+
+</html>
+
+

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AuraFX Pro — Trading Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="file-banner" id="fileBanner" style="background:#1a3a1a;border:1px solid #2ecc71;padding:.75rem 1rem;margin:0;font-size:.85rem;text-align:center">
+    For <strong>LIVE</strong> news &amp; scores: double-click <strong>START-LIVE-WEBSITE.bat</strong> then open
+    <a href="http://127.0.0.1:3847/dashboard.html" style="color:#d4af37">http://127.0.0.1:3847/dashboard.html</a>
+  </div>
+  <header class="header">
+    <h1>AuraFX <span>Pro</span></h1>
+    <div id="statusBar" class="status-bar">Checking connection…</div>
+    <div id="crashBanner" class="crash-banner hidden">🚨 HIGH MARKET RISK — CONSIDER PROTECTING OPEN POSITIONS</div>
+    <p class="platform-note">
+      <strong>This page is a companion dashboard (browser only).</strong>
+      Trading signals &amp; panels install in <strong>MetaTrader 5 only</strong> — not MT4.
+      <a href="../TEST-GUIDE.txt">Open MT5 install guide (TEST-GUIDE.txt)</a>
+    </p>
+    <p class="disclaimer">Not financial advice. Assistant only. No profit guarantee. Final decision is yours.</p>
+    <div class="test-actions">
+      <button type="button" id="btnDemoLive" class="btn-test">Use demo data</button>
+      <button type="button" id="btnTestCrash" class="btn-test">Test crash alert</button>
+      <button type="button" id="btnTestScore" class="btn-test">Test high score (85)</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card prob-card">
+      <h2>Probability dashboard</h2>
+      <div class="prob-bars">
+        <div class="prob-row"><span>Bullish</span><div class="bar"><div id="bullBar" class="fill bull"></div></div><strong id="bullPct">50%</strong></div>
+        <div class="prob-row"><span>Bearish</span><div class="bar"><div id="bearBar" class="fill bear"></div></div><strong id="bearPct">50%</strong></div>
+      </div>
+      <p id="scoreGrade" class="grade">Score: — | Confidence: —</p>
+      <p id="sentiment" class="sentiment">Sentiment: Neutral</p>
+    </section>
+
+    <section class="card">
+      <h2>AI trade checklist</h2>
+      <ul id="checklist" class="checklist"></ul>
+      <p id="checkResult" class="check-result"></p>
+    </section>
+
+    <section class="card">
+      <h2>Session intelligence</h2>
+      <p id="sessionName" class="session-active">—</p>
+      <p id="sessionHint" class="muted">Best edge: London/NY overlap for gold & majors.</p>
+    </section>
+
+    <section class="card">
+      <h2>Portfolio protection</h2>
+      <ul class="stats">
+        <li>Exposure (lots) <strong id="exposure">0</strong></li>
+        <li>Correlated symbols <strong id="corr">0</strong></li>
+        <li>Daily P/L % <strong id="dailyPnl">0</strong></li>
+      </ul>
+    </section>
+
+    <section class="card journal-card">
+      <h2>AI trade journal</h2>
+      <form id="journalForm">
+        <input type="text" id="jSymbol" placeholder="Symbol" value="XAUUSD" />
+        <select id="jDir"><option>BUY</option><option>SELL</option></select>
+        <input type="number" id="jEntry" placeholder="Entry" step="0.00001" />
+        <input type="number" id="jExit" placeholder="Exit" step="0.00001" />
+        <input type="number" id="jEmotion" placeholder="Emotion 1-10" min="1" max="10" value="5" />
+        <input type="text" id="jReason" placeholder="Reason / setup" />
+        <input type="file" id="jScreenshot" accept="image/*" />
+        <button type="submit" class="btn-primary">Save trade</button>
+      </form>
+      <div id="journalInsights" class="insights"></div>
+      <ul id="journalList" class="journal-list"></ul>
+    </section>
+
+    <section class="card screenshot-card">
+      <h2>Screenshot analysis</h2>
+      <input type="file" id="chartUpload" accept="image/*" />
+      <canvas id="chartCanvas" width="640" height="360"></canvas>
+      <pre id="screenshotAnalysis" class="analysis-out">Upload a chart screenshot for trend, S/R, SL/TP overlay hints.</pre>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Render.com — use Starter ($7/mo) for always-on + custom domain
+# Free plan: change plan: free (750 hrs/mo, sleeps after 15 min idle)
+services:
+  - type: web
+    name: aurafx-elite
+    runtime: node
+    plan: starter
+    rootDir: website
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production

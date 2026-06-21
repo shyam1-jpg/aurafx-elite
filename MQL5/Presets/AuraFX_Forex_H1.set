@@ -1,0 +1,7 @@
+; AuraFX Elite — Forex majors H1 preset
+InpTargetWinRate=76.0
+InpRsiBuyMax=62.0
+InpRsiSellMin=38.0
+InpAtrMultMin=0.35
+InpAlertsEnabled=true
+InpShowPanel=true

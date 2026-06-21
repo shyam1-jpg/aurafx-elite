@@ -1,0 +1,7 @@
+; AuraFX Elite — USDCHF H1
+InpTargetWinRate=76.0
+InpRsiBuyMax=62.0
+InpRsiSellMin=38.0
+InpAtrMultMin=0.34
+InpAlertsEnabled=true
+InpShowPanel=true

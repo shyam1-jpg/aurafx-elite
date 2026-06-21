@@ -1,0 +1,12 @@
+; AuraFX Risk Guardian — Gold volatile sessions
+InpWarnMinutesBefore=120
+InpCalendarHoursAhead=72
+InpRefreshSeconds=45
+InpSoundAlerts=true
+InpPushAlerts=true
+InpMagicFilter=-1
+InpAllowButtonClose=false
+InpShowDashboard=true
+InpPanelX=20
+InpPanelY=30
+InpUseNewsApi=false

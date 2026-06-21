@@ -1,0 +1,59 @@
+================================================================================
+  AURAFX — FREE HOSTING FOR 6+ MONTHS (DEPLOY TODAY)
+================================================================================
+
+BEST FREE HOST:  RENDER.COM
+  - $0 per month (Hobby plan)
+  - NO credit card required
+  - 750 hours/month = your site can run 24/7 all month
+  - Good for 6+ months of marketing
+
+YOUR PUBLIC LINKS AFTER DEPLOY:
+  https://YOUR-NAME.onrender.com
+  https://YOUR-NAME.onrender.com/dashboard.html
+
+--------------------------------------------------------------------------------
+STEP 1 — TEST ON YOUR PC (2 minutes)
+--------------------------------------------------------------------------------
+Double-click:  START-LIVE-WEBSITE.bat
+Open browser:  http://127.0.0.1:3847
+
+--------------------------------------------------------------------------------
+STEP 2 — PUT ON GITHUB (10 minutes)
+--------------------------------------------------------------------------------
+1. Go to https://github.com and sign up (free)
+2. New repository → name: aurafx-elite
+3. Upload the folder:  Desktop\AuraFX-Elite
+
+--------------------------------------------------------------------------------
+STEP 3 — DEPLOY ON RENDER (10 minutes)
+--------------------------------------------------------------------------------
+1. Go to https://render.com — sign up (free, no card)
+2. New +  →  Web Service
+3. Connect GitHub → choose aurafx-elite repo
+4. IMPORTANT settings:
+     Root Directory:  website
+     Build Command:   npm install
+     Start Command:   npm start
+     Instance Type:   FREE
+5. Create Web Service → wait for green "Live"
+6. Copy your URL and share it!
+
+Full guide with pictures text:  website\FREE-HOSTING-TODAY.md
+
+--------------------------------------------------------------------------------
+OTHER FREE OPTIONS (not as good for this app)
+--------------------------------------------------------------------------------
+  Railway.app     — only ~$1/month credit (not 24/7 free)
+  GitHub Pages    — static only, no live news API
+  Fly.io          — no free tier for new accounts in 2026
+
+--------------------------------------------------------------------------------
+WHAT COSTS MONEY (optional)
+--------------------------------------------------------------------------------
+  Custom domain .com     ~ $12 per YEAR (optional)
+  MetaTrader 5           $0 (free from broker)
+  MetaTrader 4           $0 (free from broker)
+  Selling on MQL5 Market $0 to list, ~20% fee when you sell ($49-$149 product)
+
+================================================================================

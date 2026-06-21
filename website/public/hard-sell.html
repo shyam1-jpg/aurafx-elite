@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AuraFX Lite — live BUY, SELL and COVER signal preview for forex and gold." />
+  <title>AuraFX Lite — Live Signal Preview</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="assets/aura-logo.svg" type="image/svg+xml" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo">AuraFX <span>Lite</span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="dashboard.html">Full dashboard</a>
+      <a href="register.html" class="btn btn-outline">Register</a>
+      <a href="mt5-install.html" class="btn btn-gold">Get MT5 version</a>
+    </div>
+  </nav>
+
+  <section class="hero" style="padding-top:2.5rem">
+    <div id="livePill" class="live-pill"><span class="dot"></span> Connecting…</div>
+    <h1>Live <em>Signal Preview</em></h1>
+    <p>See how AuraFX Elite shows BUY, SELL and COVER on chart — demo panel below. Full automation runs in MetaTrader 5 or the Pro dashboard.</p>
+  </section>
+
+  <section class="section lite-grid">
+    <div class="card lite-panel-card">
+      <h2 style="text-align:left;margin-bottom:1rem">Signal panel (demo)</h2>
+      <div class="lite-panel-mock" id="signalPanel">
+        <div class="lite-panel-title">AURAFX ELITE</div>
+        <div class="lite-panel-row muted" id="liteSymbol">XAUUSD · GOLD</div>
+        <div class="lite-panel-row lite-signal sell" id="liteSignal">Signal: SELL</div>
+        <div class="lite-panel-row">Win rate: <span id="liteWinRate">76.2</span>% · Target 76%</div>
+        <div class="lite-panel-row muted" id="liteStats">Wins 78 · Losses 24 · Total 102</div>
+        <div class="lite-panel-row accent">Sell + Cover protection enabled</div>
+      </div>
+      <p class="lite-purpose">Purpose: shows the signal style clients see on MT5 — not live broker execution on this page.</p>
+      <div class="lite-sig-btns" role="group" aria-label="Preview signal type">
+        <button type="button" class="btn lite-btn-buy" data-sig="buy">BUY</button>
+        <button type="button" class="btn lite-btn-sell active" data-sig="sell">SELL</button>
+        <button type="button" class="btn lite-btn-cover" data-sig="cover">COVER</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="text-align:left;margin-bottom:1rem">What each button does</h2>
+      <ul class="lite-explainer">
+        <li><strong>BUY</strong> — Long bias when trend + momentum align (demo toggle above).</li>
+        <li><strong>SELL</strong> — Short bias; Risk Guardian can block entries before red news.</li>
+        <li><strong>COVER</strong> — Exit or protect shorts when structure flips.</li>
+      </ul>
+      <p class="lite-purpose" id="liteMood">Loading market mood from server…</p>
+      <p style="margin-top:1rem">
+        <a href="dashboard.html" class="btn btn-gold">Open full Pro dashboard</a>
+      </p>
+      <p style="margin-top:.75rem">
+        <a href="register.html?plan=free" class="btn btn-outline">Register free — save your details</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Next steps</h2>
+    <div class="grid-3">
+      <a href="dashboard.html" class="card lite-cta-card">
+        <h3>Web dashboard</h3>
+        <p>News, calendar, AI score, journal — runs in your browser.</p>
+        <span class="platform-cta">Open dashboard →</span>
+      </a>
+      <a href="mt5-install.html" class="card lite-cta-card">
+        <h3>MetaTrader 5</h3>
+        <p>Install indicator + EA on your broker chart.</p>
+        <span class="platform-cta">MT5 install guide →</span>
+      </a>
+      <a href="register.html?plan=mt5_bundle" class="card lite-cta-card">
+        <h3>Buy MT5 bundle</h3>
+        <p>Register and pay via PayPal when you are ready to sell.</p>
+        <span class="platform-cta">Register &amp; pay →</span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© 2026 AuraFX Elite · Demo signals only · Not financial advice</p>
+    <p style="margin-top:.4rem;font-size:.72rem">
+      <a href="risk-warning.html">Risk warning</a> · <a href="terms.html">Terms</a> · <a href="index.html">Home</a>
+    </p>
+  </footer>
+
+  <div id="fileModeBanner" class="file-mode-banner hidden" role="alert"></div>
+  <script src="js/site-boot.js"></script>
+  <script src="js/aura-lite.js"></script>
+</body>
+</html>

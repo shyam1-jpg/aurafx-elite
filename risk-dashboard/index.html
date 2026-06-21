@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0c12" />
+  <title>AuraFX Risk Guardian — Live News & Trade Protection</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="alertOverlay" class="alert-overlay hidden" role="alertdialog" aria-labelledby="alertTitle">
+    <div class="alert-box high-risk">
+      <h2 id="alertTitle">HIGH RISK WARNING</h2>
+      <p id="alertBody"></p>
+      <div class="alert-actions">
+        <button type="button" class="btn-action close-trade" data-action="close">Close Trade</button>
+        <button type="button" class="btn-action reduce" data-action="reduce">Reduce Lot</button>
+        <button type="button" class="btn-action move-sl" data-action="sl">Move Stop Loss</button>
+        <button type="button" class="btn-action ignore" data-action="ignore">Ignore Warning</button>
+      </div>
+      <p class="disclaimer-inline">Not financial advice. Risk warning tool only. Final decision is yours.</p>
+    </div>
+  </div>
+
+  <header class="top-bar">
+    <div class="brand">
+      <span class="logo">AuraFX</span>
+      <span class="sub">Risk Guardian</span>
+    </div>
+    <div id="moodBadge" class="mood-badge safe">SAFE</div>
+    <button type="button" id="btnNotify" class="icon-btn" title="Enable notifications">🔔</button>
+    <button type="button" id="btnSound" class="icon-btn on" title="Sound alerts">🔊</button>
+  </header>
+
+  <div class="disclaimer-banner">
+    This is not financial advice. This is a risk warning tool. Final decision is always yours.
+  </div>
+
+  <main class="layout">
+    <section class="card risk-hero" id="riskHero">
+      <div class="risk-level" id="sessionRisk">LOW RISK</div>
+      <p class="next-event" id="nextEventText">Loading next event...</p>
+      <p class="impact" id="impactText"></p>
+      <div class="countdown" id="countdown">—</div>
+    </section>
+
+    <section class="card">
+      <h2>Market mood</h2>
+      <div class="mood-meter">
+        <div class="mood-seg safe active" data-mood="SAFE">Safe</div>
+        <div class="mood-seg caution" data-mood="CAUTION">Caution</div>
+        <div class="mood-seg dangerous" data-mood="DANGEROUS">Dangerous</div>
+      </div>
+      <ul class="stats-row">
+        <li><span>HI events today</span><strong id="hiToday">0</strong></li>
+        <li><span>Server</span><strong id="serverStatus">...</strong></li>
+      </ul>
+    </section>
+
+    <section class="card trade-card">
+      <h2>Active trade exposure</h2>
+      <form id="tradeForm" class="trade-form">
+        <label>Symbol <input type="text" id="tradeSymbol" value="XAUUSD" /></label>
+        <label>Direction
+          <select id="tradeDir">
+            <option value="BUY">BUY</option>
+            <option value="SELL">SELL</option>
+          </select>
+        </label>
+        <label>Lots <input type="number" id="tradeLots" value="0.10" step="0.01" min="0.01" /></label>
+        <label>Entry <input type="number" id="tradeEntry" value="0" step="0.01" /></label>
+        <label>Current <input type="number" id="tradeCurrent" value="0" step="0.01" /></label>
+        <label><input type="checkbox" id="hasTrade" checked /> I have an open trade</label>
+      </form>
+      <p id="exposureSummary" class="exposure-summary">Monitoring enabled.</p>
+      <p id="lossRisk" class="loss-risk"></p>
+    </section>
+
+    <section class="card ai-card">
+      <h2>AI risk explanation</h2>
+      <pre id="aiExplanation" class="ai-box">Loading...</pre>
+      <button type="button" id="btnRefreshAi" class="btn-secondary">Refresh explanation</button>
+    </section>
+
+    <section class="card calendar-card">
+      <h2>Today's high-impact calendar</h2>
+      <ul id="calendarList" class="feed-list"></ul>
+    </section>
+
+    <section class="card news-card">
+      <h2>Breaking financial news</h2>
+      <ul id="newsList" class="feed-list"></ul>
+    </section>
+  </main>
+
+  <audio id="alertSound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBTGH0fPTgjMGHm7A7+OZURE=" type="audio/wav" />
+  </audio>
+
+  <script src="app.js"></script>
+</body>
+</html>

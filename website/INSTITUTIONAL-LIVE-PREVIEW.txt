@@ -1,0 +1,41 @@
+AURAFX — LIVE INSTITUTIONAL (NOT PUBLIC YET)
+==========================================
+
+THREE MODES (environment variable INSTITUTIONAL_MODE):
+
+  demo     — DEFAULT. Public + owner see demo COT/whale text. /api/institutional-live returns 403.
+  preview  — Live FX/crypto for OWNER ONLY (X-Owner-Key). Public still sees demo.
+  public   — (Future) Live for everyone when you are ready to launch.
+
+HOW TO USE PREVIEW MODE (you only)
+----------------------------------
+1. Run START-LIVE-PREVIEW.bat  (sets INSTITUTIONAL_MODE=preview)
+2. Open http://127.0.0.1:3847/owner-preview.html
+3. Enter owner key (default: aurafx-owner)
+4. Click "Save key & test live API"
+5. Open dashboard — green banner "OWNER LIVE PREVIEW"
+
+WHAT IS LIVE TODAY (free APIs)
+------------------------------
+- EURUSD, GBPUSD, USDJPY, etc. — Frankfurter
+- BTC, ETH, BNB, SOL, XRP — CoinGecko
+- Gold proxy — CoinGecko tether-gold
+- Watchlist pills tick (live-price-ticker)
+- Scanner scores derived from live snapshot
+
+STILL DEMO / NEED API KEYS LATER
+--------------------------------
+- CFTC COT reports
+- Exchange open interest
+- Options skew
+- On-chain whale alerts
+- ETF flow data
+
+WHEN READY FOR PUBLIC
+---------------------
+1. Connect paid feeds in website/institutional-live.js
+2. Set INSTITUTIONAL_MODE=public
+3. Remove or hide owner-preview.html from marketing
+4. Lawyer review + "live data" disclaimer on risk-warning.html
+
+DO NOT add owner-preview link on index.html until launch.

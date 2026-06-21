@@ -1,0 +1,239 @@
+:root {
+  --bg: #0a0c12;
+  --card: #12182a;
+  --gold: #d4af37;
+  --text: #e8eaf2;
+  --muted: #8b90a5;
+  --safe: #2ecc71;
+  --caution: #e67e22;
+  --danger: #e74c3c;
+  --high-bg: #2a1210;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Inter, system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.disclaimer-banner {
+  background: #1a1520;
+  border-bottom: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 0.72rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.brand .logo { font-weight: 700; color: var(--gold); font-size: 1.2rem; }
+.brand .sub { color: var(--muted); font-size: 0.8rem; margin-left: 0.5rem; }
+
+.mood-badge {
+  margin-left: auto;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.mood-badge.safe { background: rgba(46,204,113,0.2); color: var(--safe); border: 1px solid var(--safe); }
+.mood-badge.caution { background: rgba(230,126,34,0.2); color: var(--caution); border: 1px solid var(--caution); }
+.mood-badge.dangerous { background: rgba(231,76,60,0.25); color: var(--danger); border: 1px solid var(--danger); animation: pulse 1.2s infinite; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.4); }
+  50% { box-shadow: 0 0 20px 4px rgba(231,76,60,0.35); }
+}
+
+.icon-btn {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.icon-btn.on { border-color: var(--gold); }
+
+.layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid rgba(212,175,55,0.12);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+}
+
+.card h2 {
+  font-size: 0.85rem;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+}
+
+.risk-hero {
+  grid-column: 1 / -1;
+  border-color: rgba(231,76,60,0.3);
+}
+.risk-hero.dangerous { background: var(--high-bg); border-color: var(--danger); }
+.risk-hero.caution { border-color: var(--caution); }
+
+.risk-level {
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+.risk-level.high { color: var(--danger); }
+.risk-level.medium { color: var(--caution); }
+.risk-level.low { color: var(--safe); }
+
+.next-event { margin-top: 0.5rem; font-size: 1rem; }
+.impact { color: var(--muted); font-size: 0.88rem; margin-top: 0.35rem; }
+.countdown { font-size: 2rem; font-weight: 700; color: var(--gold); margin-top: 0.75rem; }
+
+.mood-meter {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.mood-seg {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  opacity: 0.4;
+  border: 1px solid transparent;
+}
+.mood-seg.active { opacity: 1; font-weight: 600; }
+.mood-seg.safe.active { background: rgba(46,204,113,0.15); border-color: var(--safe); color: var(--safe); }
+.mood-seg.caution.active { background: rgba(230,126,34,0.15); border-color: var(--caution); color: var(--caution); }
+.mood-seg.dangerous.active { background: rgba(231,76,60,0.2); border-color: var(--danger); color: var(--danger); }
+
+.stats-row { list-style: none; display: flex; gap: 2rem; font-size: 0.85rem; }
+.stats-row span { color: var(--muted); display: block; }
+.stats-row strong { font-size: 1.1rem; }
+
+.trade-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+.trade-form label { font-size: 0.75rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.25rem; }
+.trade-form input, .trade-form select {
+  background: #0a0e16;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text);
+  padding: 0.4rem 0.5rem;
+  border-radius: 6px;
+}
+
+.exposure-summary { font-size: 0.9rem; }
+.loss-risk { color: var(--danger); font-weight: 600; font-size: 0.88rem; margin-top: 0.4rem; }
+
+.ai-box {
+  background: #080c14;
+  border-radius: 8px;
+  padding: 0.85rem;
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: #c8ccd8;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-bottom: 0.75rem;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.feed-list { list-style: none; max-height: 280px; overflow-y: auto; }
+.feed-list li {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.85rem;
+}
+.feed-list .time { color: var(--muted); font-size: 0.72rem; }
+.feed-list .risk-high { color: var(--danger); font-weight: 600; font-size: 0.7rem; }
+.feed-list .risk-medium { color: var(--caution); font-size: 0.7rem; }
+
+.alert-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.alert-overlay.hidden { display: none; }
+
+.alert-box {
+  background: var(--high-bg);
+  border: 2px solid var(--danger);
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 0 40px rgba(231,76,60,0.35);
+}
+.alert-box h2 { color: var(--danger); margin-bottom: 0.75rem; }
+.alert-box p { font-size: 0.9rem; line-height: 1.5; margin-bottom: 1rem; }
+
+.alert-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.btn-action {
+  padding: 0.55rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.btn-action.close-trade { background: var(--danger); color: #fff; }
+.btn-action.reduce { background: var(--caution); color: #fff; }
+.btn-action.move-sl { background: #3498db; color: #fff; }
+.btn-action.ignore { background: #333; color: #ccc; grid-column: 1 / -1; }
+
+.disclaimer-inline {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 0.75rem;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .alert-actions { grid-template-columns: 1fr; }
+}
