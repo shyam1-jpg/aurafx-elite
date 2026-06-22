@@ -28,19 +28,16 @@ a:hover { text-decoration: underline; }
 .logo:hover, .nav-logo:hover { text-decoration: none; opacity: .95; }
 .logo span, .nav-logo span { color: var(--text); font-weight: 400; }
 .logo-img {
-  width: min(420px, 62vw);
-  height: auto;
-  max-height: 72px;
-  flex-shrink: 0;
-  display: block;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  background: transparent;
+  width: 40px; height: 40px; max-width: 40px; flex-shrink: 0;
+  display: block; border-radius: 10px;
+  box-shadow: 0 0 14px rgba(212, 175, 55, .25);
+  border: none; background: transparent;
 }
 .logo-img-square {
   width: 36px; height: 36px; max-width: 36px; border-radius: 8px;
 }
+.logo:has(.logo-img) span,
+.nav-logo:has(.logo-img) span { display: none; }
 .nav-links { display: flex; gap: 1.5rem; align-items: center; font-size: .9rem; }
 .btn {
   display: inline-block; padding: .6rem 1.2rem; border-radius: 8px; font-weight: 600;
