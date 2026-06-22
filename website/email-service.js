@@ -72,7 +72,7 @@ function wrapEmailHtml(bodyInner) {
     '<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 12px">' +
     '<table width="600" style="max-width:600px;background:#121820;border:1px solid #2a3040;border-radius:12px;overflow:hidden">' +
     '<tr><td style="background:linear-gradient(135deg,#1a2030,#0d1118);padding:20px 24px;border-bottom:2px solid #d4af37">' +
-    '<img src="' + escHtml(SITE_URL) + '/assets/aura-logo.svg" width="40" height="40" alt="AuraFX" style="vertical-align:middle;border-radius:8px;margin-right:10px"/>' +
+    '<img src="' + escHtml(SITE_URL) + '/assets/aura-icon-140.png" width="40" height="40" alt="AuraFX" style="vertical-align:middle;border-radius:8px;margin-right:10px"/>' +
     '<span style="font-size:22px;font-weight:700;color:#d4af37;vertical-align:middle">AuraFX</span> <span style="color:#888;font-size:14px;vertical-align:middle"> Elite</span></td></tr>' +
     '<tr><td style="padding:24px;font-size:15px;line-height:1.65">' + bodyInner + '</td></tr>' +
     '<tr><td style="padding:16px 24px;background:#080c14;font-size:11px;color:#888;border-top:1px solid #2a3040">' +

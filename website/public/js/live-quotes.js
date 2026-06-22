@@ -44,7 +44,7 @@
   window.AURAFX_refreshLiveQuotes = async function () {
     var ok = await fetchFromServer();
     if (!ok) {
-      window.AURAFX_LIVE_QUOTES.source = 'Offline — restart START-LIVE-WEBSITE.bat';
+      window.AURAFX_LIVE_QUOTES.source = 'Offline — visit aurafxelite.com for live data';
       window.AURAFX_LIVE_QUOTES.live = false;
       document.dispatchEvent(new CustomEvent('aurafx-quotes-updated'));
     }

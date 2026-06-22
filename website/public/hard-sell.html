@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="AuraFX Lite — live BUY, SELL and COVER signal preview for forex and gold." />
-  <title>AuraFX Lite — Live Signal Preview</title>
+  <meta name="description" content="AuraFX Lite — illustrative BUY, SELL and COVER label preview for educational forex and gold analysis." />
+  <title>AuraFX Lite — Analysis Label Preview</title>
   <link rel="stylesheet" href="css/site.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="js/font-loader.js"></script>
   <link rel="icon" href="assets/aura-icon-140.png" type="image/png" />
 </head>
 <body>
@@ -22,22 +22,22 @@
 
   <section class="hero" style="padding-top:2.5rem">
     <div id="livePill" class="live-pill"><span class="dot"></span> Connecting…</div>
-    <h1>Live <em>Signal Preview</em></h1>
-    <p>See how AuraFX Elite shows BUY, SELL and COVER on chart — demo panel below. Full automation runs in MetaTrader 5 or the Pro dashboard.</p>
+    <span class="edu-badge">Educational software only — not financial advice</span>
+    <h1>Analysis <em>Label Preview</em></h1>
+    <p>See how AuraFX Elite displays BUY, SELL and COVER labels on chart — illustrative panel below. Full tools run in MetaTrader 5 or the web dashboard.</p>
   </section>
 
   <section class="section lite-grid">
     <div class="card lite-panel-card">
-      <h2 style="text-align:left;margin-bottom:1rem">Signal panel (demo)</h2>
+      <h2 style="text-align:left;margin-bottom:1rem">Label panel (illustrative)</h2>
       <div class="lite-panel-mock" id="signalPanel">
         <div class="lite-panel-title">AURAFX ELITE</div>
         <div class="lite-panel-row muted" id="liteSymbol">XAUUSD · GOLD</div>
-        <div class="lite-panel-row lite-signal sell" id="liteSignal">Signal: SELL</div>
-        <div class="lite-panel-row">Win rate: <span id="liteWinRate">76.2</span>% · Target 76%</div>
-        <div class="lite-panel-row muted" id="liteStats">Wins 78 · Losses 24 · Total 102</div>
-        <div class="lite-panel-row accent">Sell + Cover protection enabled</div>
+        <div class="lite-panel-row lite-signal sell" id="liteSignal">Label: SELL</div>
+        <div class="lite-panel-row muted" id="liteStats">Session context · checklist items</div>
+        <div class="lite-panel-row accent">Cover protection overlay (illustrative)</div>
       </div>
-      <p class="lite-purpose">Purpose: shows the signal style clients see on MT5 — not live broker execution on this page.</p>
+      <p class="lite-purpose">Purpose: shows the label style on MT5 — not live broker execution or advice on this page.</p>
       <div class="lite-sig-btns" role="group" aria-label="Preview signal type">
         <button type="button" class="btn lite-btn-buy" data-sig="buy">BUY</button>
         <button type="button" class="btn lite-btn-sell active" data-sig="sell">SELL</button>

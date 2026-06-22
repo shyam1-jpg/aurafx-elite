@@ -3,75 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="AuraFX Elite — Live forex & gold trading assistant. News protection, AI scoring, MT5 signals. MT4 coming soon." />
-  <title>AuraFX Elite — Live Forex & Gold Trading Assistant</title>
+  <meta name="description" content="AuraFX Elite — educational forex and gold market analysis software for MetaTrader 5 and web. News calendar, risk tools, and chart helpers. Not financial advice." />
+  <meta name="keywords" content="AuraFX Elite, MetaTrader 5, forex education, gold analysis, XAUUSD, trading software UK" />
+  <meta property="og:title" content="AuraFX Elite — Educational Trading Software" />
+  <meta property="og:description" content="Market analysis tools for MT5 and web. Educational software only — not regulated investment advice." />
+  <meta property="og:url" content="https://aurafxelite.com/" />
+  <meta property="og:type" content="website" />
+  <title>AuraFX Elite — Educational Forex &amp; Gold Analysis Software</title>
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/institutional.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="icon" href="assets/aura-icon-140.png" type="image/png" />
+  <script src="js/font-loader.js"></script>
 </head>
 <body>
-  <nav class="nav">
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <nav class="nav" aria-label="Primary">
     <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
     <div class="nav-links">
+      <a href="about.html">About</a>
+      <a href="how-it-works.html">How it works</a>
       <a href="#features">Features</a>
-      <a href="#platforms">Platforms</a>
       <a href="#pricing">Pricing</a>
-      <a href="#contact">Contact</a>
+      <a href="support.html">Support</a>
       <a href="register.html">Register</a>
-      <a href="dashboard.html" class="btn btn-gold">AuraFX Pro Dashboard</a>
+      <a href="dashboard.html" class="btn btn-gold">Open dashboard</a>
     </div>
   </nav>
 
+  <main id="main">
   <section class="hero">
     <img src="assets/aura-icon-140.png" alt="AuraFX Elite logo" class="hero-logo" width="140" height="140" />
-    <div id="livePill" class="live-pill"><span class="dot"></span> Connecting to live API…</div>
-    <h1>Professional <em>Forex & Gold</em> Trading Assistant</h1>
-    <p>Live news protection, multi-timeframe analysis, AI trade scoring, and risk dashboard — built for serious traders. Market with confidence.</p>
-    <a href="dashboard.html" class="btn btn-gold">Open Live Dashboard</a>
-    <a href="aura-lite.html" class="btn btn-outline" style="margin-left:.5rem">Live signals preview</a>
+    <div id="livePill" class="live-pill" aria-live="polite"><span class="dot"></span> Loading market status…</div>
+    <span class="edu-badge" role="note">Educational software only — not financial advice</span>
+    <h1>Professional <em>Forex &amp; Gold</em> Analysis Tools</h1>
+    <p>Live economic calendar, volatility alerts, multi-timeframe chart helpers, and risk dashboard — designed for self-directed traders using their own broker account.</p>
+    <a href="dashboard.html" class="btn btn-gold">Open analysis dashboard</a>
+    <a href="how-it-works.html" class="btn btn-outline" style="margin-left:.5rem">See how it works</a>
   </section>
 
   <section id="features" class="section">
     <h2>Everything in one system</h2>
     <div class="grid-3">
-      <div class="card"><h3>Live news & risk</h3><p>NFP, CPI, FOMC warnings. Block bad entries 30 min before major events.</p></div>
-      <div class="card"><h3>AI trade score 0–100</h3><p>Trend, volume, structure, news, volatility — Excellent / Good / Avoid.</p></div>
-      <div class="card"><h3>Probability dashboard</h3><p>Bullish vs bearish %, sentiment, session intelligence.</p></div>
-      <div class="card"><h3>Market structure</h3><p>FVG, order blocks, BOS, CHOCH, liquidity zones.</p></div>
-      <div class="card"><h3>Gold specialist</h3><p>XAUUSD tuned presets, DXY proxy, overlap sessions.</p></div>
-      <div class="card"><h3>Trade journal</h3><p>Log trades, emotion, screenshots — learn your best setups.</p></div>
+      <div class="card"><h3>Live news &amp; risk</h3><p>NFP, CPI, FOMC warnings. Optional entry blocks before major events.</p></div>
+      <div class="card"><h3>Setup checklist</h3><p>Trend, volume, structure, news, and volatility checks — Excellent / Marginal / Avoid labels.</p></div>
+      <div class="card"><h3>Market bias display</h3><p>Bullish vs bearish weighting, sentiment labels, session context.</p></div>
+      <div class="card"><h3>Market structure</h3><p>FVG, order blocks, BOS, CHOCH, liquidity zones (educational overlays).</p></div>
+      <div class="card"><h3>Gold specialist</h3><p>XAUUSD presets, DXY proxy context, session overlap notes.</p></div>
+      <div class="card"><h3>Trade journal</h3><p>Log trades, emotion, screenshots — review your own process.</p></div>
     </div>
+  </section>
+
+  <section class="section trust-strip">
+    <p class="trust-statement">
+      <strong>No broker relationship.</strong> We do not hold client money, operate a trading account on your behalf, or receive referral fees from brokers.
+      You trade entirely with your own regulated broker under their terms.
+    </p>
   </section>
 
   <section id="platforms" class="section">
     <h2>Trading platforms</h2>
     <div class="platform-row">
-      <a href="mt5-install.html" class="platform-box active" title="How to get AuraFX on MT5">
+      <a href="mt5-install.html" class="platform-box active" title="How to install AuraFX on MetaTrader 5">
         <h3>MetaTrader 5</h3>
         <span class="badge">AVAILABLE</span>
-        <p style="margin-top:.75rem;color:var(--muted);font-size:.85rem">Signals, Pro Assistant, Risk Guardian &amp; EA — install via MQL5 Market or use the web dashboard.</p>
-        <span class="platform-cta">How to install on MT5 →</span>
+        <p style="margin-top:.75rem;color:var(--muted);font-size:.85rem">Indicators, Pro Assistant, Risk Guardian &amp; EA — install via MQL5 Market or the web dashboard.</p>
+        <span class="platform-cta">Installation guide →</span>
       </a>
-      <a href="register.html?plan=mt4_waitlist" class="platform-box soon" title="Join MT4 waitlist — register interest">
+      <a href="register.html?plan=mt4_waitlist" class="platform-box soon" title="Join MT4 waitlist">
         <h3>MetaTrader 4</h3>
-        <span class="badge badge-soon">NEXT WEEK</span>
-        <p style="margin-top:.75rem;color:var(--muted);font-size:.85rem">MQL4 port coming — join waitlist via support email when listed.</p>
-        <span class="platform-cta">Click to join waitlist →</span>
+        <span class="badge badge-soon">COMING SOON</span>
+        <p style="margin-top:.75rem;color:var(--muted);font-size:.85rem">MQL4 port in development — register interest via the waitlist.</p>
+        <span class="platform-cta">Join waitlist →</span>
       </a>
-      <a href="dashboard.html" class="platform-box active" title="Open live web dashboard">
-        <h3>Live website</h3>
-        <span class="badge">LIVE NOW</span>
-        <p style="margin-top:.75rem;color:var(--muted);font-size:.85rem">This site — news, calendar, journal, scoring. Works in any browser.</p>
-        <span class="platform-cta">Click to open dashboard →</span>
+      <a href="dashboard.html" class="platform-box active" title="Open web dashboard">
+        <h3>Web dashboard</h3>
+        <span class="badge">LIVE</span>
+        <p style="margin-top:.75rem;color:var(--muted);font-size:.85rem">News, calendar, journal, and analysis panels in your browser.</p>
+        <span class="platform-cta">Open dashboard →</span>
       </a>
     </div>
+    <p style="text-align:center;margin-top:1.25rem">
+      <a href="installation-guide.html">Full installation guide</a> ·
+      <a href="dashboard.html">View live dashboard screenshots</a>
+    </p>
   </section>
 
   <section id="pricing" class="section">
     <h2>Pricing</h2>
+    <p class="edu-badge edu-badge-center">Educational software only — not financial advice</p>
     <p style="text-align:center;color:var(--muted);font-size:.88rem;max-width:640px;margin:0 auto 1.25rem">
-      Recommended retail on MQL5 Market (USD). You choose the exact price when you publish. Buyers pay the listed price on mql5.com.
+      Recommended retail pricing on MQL5 Market (USD). Listed prices are set when published on mql5.com.
     </p>
     <div class="pricing-grid">
       <div class="card price-card">
@@ -80,7 +101,7 @@
         <ul>
           <li>Live dashboard &amp; analytics</li>
           <li>News, calendar, journal</li>
-          <li>No signup on this site</li>
+          <li>Registration required</li>
         </ul>
         <a href="register.html?plan=free" class="btn btn-outline">Register free</a>
       </div>
@@ -93,7 +114,7 @@
           <li>Symbol presets</li>
           <li>One-time purchase on MQL5</li>
         </ul>
-        <a href="https://www.mql5.com/en/market" class="btn btn-outline" style="margin-top:.75rem" target="_blank" rel="noopener">Find on MQL5</a>
+        <a href="https://www.mql5.com/en/market" class="btn btn-outline" style="margin-top:.75rem" target="_blank" rel="noopener noreferrer">Find on MQL5</a>
       </div>
       <div class="card price-card featured">
         <h3>MT5 full bundle</h3>
@@ -102,67 +123,67 @@
           <li>All indicators + Pro Assistant</li>
           <li>Elite EA + Risk Guardian</li>
           <li>Full preset pack (EURUSD, XAUUSD, Pro)</li>
-          <li>Best value — one-time on MQL5</li>
+          <li>One-time purchase on MQL5</li>
         </ul>
-        <a href="register.html?plan=mt5_bundle" class="btn btn-gold" style="margin-top:.75rem">Register &amp; pay with PayPal</a>
+        <a href="register.html?plan=mt5_bundle" class="btn btn-gold" style="margin-top:.75rem">Register interest</a>
       </div>
       <div class="card price-card">
         <h3>MT5 monthly rent</h3>
         <div class="price">$15 <span>– $25/mo</span></div>
         <ul>
           <li>Optional on MQL5 Market</li>
-          <li>Lower upfront for traders</li>
-          <li>You set rent term on listing</li>
+          <li>Lower upfront cost</li>
+          <li>Cancel via MQL5 rental terms</li>
         </ul>
-        <a href="register.html?plan=mt5_rent" class="btn btn-outline" style="margin-top:.75rem">Register &amp; pay monthly</a>
+        <a href="register.html?plan=mt5_rent" class="btn btn-outline" style="margin-top:.75rem">Register interest</a>
       </div>
       <div class="card price-card">
         <h3>MetaTrader 4</h3>
         <div class="price">$49 <span>– $99</span></div>
         <ul>
           <li>MQL4 port — coming soon</li>
-          <li>MT4 Market listing</li>
-          <li>Join waitlist for launch price</li>
+          <li>MT4 Market listing planned</li>
+          <li>Join waitlist for launch</li>
         </ul>
         <a href="register.html?plan=mt4_waitlist" class="btn btn-outline" style="margin-top:.75rem">Join MT4 waitlist</a>
       </div>
     </div>
     <p style="margin-top:1.25rem;font-size:.8rem;color:var(--muted);text-align:center;max-width:720px;margin-left:auto;margin-right:auto">
-      <strong>Seller note:</strong> MQL5 charges buyers your listed price. Marketplace commission is about 20% per sale (you keep roughly $39–$119 on a $99 bundle).
-      MetaTrader 5/4 platforms from your broker remain <strong>$0</strong>. Website hosting for you: about <strong>$0–7/mo</strong> + domain ~<strong>$12/year</strong> when live online.
+      Online card payments via PayPal appear when checkout is enabled on the server. Until then, register your interest and purchase via MQL5 Market where listed.
+      MetaTrader platforms are provided free by your broker.
     </p>
   </section>
 
   <section id="contact" class="section">
-    <h2>Register — save your contact details</h2>
+    <h2>Register for access</h2>
     <p style="text-align:center;color:var(--muted);max-width:560px;margin:0 auto 1.25rem;font-size:.95rem">
-      Clients can register with name, email, phone, and country. You receive leads on your server — then they open the live dashboard.
+      Create an account with your name, email, and country to access the dashboard and receive product updates.
     </p>
     <p style="text-align:center">
-      <a href="register.html" class="btn btn-gold">Client registration form</a>
+      <a href="register.html" class="btn btn-gold">Registration form</a>
       <a href="dashboard.html" class="btn btn-outline" style="margin-left:.5rem">Open dashboard</a>
     </p>
   </section>
 
   <div id="aurafx-inst-home"></div>
   <div id="aurafx-global-home"></div>
+  </main>
 
   <footer class="footer">
-    <p>© 2026 AuraFX Elite · Not financial advice · No profit guarantee · Past performance ≠ future results</p>
-    <p style="margin-top:.5rem"><a href="dashboard.html">Dashboard</a> · <a href="register.html">Register</a> · <a href="owner-leads.html">Owner: view leads</a></p>
+    <p>© 2026 AuraFX Elite · Educational software only · Not financial advice · Past performance is not indicative of future results</p>
+    <p style="margin-top:.5rem">
+      <a href="dashboard.html">Dashboard</a> · <a href="register.html">Register</a> ·
+      <a href="about.html">About</a> · <a href="faq.html">FAQ</a> · <a href="support.html">Support</a> · <a href="roadmap.html">Roadmap</a>
+    </p>
     <p style="margin-top:.4rem;font-size:.72rem">
       <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="risk-warning.html">Risk warning</a> ·
-      <a href="responsible-trading.html">Responsible trading</a> · <a href="regulatory.html">Regulatory (FCA)</a> ·
+      <a href="responsible-trading.html">Responsible trading</a> · <a href="regulatory.html">Regulatory</a> ·
       <a href="refunds.html">Refunds</a> · <a href="cookies.html">Cookies</a>
     </p>
-    <p style="margin-top:.35rem;font-size:.7rem" id="domainNote" class="hidden">Domain: <strong>aurafxelite.com</strong></p>
-    <p style="margin-top:.25rem;font-size:.65rem"><a href="system-status.html">System status (owners only)</a></p>
+    <p style="margin-top:.35rem;font-size:.7rem">Support: <a href="mailto:support@aurafxelite.com">support@aurafxelite.com</a></p>
   </footer>
 
-  <div id="fileModeBanner" class="file-mode-banner hidden" role="alert">
-    Buttons need the live server — double-click <strong>START-LIVE-WEBSITE.bat</strong>, then open
-    <a href="http://127.0.0.1:3847/">http://127.0.0.1:3847/</a>
-  </div>
+  <div id="fileModeBanner" class="file-mode-banner hidden" role="alert" aria-live="assertive"></div>
 
   <script src="js/site-boot.js"></script>
   <script src="js/cookie-consent.js"></script>

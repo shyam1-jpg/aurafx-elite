@@ -367,7 +367,8 @@
       id: d.id, email: payload.email, fullName: payload.fullName,
 
       plan: selectedPlan, paymentStatus: paymentStatus, countryCode: payload.countryCode,
-      emailVerified: !!d.emailVerified
+      emailVerified: !!d.emailVerified,
+      dashboardToken: d.dashboardToken || ''
 
     }));
 
@@ -525,26 +526,13 @@
       $('paypalSetupNote').hidden = false;
 
       $('paypalSetupNote').innerHTML =
-        '<strong>PayPal is not set up yet.</strong> The site owner must add <code>PAYPAL_CLIENT_ID</code> and ' +
-        '<code>PAYPAL_CLIENT_SECRET</code> to the server (see PAYPAL-SETUP.txt). ' +
-        'Until then, paid plans cannot be completed online.';
+        '<strong>Online checkout is not available yet.</strong> Register your interest below or purchase via ' +
+        '<a href="https://www.mql5.com/en/market" target="_blank" rel="noopener noreferrer">MQL5 Market</a> when listed. ' +
+        'For help, email <a href="mailto:support@aurafxelite.com">support@aurafxelite.com</a>.';
 
-      var canManual = config && config.allowManualPaymentConfirm;
-      var hasBizEmail = config && config.paypalBusinessEmail &&
-        config.paypalBusinessEmail.indexOf('your-paypal') < 0 &&
-        config.paypalBusinessEmail.indexOf('YOUR_PAYPAL') < 0;
-
-      if (hasBizEmail) {
-        $('paypalFallback').hidden = false;
-        $('paypalLink').href = buildPaypalLink();
-      }
-
-      if (canManual) {
-        $('paypalFallback').hidden = false;
-      } else {
-        var btnManual = $('btnConfirmManual');
-        if (btnManual) btnManual.hidden = true;
-      }
+      $('paypalFallback').hidden = true;
+      var btnManual = $('btnConfirmManual');
+      if (btnManual) btnManual.hidden = true;
 
       return;
 
@@ -686,7 +674,7 @@
 
     } catch (e) {
 
-      setMsg(e.message + ' — run START-LIVE-WEBSITE.bat', false);
+      setMsg(e.message + ' — check your connection or email support@aurafxelite.com', false);
 
       showStep(2);
 

@@ -3,103 +3,227 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AuraFX Pro — Live Dashboard</title>
+  <meta name="description" content="AuraFX Pro — live forex and gold analysis dashboard with calendar, charts, journal sync, and educational tools." />
+  <title>AuraFX Pro — Live Analysis Dashboard</title>
+  <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/pro-dashboard.css" />
   <link rel="stylesheet" href="css/institutional.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="js/font-loader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
-  <nav class="top-nav">
-    <a href="index.html" class="nav-logo">AuraFX <span>Pro</span></a>
-    <a href="index.html" class="nav-home">← Marketing home</a>
-    <a href="register.html" class="nav-home" style="margin-left:.75rem;color:var(--gold)">Register</a>
-  </nav>
-
-  <header class="header">
-    <h1>AuraFX <span>Pro</span> — Live Dashboard</h1>
-    <div id="statusBar" class="status-bar">Connecting…</div>
-    <div id="crashBanner" class="crash-banner hidden">🚨 HIGH MARKET RISK — CONSIDER PROTECTING OPEN POSITIONS</div>
-    <p class="platform-note">Live website · MT5 install next · MT4 coming soon · <a href="index.html">aurafx home</a></p>
-    <p class="disclaimer">Not financial advice. Assistant only. Final decision is yours.</p>
-    <div class="test-actions">
-      <button type="button" id="btnDemoLive" class="btn-test">Demo data</button>
-      <button type="button" id="btnTestCrash" class="btn-test">Test crash alert</button>
-      <button type="button" id="btnTestScore" class="btn-test">Test score 85</button>
-    </div>
-  </header>
-
-  <main class="grid">
-    <section class="card prob-card">
-      <h2>Probability dashboard</h2>
-      <div class="prob-bars">
-        <div class="prob-row"><span>Bullish</span><div class="bar"><div id="bullBar" class="fill bull"></div></div><strong id="bullPct">50%</strong></div>
-        <div class="prob-row"><span>Bearish</span><div class="bar"><div id="bearBar" class="fill bear"></div></div><strong id="bearPct">50%</strong></div>
+  <div class="dash-app">
+    <aside class="dash-sidebar" id="dashSidebar" aria-label="Dashboard sections">
+      <div class="dash-sidebar-brand">
+        <a href="index.html">AuraFX <span>Pro</span></a>
       </div>
-      <p id="scoreGrade" class="grade">Score: — | Confidence: —</p>
-      <p id="sentiment" class="sentiment">Sentiment: Neutral</p>
-      <p id="nextEventLine" class="muted" style="margin-top:.5rem">—</p>
-    </section>
-
-    <section class="card">
-      <h2>AI trade checklist</h2>
-      <ul id="checklist" class="checklist"></ul>
-      <p id="checkResult" class="check-result"></p>
-    </section>
-
-    <section class="card">
-      <h2>Session intelligence</h2>
-      <p id="sessionName" class="session-active">—</p>
-      <p id="sessionHint" class="muted">Best edge: London/NY overlap for gold & majors.</p>
-    </section>
-
-    <section class="card">
-      <h2>Portfolio protection</h2>
-      <ul class="stats">
-        <li>Exposure (lots) <strong id="exposure">0</strong></li>
-        <li>Correlated symbols <strong id="corr">0</strong></li>
-        <li>Daily P/L % <strong id="dailyPnl">0</strong></li>
+      <ul class="dash-nav" role="tablist">
+        <li><button type="button" class="active" data-panel="overview" role="tab" aria-selected="true">Overview</button></li>
+        <li><button type="button" data-panel="markets" role="tab">Markets</button></li>
+        <li><button type="button" data-panel="calendar" role="tab">Calendar &amp; News</button></li>
+        <li><button type="button" data-panel="journal" role="tab">Trade journal</button></li>
+        <li><button type="button" data-panel="analytics" role="tab">Analytics</button></li>
+        <li><button type="button" data-panel="settings" role="tab">Settings</button></li>
       </ul>
-    </section>
+      <div class="dash-sidebar-foot">
+        <a href="mt5-install.html">MT5 install</a>
+        <a href="index.html">Marketing home</a>
+        <a href="support.html">Support</a>
+      </div>
+    </aside>
 
-    <section class="card news-card">
-      <h2>Live news & calendar</h2>
-      <ul id="calendarList" class="feed-list"></ul>
-      <h2 style="margin-top:1rem">Breaking news</h2>
-      <ul id="newsList" class="feed-list"></ul>
-    </section>
+    <div class="dash-main">
+      <header class="dash-topbar">
+        <div class="dash-ticker" id="priceTicker" aria-live="polite">
+          <span class="dash-ticker-item"><span class="lbl">Loading quotes…</span></span>
+        </div>
+        <div class="dash-topbar-row">
+          <div>
+            <button type="button" class="btn-dash sidebar-toggle" id="btnSidebar" aria-label="Toggle menu">☰</button>
+            <span class="dash-topbar-title">AuraFX <span>Pro</span> — Live Dashboard</span>
+            <span class="edu-badge" role="note">Educational only</span>
+          </div>
+          <div class="dash-topbar-actions">
+            <div class="range-toggle" role="group" aria-label="Chart time range">
+              <button type="button" data-range="live" class="active" title="Last 5 minutes">Live</button>
+              <button type="button" data-range="5m" title="Last 5 minutes">5m</button>
+              <button type="button" data-range="1h" title="Last hour">1h</button>
+              <button type="button" data-range="24h" title="Last 24 hours">24h</button>
+            </div>
+            <button type="button" class="btn-dash" id="btnRefresh" title="Refresh now (R)">↻ Refresh</button>
+            <button type="button" class="btn-dash" id="btnTheme" title="Toggle theme">Theme</button>
+            <div class="user-chip" id="userChip" title="Registration link">
+              <span class="user-avatar" id="userAvatar">?</span>
+              <span id="userName">Guest</span>
+            </div>
+            <button type="button" class="btn-dash" id="btnSignOut" hidden>Sign out</button>
+          </div>
+        </div>
+        <div id="statusBar" class="status-bar" aria-live="polite"><span class="status-line">Connecting…</span></div>
+        <div id="crashBanner" class="crash-banner hidden" role="alert">High market volatility — review open risk with your broker</div>
+        <p class="disclaimer"><strong>Not financial advice.</strong> Analysis tools only. No broker relationship · No client money held · No trading account access.</p>
+      </header>
 
-    <section class="card journal-card">
-      <h2>AI trade journal</h2>
-      <form id="journalForm">
-        <input type="text" id="jSymbol" placeholder="Symbol" value="XAUUSD" />
-        <select id="jDir"><option>BUY</option><option>SELL</option></select>
-        <input type="number" id="jEntry" placeholder="Entry" step="0.00001" />
-        <input type="number" id="jExit" placeholder="Exit" step="0.00001" />
-        <input type="number" id="jEmotion" placeholder="Emotion 1-10" min="1" max="10" value="5" />
-        <input type="text" id="jReason" placeholder="Reason / setup" />
-        <button type="submit" class="btn-primary">Save trade</button>
-      </form>
-      <div id="journalInsights" class="insights"></div>
-      <ul id="journalList" class="journal-list"></ul>
-    </section>
+      <div class="dash-content">
+        <!-- KPI row (all panels) -->
+        <div class="kpi-row" id="kpiRow" aria-label="Key metrics">
+          <div class="kpi-card"><div class="kpi-label">Session</div><div class="kpi-value" id="kpiSession">—</div></div>
+          <div class="kpi-card"><div class="kpi-label">Market mood</div><div class="kpi-value" id="kpiMood">—</div></div>
+          <div class="kpi-card"><div class="kpi-label">Setup score</div><div class="kpi-value" id="kpiScore">—</div><div class="kpi-sub">Educational</div></div>
+          <div class="kpi-card"><div class="kpi-label">Next event</div><div class="kpi-value" id="kpiEvent" style="font-size:.95rem">—</div></div>
+          <div class="kpi-card" id="kpiApiCard"><div class="kpi-label">API status</div><div class="kpi-value" id="kpiApi">—</div></div>
+          <div class="kpi-card"><div class="kpi-label">Quote age</div><div class="kpi-value" id="kpiQuoteAge">—</div></div>
+        </div>
 
-    <section class="card screenshot-card">
-      <h2>Screenshot analysis</h2>
-      <input type="file" id="chartUpload" accept="image/*" />
-      <canvas id="chartCanvas" width="640" height="360"></canvas>
-      <pre id="screenshotAnalysis" class="analysis-out">Upload a chart screenshot for trend, S/R, SL/TP overlay hints.</pre>
-    </section>
+        <!-- OVERVIEW -->
+        <section id="panel-overview" class="dash-panel active" role="tabpanel">
+          <div class="grid">
+            <div class="card card-wide">
+              <h2>Mood &amp; setup score history</h2>
+              <div class="chart-wrap"><canvas id="moodChart" aria-label="Mood and score over time chart"></canvas></div>
+            </div>
+            <section class="card prob-card" aria-labelledby="probHeading">
+              <h2 id="probHeading">Market bias</h2>
+              <div class="prob-bars">
+                <div class="prob-row"><span>Bullish weight</span><div class="bar"><div id="bullBar" class="fill bull"></div></div><strong id="bullPct">50%</strong></div>
+                <div class="prob-row"><span>Bearish weight</span><div class="bar"><div id="bearBar" class="fill bear"></div></div><strong id="bearPct">50%</strong></div>
+              </div>
+              <p id="scoreGrade" class="grade">Setup score: —</p>
+              <p id="sentiment" class="sentiment">Sentiment: Neutral</p>
+              <p id="nextEventLine" class="muted" style="margin-top:.5rem">—</p>
+            </section>
+            <section class="card" aria-labelledby="checkHeading">
+              <h2 id="checkHeading">Setup checklist</h2>
+              <ul id="checklist" class="checklist"></ul>
+              <p id="checkResult" class="check-result"></p>
+            </section>
+            <section class="card" aria-labelledby="sessionHeading">
+              <h2 id="sessionHeading">Session</h2>
+              <p id="sessionName" class="session-active">—</p>
+              <p id="sessionHint" class="muted">London/NY overlap often has highest liquidity for gold and majors.</p>
+            </section>
+            <section class="card card-wide">
+              <h2>Live event log</h2>
+              <ul id="eventLog" class="event-log" aria-live="polite"><li class="ev-info"><span class="ev-time">—</span><span class="ev-level">info</span><span class="ev-msg">Loading events…</span></li></ul>
+            </section>
+          </div>
+        </section>
 
-    <div id="aurafx-inst-dash" class="inst-mount"></div>
-    <div id="aurafx-global-markets" class="inst-mount"></div>
-  </main>
-  <footer class="footer-mini">© AuraFX Elite · <a href="index.html">Home</a> · <a href="register.html">Register</a> ·
-    <a href="terms.html">Terms</a> · <a href="risk-warning.html">Risk</a> · <a href="regulatory.html">Regulatory</a></footer>
+        <!-- MARKETS -->
+        <section id="panel-markets" class="dash-panel" role="tabpanel" hidden>
+          <div class="grid">
+            <section class="card card-wide">
+              <h2>System health</h2>
+              <div class="health-grid" id="healthGrid"></div>
+            </section>
+            <section class="card" aria-labelledby="portHeading">
+              <h2 id="portHeading">Portfolio notes</h2>
+              <ul class="stats">
+                <li>Exposure (lots) <strong id="exposure">0</strong></li>
+                <li>Correlated symbols <strong id="corr">0</strong></li>
+                <li>Daily P/L % <strong id="dailyPnl">0</strong></li>
+              </ul>
+              <p class="muted" style="margin-top:.5rem">Manual notes only — not connected to your broker.</p>
+            </section>
+            <div id="aurafx-inst-dash" class="inst-mount card-wide"></div>
+            <div id="aurafx-global-markets" class="inst-mount card-wide"></div>
+          </div>
+        </section>
+
+        <!-- CALENDAR -->
+        <section id="panel-calendar" class="dash-panel" role="tabpanel" hidden>
+          <div class="grid">
+            <section class="card card-wide" aria-labelledby="newsHeading">
+              <h2 id="newsHeading">Economic calendar</h2>
+              <ul id="calendarList" class="feed-list"></ul>
+              <h2 style="margin-top:1rem">Headlines</h2>
+              <ul id="newsList" class="feed-list"></ul>
+            </section>
+          </div>
+        </section>
+
+        <!-- JOURNAL -->
+        <section id="panel-journal" class="dash-panel" role="tabpanel" hidden>
+          <div class="grid">
+            <section class="card card-wide" aria-labelledby="journalHeading">
+              <h2 id="journalHeading">Trade journal <span id="journalSyncBadge" class="sync-badge local">Local only</span></h2>
+              <form id="journalForm">
+                <label for="jSymbol" class="sr-only">Symbol</label>
+                <input type="text" id="jSymbol" name="symbol" placeholder="Symbol" value="XAUUSD" aria-label="Symbol" />
+                <label for="jDir" class="sr-only">Direction</label>
+                <select id="jDir" name="direction" aria-label="Direction"><option>BUY</option><option>SELL</option></select>
+                <label for="jEntry" class="sr-only">Entry</label>
+                <input type="number" id="jEntry" name="entry" placeholder="Entry" step="0.00001" aria-label="Entry price" />
+                <label for="jExit" class="sr-only">Exit</label>
+                <input type="number" id="jExit" name="exit" placeholder="Exit" step="0.00001" aria-label="Exit price" />
+                <label for="jEmotion" class="sr-only">Emotion</label>
+                <input type="number" id="jEmotion" name="emotion" placeholder="Emotion 1-10" min="1" max="10" value="5" aria-label="Emotion 1 to 10" />
+                <label for="jReason" class="sr-only">Reason</label>
+                <input type="text" id="jReason" name="reason" placeholder="Reason / setup" aria-label="Reason" />
+                <button type="submit" class="btn-primary">Save trade</button>
+              </form>
+              <div style="margin:.75rem 0;display:flex;gap:.5rem;flex-wrap:wrap">
+                <button type="button" class="btn-dash" id="btnExportJournal">Export CSV</button>
+                <button type="button" class="btn-dash" id="btnSyncJournal" hidden>Sync to cloud</button>
+              </div>
+              <div id="journalInsights" class="insights"></div>
+              <ul id="journalList" class="journal-list"></ul>
+            </section>
+            <section class="card screenshot-card card-wide" aria-labelledby="screenshotHeading">
+              <h2 id="screenshotHeading">Chart screenshot overlay</h2>
+              <label for="chartUpload" class="upload-label">Upload chart image</label>
+              <input type="file" id="chartUpload" accept="image/*" />
+              <canvas id="chartCanvas" width="640" height="360" role="img" aria-label="Chart with illustrative zones"></canvas>
+              <pre id="screenshotAnalysis" class="analysis-out">Upload a chart for illustrative zone overlays.</pre>
+            </section>
+          </div>
+        </section>
+
+        <!-- ANALYTICS -->
+        <section id="panel-analytics" class="dash-panel" role="tabpanel" hidden>
+          <div class="grid">
+            <div class="card card-wide">
+              <h2>Session risk gauge</h2>
+              <div class="chart-wrap" style="height:180px;max-width:280px;margin:0 auto"><canvas id="riskGauge" aria-label="Session risk gauge"></canvas></div>
+            </div>
+            <div class="card card-wide">
+              <h2>Bullish weight history</h2>
+              <div class="chart-wrap"><canvas id="bullChart" aria-label="Bullish weight over time"></canvas></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="panel-settings" class="dash-panel" role="tabpanel" hidden>
+          <div class="card card-wide">
+            <h2>Account link</h2>
+            <p class="muted" style="margin-bottom:.75rem">Link your registration to sync journal to cloud (Neon database when configured on server).</p>
+            <div class="settings-block">
+              <label for="linkEmail">Registration email</label>
+              <input type="email" id="linkEmail" placeholder="you@email.com" aria-label="Registration email" />
+              <button type="button" class="btn-dash btn-dash-primary" id="btnLinkAccount" style="margin-top:.5rem">Link account</button>
+              <p id="linkMsg" class="muted" style="margin-top:.5rem"></p>
+            </div>
+            <div class="settings-block">
+              <h3>Preferences</h3>
+              <p class="muted">Theme: use the Theme button in the top bar.<br>
+              Refresh: auto every 60s · manual ↻ or press <kbd>R</kbd><br>
+              <a href="register.html">Register</a> · <a href="privacy.html">Privacy</a></p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="footer-mini">© AuraFX Elite · Educational software only ·
+        <a href="index.html">Home</a> · <a href="terms.html">Terms</a> · <a href="risk-warning.html">Risk</a></footer>
+    </div>
+  </div>
+
   <div id="fileModeBanner" class="file-mode-banner hidden" role="alert"></div>
   <script src="js/site-boot.js"></script>
+  <script src="js/cookie-consent.js"></script>
   <script src="js/market-price-bases.js"></script>
   <script src="js/live-quotes.js"></script>
-  <script src="js/live-price-ticker.js"></script>
   <script src="js/pro-dashboard.js"></script>
   <script src="js/institutional-data.js"></script>
   <script src="js/institutional.js"></script>

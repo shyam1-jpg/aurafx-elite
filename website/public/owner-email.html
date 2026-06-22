@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Owner — Email campaigns</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Email campaigns — AuraFX Admin</title>
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/register.css" />
   <link rel="stylesheet" href="css/legal.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     .email-editor { width: 100%; min-height: 220px; padding: .75rem; background: #080c14; border: 1px solid #333; color: var(--text); border-radius: 8px; font-family: inherit; font-size: .85rem; }
     .email-preview { background: #fff; color: #111; min-height: 200px; border-radius: 8px; border: 1px solid #333; }
@@ -20,7 +20,8 @@
     <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
     <div class="nav-links">
       <a href="owner-leads.html">Leads</a>
-      <a href="owner-preview.html">Live preview</a>
+      <a href="system-status.html">System status</a>
+      <button type="button" class="btn btn-outline" id="btnLogout" style="font-size:.8rem">Sign out</button>
     </div>
   </nav>
 
@@ -33,9 +34,7 @@
     </div>
 
     <div class="card reg-form" style="padding:1rem;margin-bottom:1rem">
-      <label style="font-size:.78rem;color:var(--muted)">Owner key</label>
-      <input type="password" id="ownerKey" value="aurafx-owner" style="width:100%;max-width:320px;padding:.5rem;margin:.35rem 0;background:#080c14;border:1px solid #333;border-radius:6px;color:var(--text)" />
-      <button type="button" class="btn btn-outline" id="btnStatus" style="margin-left:.5rem">Check email status</button>
+      <button type="button" class="btn btn-outline" id="btnStatus">Check email status</button>
       <p id="statusMsg" class="reg-msg" style="text-align:left;margin-top:.5rem"></p>
       <div id="statPills"></div>
     </div>
@@ -100,16 +99,18 @@
   </footer>
 
   <script src="js/site-boot.js"></script>
+  <script src="js/admin-pages.js"></script>
   <script>
   (function () {
-    var API = window.AURAFX_API_BASE || '';
-    function key() { return document.getElementById('ownerKey').value.trim(); }
-    function hdr() { return { 'Content-Type': 'application/json', 'X-Owner-Key': key() }; }
+    document.getElementById('btnLogout').onclick = function () { AURAFX_ADMIN.adminLogout(); };
+
+    function jsonHeaders() {
+      return { 'Content-Type': 'application/json' };
+    }
 
     function setPreview() {
       var html = document.getElementById('htmlBody').value;
-      var f = document.getElementById('previewFrame');
-      f.srcdoc = html.replace(/\{\{name\}\}/gi, 'Alex');
+      document.getElementById('previewFrame').srcdoc = html.replace(/\{\{name\}\}/gi, 'Alex');
     }
 
     document.getElementById('htmlBody').addEventListener('input', setPreview);
@@ -117,23 +118,19 @@
     document.getElementById('btnStatus').onclick = async function () {
       var el = document.getElementById('statusMsg');
       try {
-        var r = await fetch(API + '/api/email/status', { headers: { 'X-Owner-Key': key() } });
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/email/status');
         var d = await r.json();
         if (!r.ok) throw new Error(d.error || 'Failed');
         var s = d.status || {};
-        el.textContent = s.configured
-          ? '✓ Email ready — ' + s.provider + ' from ' + s.from
-          : '✗ Set RESEND_API_KEY on server (see EMAIL-SETUP.txt)';
+        el.textContent = s.configured ? 'Email ready — ' + s.provider + ' from ' + s.from : 'Set RESEND_API_KEY on server';
         el.className = 'reg-msg ' + (s.configured ? 'ok' : 'err');
-        var sub = await fetch(API + '/api/email/subscribers', { headers: { 'X-Owner-Key': key() } });
+        var sub = await AURAFX_ADMIN.adminFetch('/api/email/subscribers');
         var sd = await sub.json();
         document.getElementById('statPills').innerHTML =
           '<span class="stat-pill">Total <strong>' + (sd.total || 0) + '</strong></span>' +
-          '<span class="stat-pill">Marketing <strong>' + (sd.marketingOptIn || 0) + '</strong></span>' +
-          (s.aiAvailable ? '<span class="stat-pill">AI <strong>on</strong></span>' : '');
-        if (d.lastCampaign) {
-          document.getElementById('campaignLog').textContent = JSON.stringify(d.lastCampaign, null, 2);
-        }
+          '<span class="stat-pill">Marketing <strong>' + (sd.marketingOptIn || 0) + '</strong></span>';
+        if (d.lastCampaign) document.getElementById('campaignLog').textContent = JSON.stringify(d.lastCampaign, null, 2);
       } catch (e) {
         el.textContent = e.message;
         el.className = 'reg-msg err';
@@ -144,9 +141,10 @@
       var msg = document.getElementById('sendMsg');
       msg.textContent = 'Generating…';
       try {
-        var r = await fetch(API + '/api/email/draft', {
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/email/draft', {
           method: 'POST',
-          headers: hdr(),
+          headers: jsonHeaders(),
           body: JSON.stringify({
             type: document.getElementById('draftType').value,
             audience: document.getElementById('audience').value,
@@ -159,8 +157,7 @@
         document.getElementById('subject').value = d.draft.subject;
         document.getElementById('htmlBody').value = d.draft.html;
         setPreview();
-        msg.textContent = '✓ Draft ready for ' + d.recipientCount + ' recipients' +
-          (d.draft.aiPolished ? ' (AI polished)' : '');
+        msg.textContent = 'Draft ready for ' + d.recipientCount + ' recipients';
         msg.className = 'reg-msg ok';
       } catch (e) {
         msg.textContent = e.message;
@@ -172,11 +169,12 @@
       var msg = document.getElementById('sendMsg');
       var dry = document.getElementById('dryRun').checked;
       if (!dry && !confirm('Send this email to ALL selected clients?')) return;
-      msg.textContent = dry ? 'Dry run…' : 'Starting send in background…';
+      msg.textContent = dry ? 'Dry run…' : 'Starting send…';
       try {
-        var r = await fetch(API + '/api/email/send', {
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/email/send', {
           method: 'POST',
-          headers: hdr(),
+          headers: jsonHeaders(),
           body: JSON.stringify({
             subject: document.getElementById('subject').value,
             html: document.getElementById('htmlBody').value,
@@ -187,22 +185,16 @@
         var d = await r.json();
         if (!r.ok) throw new Error(d.error || 'Send failed');
         document.getElementById('campaignLog').textContent = JSON.stringify(d, null, 2);
-        msg.textContent = dry
-          ? '✓ Dry run: ' + d.total + ' would receive (preview: ' + (d.preview || []).join(', ') + ')'
-          : '✓ Sending to ' + d.total + ' clients — keep server open; refresh log in ~1 min';
+        msg.textContent = dry ? 'Dry run: ' + d.total + ' would receive' : 'Sending to ' + d.total + ' clients';
         msg.className = 'reg-msg ok';
-        if (!dry) setTimeout(function () { document.getElementById('btnRefreshLog').click(); }, 8000);
       } catch (e) {
         msg.textContent = e.message;
         msg.className = 'reg-msg err';
       }
     };
 
-    document.getElementById('btnRefreshLog').onclick = function () {
-      document.getElementById('btnStatus').click();
-    };
-
-    document.getElementById('btnStatus').click();
+    document.getElementById('btnRefreshLog').onclick = function () { document.getElementById('btnStatus').click(); };
+    AURAFX_ADMIN.requireAdmin().then(function () { document.getElementById('btnStatus').click(); });
   })();
   </script>
 </body>

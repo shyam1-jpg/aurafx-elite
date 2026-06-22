@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Admin sign in — AuraFX Elite</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/register.css" />
+  <style>
+    .admin-login { max-width: 420px; margin: 3rem auto; padding: 0 1rem; }
+    .admin-login label { display: block; font-size: .82rem; color: var(--muted); margin: .75rem 0 .35rem; }
+    .admin-login input { width: 100%; padding: .55rem .65rem; background: #080c14; border: 1px solid #333; color: var(--text); border-radius: 6px; }
+    .admin-login .hint { font-size: .78rem; color: var(--muted); margin-top: 1rem; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
+  </nav>
+
+  <section class="admin-login">
+    <h1 style="color:var(--gold);font-size:1.35rem;margin-bottom:.5rem">Admin sign in</h1>
+    <p class="reg-lead">Restricted area. Authorised operators only.</p>
+    <form id="loginForm" class="card" style="padding:1.25rem;margin-top:1rem">
+      <label for="adminPassword">Password</label>
+      <input type="password" id="adminPassword" name="password" autocomplete="current-password" required aria-required="true" />
+
+      <div id="totpBlock" hidden>
+        <label for="adminTotp">Authenticator code (6 digits)</label>
+        <input type="text" id="adminTotp" name="totp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" aria-describedby="totpHint" />
+        <p id="totpHint" class="hint">Two-factor authentication is enabled on this server.</p>
+      </div>
+
+      <button type="submit" class="btn btn-gold" style="width:100%;margin-top:1rem">Sign in</button>
+      <p id="loginMsg" class="reg-msg" role="status" aria-live="polite"></p>
+    </form>
+    <p class="hint">Forgotten access? Contact the site operator via support@aurafxelite.com from the registered business email.</p>
+  </section>
+
+  <script src="js/site-boot.js"></script>
+  <script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var next = params.get('next') || '/owner-leads.html';
+    var msg = document.getElementById('loginMsg');
+    var totpBlock = document.getElementById('totpBlock');
+
+    fetch((window.AURAFX_API_BASE || '') + '/api/admin/session', { credentials: 'include' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.authenticated) window.location.href = next;
+        if (d.totpEnabled) totpBlock.hidden = false;
+      })
+      .catch(function () { /* session check optional */ });
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      msg.textContent = 'Signing in…';
+      msg.className = 'reg-msg';
+      try {
+        var r = await fetch((window.AURAFX_API_BASE || '') + '/api/admin/login', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            password: document.getElementById('adminPassword').value,
+            totp: document.getElementById('adminTotp').value
+          })
+        });
+        var d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Sign in failed');
+        window.location.href = next;
+      } catch (err) {
+        msg.textContent = err.message;
+        msg.className = 'reg-msg err';
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

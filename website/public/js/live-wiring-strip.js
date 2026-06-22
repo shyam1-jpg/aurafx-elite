@@ -21,7 +21,7 @@
     } catch (e) {
       strip.className = 'wiring-strip wiring-strip-fail';
       strip.innerHTML =
-        '○ Server offline — run <strong>START-LIVE-WEBSITE.bat</strong> · <a href="live-wiring.html">Fix wiring →</a>';
+        '○ Server offline — <a href="https://aurafxelite.com">Visit live site</a>';
     }
   }
 

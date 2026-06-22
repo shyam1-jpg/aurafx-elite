@@ -6,33 +6,40 @@
   <title>Cookie Policy — AuraFX Elite</title>
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/legal.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="js/font-loader.js"></script>
 </head>
 <body>
-  <nav class="nav">
-    <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
-    <div class="nav-links"><a href="register.html">Register</a></div>
-  </nav>
+  <nav class="nav"><a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a><div class="nav-links"><a href="register.html">Register</a></div></nav>
   <article class="legal-page section">
     <nav class="legal-nav">
       <a href="privacy.html">Privacy</a> · <a href="cookies.html" class="legal-active">Cookies</a>
     </nav>
     <h1>Cookie Policy</h1>
-    <p class="legal-updated">Last updated: May 2026</p>
+    <p class="legal-updated">Last updated: June 2026</p>
 
-    <h2>What we use</h2>
+    <h2>How consent works</h2>
+    <p>When you first visit, a banner lets you choose <strong>Accept all</strong> or <strong>Essential only</strong>. Your choice is stored in local storage as <code>aurafx_cookie_consent</code>. Non-essential scripts (Google Fonts) load only if you accept all.</p>
+
+    <h2>Cookies &amp; storage we use</h2>
     <table class="cost-table">
-      <tr><th>Name / storage</th><th>Purpose</th><th>Duration</th></tr>
-      <tr><td>aurafx_cookie_consent</td><td>Remember cookie choice</td><td>Until cleared</td></tr>
-      <tr><td>aurafx_client</td><td>Registration session (local)</td><td>Until cleared</td></tr>
-      <tr><td>Server session / logs</td><td>Security, API</td><td>Short-term logs</td></tr>
+      <tr><th>Name</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
+      <tr><td>aurafx_cookie_consent</td><td>Essential (local storage)</td><td>Remember cookie choice</td><td>Until cleared</td></tr>
+      <tr><td>aurafx_client</td><td>Essential (local storage)</td><td>Registration session on device</td><td>Until cleared</td></tr>
+      <tr><td>aurafx_journal</td><td>Functional (local storage)</td><td>Trade journal entries on dashboard</td><td>Until cleared</td></tr>
+      <tr><td>aurafx_admin</td><td>Essential (HTTP cookie)</td><td>Admin session (staff only)</td><td>8 hours</td></tr>
+      <tr><td>Google Fonts</td><td>Non-essential</td><td>Inter web font (if accepted)</td><td>Per Google policy</td></tr>
     </table>
 
     <h2>Third parties</h2>
-    <p>PayPal may set cookies when you pay. Google Fonts loads from Google (see their policy). Live price APIs (Frankfurter, CoinGecko) are called from your browser — they may log IP per their terms.</p>
+    <ul>
+      <li><strong>PayPal</strong> — may set cookies when you pay (only when checkout is enabled).</li>
+      <li><strong>Google Fonts</strong> — loaded only after “Accept all”.</li>
+      <li><strong>Market data APIs</strong> — Yahoo Finance / CoinGecko called from our server; your browser does not send personal data to them beyond normal HTTP requests initiated by our pages.</li>
+    </ul>
 
     <h2>Control</h2>
-    <p>Use browser settings to block cookies; some features (registration remember, consent banner) may not work.</p>
+    <p>Clear site data in your browser to reset consent. Blocking essential storage may break registration and the consent banner memory.</p>
+    <p>To change preference: clear <code>aurafx_cookie_consent</code> in browser storage and reload the page.</p>
   </article>
   <footer class="footer"><p>© AuraFX Elite · <a href="index.html">Home</a></p></footer>
   <script src="js/site-boot.js"></script>

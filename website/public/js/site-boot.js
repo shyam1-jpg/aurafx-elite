@@ -1,9 +1,11 @@
 /**
- * AuraFX site boot — API base, logo, favicon, file:// banner, live pill.
+ * AuraFX site boot — API base, logo, favicon, live pill.
  */
 (function () {
   var isFile = window.location.protocol === 'file:';
-  window.AURAFX_API_BASE = isFile ? 'http://127.0.0.1:3847' : '';
+  var isLiveSite = /aurafxelite\.com|onrender\.com/i.test(window.location.hostname || '');
+  window.AURAFX_API_BASE = isFile ? '' : '';
+  window.AURAFX_IS_FILE_MODE = isFile;
   var LOGO = '/assets/aura-icon-140.png';
 
   function assetUrl(path) {
@@ -38,9 +40,7 @@
     var banner = document.getElementById('fileModeBanner');
     if (banner) {
       banner.classList.remove('hidden');
-      banner.innerHTML =
-        'Opened as a file — links may not work. Run <strong>START-LIVE-WEBSITE.bat</strong>, then use ' +
-        '<a href="http://127.0.0.1:3847/index.html">http://127.0.0.1:3847/</a>';
+      banner.textContent = 'This page was opened from your computer. For full features, visit https://aurafxelite.com';
     }
   }
 
@@ -62,16 +62,14 @@
         }
       } catch (_) { /* quotes optional */ }
       pill.className = 'live-pill online';
-      var nextEv = d.nextEvent && d.nextEvent.title ? d.nextEvent.title : (d.nextEvent || '');
+      var nextEv = d.nextEvent && d.nextEvent.title ? d.nextEvent.title : '';
       pill.innerHTML =
-        '<span class="dot"></span> LIVE' + goldLine + ' · Mood: ' + (d.mood || '—') +
+        '<span class="dot"></span> Live data' + goldLine + ' · Mood: ' + (d.mood || '—') +
         (nextEv ? ' · Next: ' + nextEv : '');
-      var dn = document.getElementById('domainNote');
-      if (dn && window.location.hostname.indexOf('aurafxelite.com') >= 0) dn.classList.remove('hidden');
     } catch (e) {
-      pill.textContent = isFile
-        ? 'Start START-LIVE-WEBSITE.bat for live buttons & API'
-        : 'Market feed loading — refresh in a few seconds';
+      pill.textContent = isLiveSite
+        ? 'Market feed loading — please refresh shortly'
+        : 'Connect to aurafxelite.com for live market data';
       pill.style.borderColor = '#e67e22';
       pill.style.color = '#e67e22';
     }

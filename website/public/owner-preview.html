@@ -3,93 +3,52 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Owner — Live institutional preview</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Live preview — AuraFX Admin</title>
   <link rel="stylesheet" href="css/site.css" />
-  <link rel="stylesheet" href="css/register.css" />
-  <link rel="stylesheet" href="css/legal.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <nav class="nav">
-    <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
-    <div class="nav-links"><a href="dashboard.html">Dashboard</a></div>
+    <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="owner-leads.html">Leads</a>
+      <a href="system-status.html">Status</a>
+      <button type="button" class="btn btn-outline" id="btnLogout" style="font-size:.8rem">Sign out</button>
+    </div>
   </nav>
-
-  <section class="section reg-section" style="max-width:640px">
-    <h2>Live institutional preview (owner only)</h2>
-    <p class="reg-lead">Public visitors still see <strong>demo</strong> data. Only you can turn on live FX/crypto snapshots while you finish COT, whale, and ETF APIs.</p>
-
-    <div class="legal-banner" style="margin-bottom:1rem">
-      Server must run with <code>INSTITUTIONAL_MODE=preview</code>. Default is <code>demo</code> (live API blocked).
+  <section class="section" style="max-width:720px">
+    <h2>Institutional live preview</h2>
+    <p class="reg-lead">Requires server <code>INSTITUTIONAL_MODE=preview</code> and admin sign-in. Public visitors see standard dashboard data only.</p>
+    <div class="card" style="padding:1rem;margin-top:1rem">
+      <button type="button" class="btn btn-gold" id="btnTest">Test live institutional API</button>
+      <button type="button" class="btn btn-outline" id="btnDash" style="margin-left:.5rem">Open dashboard</button>
+      <p id="msg" class="reg-msg" style="margin-top:.75rem"></p>
+      <pre id="out" style="font-size:.72rem;background:#080c14;padding:1rem;border-radius:8px;overflow:auto;max-height:320px;color:var(--muted)"></pre>
     </div>
-
-    <div class="card reg-form">
-      <h3 style="color:var(--gold);font-size:.95rem;margin-bottom:.75rem">Step 1 — Start server in preview mode</h3>
-      <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem">Windows CMD (in <code>website</code> folder):</p>
-      <pre style="background:#080c14;border:1px solid #333;padding:1rem;border-radius:8px;font-size:.78rem;overflow:auto">set INSTITUTIONAL_MODE=preview
-set AURAFX_OWNER_KEY=aurafx-owner
-node simple-server.js</pre>
-      <p style="font-size:.8rem;color:var(--muted);margin-top:.75rem">Or double-click <strong>START-LIVE-PREVIEW.bat</strong> in the project folder.</p>
-    </div>
-
-    <div class="card reg-form" style="margin-top:1rem">
-      <h3 style="color:var(--gold);font-size:.95rem;margin-bottom:.75rem">Step 2 — Save owner key in this browser</h3>
-      <label style="font-size:.78rem;color:var(--muted)">Owner key (same as AURAFX_OWNER_KEY)</label>
-      <input type="password" id="ownerKey" value="aurafx-owner" style="width:100%;padding:.55rem;margin:.35rem 0 1rem;background:#080c14;border:1px solid #333;border-radius:8px;color:var(--text)" />
-      <button type="button" class="btn btn-gold" id="btnSave">Save key &amp; test live API</button>
-      <p id="testMsg" class="reg-msg" style="margin-top:.75rem"></p>
-    </div>
-
-    <div class="reg-actions" style="margin-top:1.25rem">
-      <a href="dashboard.html" class="btn btn-gold" id="btnDash">Open dashboard with live preview</a>
-      <button type="button" class="btn btn-outline" id="btnClear">Turn off preview (demo only)</button>
-    </div>
-
-    <p class="reg-note" style="margin-top:1.5rem">
-      When ready for everyone: set <code>INSTITUTIONAL_MODE=public</code> on the server (later). Until then, do not link this page from the public home page.
-    </p>
   </section>
-
-  <footer class="footer">
-    <p><a href="owner-leads.html">Client leads</a> · <a href="system-status.html">System status</a> · <a href="index.html">Home</a></p>
-  </footer>
-
   <script src="js/site-boot.js"></script>
+  <script src="js/admin-pages.js"></script>
   <script>
   (function () {
-    var API = window.AURAFX_API_BASE || '';
-    function msg(t, ok) {
-      var el = document.getElementById('testMsg');
-      el.textContent = t;
-      el.className = 'reg-msg ' + (ok ? 'ok' : 'err');
-    }
-    document.getElementById('btnSave').onclick = async function () {
-      var key = document.getElementById('ownerKey').value.trim();
-      if (!key) return msg('Enter owner key', false);
-      sessionStorage.setItem('aurafx_owner_key', key);
+    document.getElementById('btnLogout').onclick = function () { AURAFX_ADMIN.adminLogout(); };
+    document.getElementById('btnDash').onclick = function () { location.href = 'dashboard.html'; };
+    document.getElementById('btnTest').onclick = async function () {
+      var msg = document.getElementById('msg');
+      msg.textContent = 'Loading…';
       try {
-        var cfg = await fetch(API + '/api/config').then(function (r) { return r.json(); });
-        if (!cfg.ownerPreviewAvailable) {
-          return msg('Server is in demo mode. Restart with INSTITUTIONAL_MODE=preview', false);
-        }
-        var r = await fetch(API + '/api/institutional-live', { headers: { 'X-Owner-Key': key } });
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/institutional-live');
         var d = await r.json();
-        if (!r.ok) return msg(d.error || 'Live API failed', false);
-        msg('✓ Live preview OK — ' + (d.quotes && d.quotes.source) + ' · open dashboard', true);
+        if (!r.ok) throw new Error(d.error || 'Failed');
+        document.getElementById('out').textContent = JSON.stringify(d, null, 2);
+        msg.textContent = 'Live preview OK';
+        msg.className = 'reg-msg ok';
       } catch (e) {
-        msg('Start START-LIVE-WEBSITE.bat or PREVIEW bat first', false);
+        msg.textContent = e.message;
+        msg.className = 'reg-msg err';
       }
     };
-    document.getElementById('btnClear').onclick = function () {
-      sessionStorage.removeItem('aurafx_owner_key');
-      window.AURAFX_LIVE_PREVIEW = false;
-      msg('Preview off — dashboard will show demo institutional data', true);
-    };
-    document.getElementById('btnDash').onclick = function () {
-      var key = document.getElementById('ownerKey').value.trim();
-      if (key) sessionStorage.setItem('aurafx_owner_key', key);
-      location.href = 'dashboard.html';
-    };
+    AURAFX_ADMIN.requireAdmin();
   })();
   </script>
 </body>

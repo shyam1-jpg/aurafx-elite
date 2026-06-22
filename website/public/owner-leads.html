@@ -3,16 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AuraFX — Client leads (Owner)</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Client registrations — AuraFX Admin</title>
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/register.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     .leads-table { width: 100%; border-collapse: collapse; font-size: .8rem; margin-top: 1rem; }
     .leads-table th, .leads-table td { border: 1px solid #333; padding: .5rem; text-align: left; }
     .leads-table th { color: var(--gold); background: #1a2030; }
-    .owner-key { max-width: 320px; margin: 0 auto 1rem; }
-    .owner-key input { width: 100%; padding: .5rem; background: #080c14; border: 1px solid #333; color: var(--text); border-radius: 6px; }
   </style>
 </head>
 <body>
@@ -20,35 +18,34 @@
     <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
     <div class="nav-links">
       <a href="owner-email.html">Email campaigns</a>
-      <a href="register.html">Register</a>
+      <a href="system-status.html">System status</a>
+      <button type="button" class="btn btn-outline" id="btnLogout" style="font-size:.8rem">Sign out</button>
     </div>
   </nav>
 
   <section class="section reg-section" style="max-width:960px">
-    <h2>Client registrations (owner)</h2>
-    <p class="reg-lead">View everyone who submitted the registration form. Default key: <code>aurafx-owner</code> (change with env AURAFX_OWNER_KEY on server).</p>
-    <div class="owner-key card" style="padding:1rem">
-      <label>Owner key</label>
-      <input type="password" id="ownerKey" value="aurafx-owner" />
-      <button type="button" class="btn btn-gold" style="margin-top:.5rem;width:100%" id="btnLoad">Load registrations</button>
-    </div>
-    <p id="leadMsg" class="reg-msg"></p>
+    <h2>Client registrations</h2>
+    <p class="reg-lead">Signed-in admin view. Data is stored securely on the server.</p>
+    <button type="button" class="btn btn-gold" id="btnLoad">Refresh list</button>
+    <p id="leadMsg" class="reg-msg" role="status" aria-live="polite"></p>
     <div class="inst-scroll" id="leadTableWrap"></div>
   </section>
 
   <footer class="footer"><p><a href="index.html">Home</a></p></footer>
 
   <script src="js/site-boot.js"></script>
+  <script src="js/admin-pages.js"></script>
   <script>
   (function () {
-    var API = window.AURAFX_API_BASE || '';
-    document.getElementById('btnLoad').onclick = async function () {
+    document.getElementById('btnLogout').onclick = function () { AURAFX_ADMIN.adminLogout(); };
+
+    async function loadLeads() {
       var msg = document.getElementById('leadMsg');
-      var key = document.getElementById('ownerKey').value;
       msg.textContent = 'Loading…';
       msg.className = 'reg-msg';
       try {
-        var r = await fetch(API + '/api/registrations', { headers: { 'X-Owner-Key': key } });
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/registrations');
         var d = await r.json();
         if (!r.ok) throw new Error(d.error || 'Failed');
         if (!d.registrations.length) {
@@ -59,17 +56,20 @@
         msg.textContent = d.count + ' client(s) registered.';
         msg.className = 'reg-msg ok';
         document.getElementById('leadTableWrap').innerHTML =
-          '<table class="leads-table"><tr><th>Name</th><th>Email</th><th>Verified</th><th>Found via</th><th>Plan</th><th>Payment</th><th>Date</th></tr>' +
+          '<table class="leads-table"><caption class="sr-only">Registration list</caption><tr><th>Name</th><th>Email</th><th>Verified</th><th>Found via</th><th>Plan</th><th>Payment</th><th>Date</th></tr>' +
           d.registrations.map(function (x) {
-            return '<tr><td>' + x.fullName + '</td><td>' + x.email + '</td><td>' + (x.emailVerified ? '✓' : '—') + '</td><td>' +
+            return '<tr><td>' + x.fullName + '</td><td>' + x.email + '</td><td>' + (x.emailVerified ? 'Yes' : 'No') + '</td><td>' +
               (x.heardFromLabel || x.heardFrom || '—') + '</td><td>' + (x.planName || x.plan || '—') + '</td><td>' + (x.paymentStatus || '—') + '</td><td>' +
               (x.registeredAt || '').slice(0, 10) + '</td></tr>';
           }).join('') + '</table>';
       } catch (e) {
-        msg.textContent = e.message + ' — run START-LIVE-WEBSITE.bat';
+        msg.textContent = e.message;
         msg.className = 'reg-msg err';
       }
-    };
+    }
+
+    document.getElementById('btnLoad').onclick = loadLeads;
+    loadLeads();
   })();
   </script>
 </body>

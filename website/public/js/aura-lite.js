@@ -40,7 +40,7 @@
           '<span class="dot"></span> LIVE preview · Mood ' + (d.mood || '—');
       }
     } catch (e) {
-      if (moodEl) moodEl.textContent = 'Start START-LIVE-WEBSITE.bat for live mood data.';
+      if (moodEl) moodEl.textContent = 'Live data unavailable — open aurafxelite.com/dashboard.html';
     }
   }
 

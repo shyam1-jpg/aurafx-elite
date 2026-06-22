@@ -8,6 +8,24 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const regStore = require('./registrations-store');
+const business = require('./business-identity');
+
+let dashStore = null;
+try {
+  dashStore = require('./dashboard-store');
+} catch (e) {
+  console.warn('[AuraFX] dashboard-store not loaded:', e.message);
+}
+
+let adminAuth = null;
+try {
+  adminAuth = require('./admin-auth');
+} catch (e) {
+  console.warn('[AuraFX] admin-auth not loaded:', e.message);
+}
+
+const IS_PRODUCTION = process.env.RENDER === 'true' ||
+  String(process.env.NODE_ENV || '').toLowerCase() === 'production';
 
 let paypalVerify = null;
 try {
@@ -48,10 +66,11 @@ let cache = {
     { title: 'FOMC Statement', time: new Date(Date.now() + 7200000).toISOString(), risk: 'HIGH', currency: 'USD' }
   ],
   news: [{ title: 'AuraFX live server running', risk: 'LOW', time: new Date().toISOString(), source: 'AuraFX' }],
-  updatedAt: new Date().toISOString()
+  updatedAt: new Date().toISOString(),
+  lastHistoryMood: null
 };
 
-const OWNER_KEY = process.env.AURAFX_OWNER_KEY || 'aurafx-owner';
+const OWNER_KEY = process.env.AURAFX_OWNER_KEY || (IS_PRODUCTION ? '' : 'aurafx-local-dev');
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID || '';
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || '';
 const PAYPAL_MODE = process.env.PAYPAL_MODE || 'sandbox';
@@ -89,7 +108,29 @@ try {
 }
 
 function ownerKeyOk(req) {
+  if (!OWNER_KEY) return false;
   return req.headers['x-owner-key'] === OWNER_KEY;
+}
+
+function adminAuthOk(req) {
+  if (adminAuth && adminAuth.isAuthenticated(req)) return true;
+  if (!IS_PRODUCTION && OWNER_KEY && ownerKeyOk(req)) return true;
+  return false;
+}
+
+function requireAdminApi(req, res) {
+  if (adminAuthOk(req)) return true;
+  if (adminAuth) adminAuth.auditLog('admin_api_denied', req, req.url);
+  json(res, 403, { error: 'Forbidden — admin sign-in required' });
+  return false;
+}
+
+function redirectAdminLogin(res, nextPath) {
+  res.writeHead(302, securityHeaders({
+    Location: '/admin-login.html?next=' + encodeURIComponent(nextPath || '/owner-leads.html'),
+    'Cache-Control': 'no-store'
+  }));
+  res.end();
 }
 
 function securityHeaders(extra) {
@@ -123,7 +164,7 @@ function corsPreflight(res) {
   res.writeHead(204, {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, X-Owner-Key'
+    'Access-Control-Allow-Headers': 'Content-Type, X-Owner-Key, X-Dashboard-Id, X-Dashboard-Token, X-Dashboard-Email'
   });
   res.end();
 }
@@ -289,7 +330,10 @@ function handleRegister(req, res) {
         message: 'Registration successful',
         emailVerified: row.emailVerified,
         verificationEmailSent,
-        verificationError: verificationError || undefined
+        verificationError: verificationError || undefined,
+        dashboardToken: dashStore ? dashStore.makeDashboardToken(row.id, row.email) : undefined,
+        fullName: row.fullName,
+        email: row.email
       });
     })
     .catch((e) => json(res, 400, { error: e.message }));
@@ -344,26 +388,32 @@ function handlePayment(req, res) {
 
 function apiConfig() {
   const emailStatus = emailMod ? emailMod.getStatus() : { configured: false };
-  const paypalReady = !!(PAYPAL_CLIENT_ID && (paypalVerify && paypalVerify.isConfigured()));
+  const paypalReady = !!(PAYPAL_CLIENT_ID && paypalVerify && paypalVerify.isConfigured());
   return {
     plans: PLANS,
     paypalConfigured: paypalReady,
-    paypalClientId: PAYPAL_CLIENT_ID,
+    paypalClientId: paypalReady ? PAYPAL_CLIENT_ID : '',
     paypalMode: PAYPAL_MODE,
-    paypalBusinessEmail: PAYPAL_BUSINESS_EMAIL,
-    allowManualPaymentConfirm: ALLOW_MANUAL_PAYMENT_CONFIRM,
+    paypalBusinessEmail: paypalReady ? PAYPAL_BUSINESS_EMAIL : '',
+    allowManualPaymentConfirm: IS_PRODUCTION ? false : ALLOW_MANUAL_PAYMENT_CONFIRM,
     dataEncryption: secureFields ? secureFields.enabled() : false,
     currency: 'USD',
     institutionalMode: INSTITUTIONAL_MODE,
     institutionalLivePublic: INSTITUTIONAL_MODE === 'public',
     ownerPreviewAvailable: INSTITUTIONAL_MODE === 'preview' || INSTITUTIONAL_MODE === 'public',
     email: emailStatus,
-    storage: regStore.storageInfo()
+    storage: regStore.storageInfo(),
+    dashboard: dashStore ? dashStore.storageInfo() : { backend: 'unavailable' },
+    business: {
+      tradingName: business.tradingName,
+      supportEmail: business.supportEmail,
+      website: business.website
+    }
   };
 }
 
 function handleEmailSubscribers(req, res) {
-  if (!ownerKeyOk(req)) return json(res, 403, { error: 'Forbidden' });
+  if (!requireAdminApi(req, res)) return;
   regStore.getRegistrations()
     .then((list) => {
       const marketing = list.filter((r) => r.marketingOptIn);
@@ -378,7 +428,7 @@ function handleEmailSubscribers(req, res) {
 }
 
 function handleEmailDraft(req, res) {
-  if (!ownerKeyOk(req)) return json(res, 403, { error: 'Forbidden' });
+  if (!requireAdminApi(req, res)) return;
   if (!emailMod) return json(res, 503, { error: 'Email module unavailable' });
   readBody(req)
     .then(async (body) => {
@@ -397,7 +447,7 @@ function handleEmailDraft(req, res) {
 }
 
 function handleEmailSend(req, res) {
-  if (!ownerKeyOk(req)) return json(res, 403, { error: 'Forbidden' });
+  if (!requireAdminApi(req, res)) return;
   if (!emailMod) return json(res, 503, { error: 'Email module unavailable' });
   readBody(req)
     .then(async (body) => {
@@ -432,7 +482,7 @@ function handleEmailSend(req, res) {
 }
 
 function handleEmailStatus(req, res) {
-  if (!ownerKeyOk(req)) return json(res, 403, { error: 'Forbidden' });
+  if (!requireAdminApi(req, res)) return;
   if (!emailMod) return json(res, 200, { configured: false });
   const campaigns = emailMod.getCampaigns();
   json(res, 200, {
@@ -450,8 +500,8 @@ function handleInstitutionalLive(req, res) {
       institutionalMode: 'demo'
     });
   }
-  if (INSTITUTIONAL_MODE === 'preview' && !instLiveMod.ownerKeyOk(req, OWNER_KEY)) {
-    return json(res, 403, { error: 'Valid X-Owner-Key required for live preview' });
+  if (INSTITUTIONAL_MODE === 'preview' && !adminAuthOk(req)) {
+    return json(res, 403, { error: 'Admin sign-in required for live preview' });
   }
   instLiveMod.getLivePayload(cache)
     .then((payload) => json(res, 200, payload))
@@ -536,8 +586,10 @@ function apiInstitutional(quotes) {
       structure: 'Higher lows', sr: '2328-2332 demand', candles: 'Bullish engulfing H4', rr: '1:2.4'
     },
     performance: {
-      winRate: 76.2, rr: 2.1, avgWin: 142, avgLoss: 68, profitFactor: 1.48,
-      maxDD: 11.2, consecWins: 5, consecLoss: 2, sharpe: 1.12, monthlyGrowth: 4.2
+      sampleSize: 'Illustrative only',
+      note: 'Historical back-tests are not indicative of future results',
+      maxDD: 'Varies by settings',
+      disclaimer: 'Educational metrics — not a performance promise'
     },
     institutional: {
       cot: 'Gold specs net long +', positioning: 'USD longs elevated',
@@ -611,11 +663,98 @@ function tickLiveData() {
   if (cache.nextEvent && cache.nextEvent.minutesUntil > 0) {
     cache.nextEvent.minutesUntil = Math.max(0, cache.nextEvent.minutesUntil - 1);
   }
+  if (dashStore) {
+    const summary = apiProSummary();
+    dashStore.appendHistory({
+      ts: cache.updatedAt,
+      mood: summary.mood,
+      score: summary.score,
+      bullishProb: summary.bullishProb,
+      sessionRisk: summary.sessionRisk
+    }).catch(() => {});
+    if (cache.lastHistoryMood && cache.lastHistoryMood !== summary.mood) {
+      dashStore.appendEvent('warn', 'Market mood changed to ' + summary.mood)
+        .catch(() => {});
+    }
+    cache.lastHistoryMood = summary.mood;
+    if (cache.nextEvent && cache.nextEvent.minutesUntil === 30) {
+      dashStore.appendEvent('warn', 'High-impact event in 30 min: ' + cache.nextEvent.title)
+        .catch(() => {});
+    }
+  }
 }
 
 setInterval(tickLiveData, 60000);
 
+function dashboardAuth(req) {
+  const id = req.headers['x-dashboard-id'] || '';
+  const token = req.headers['x-dashboard-token'] || '';
+  const email = String(req.headers['x-dashboard-email'] || '').trim().toLowerCase();
+  if (!dashStore || !id || !token || !email) return null;
+  if (!dashStore.verifyDashboardToken(id, email, token)) return null;
+  return { id, email };
+}
+
+function handleDashboardSession(req, res) {
+  readBody(req)
+    .then(async (body) => {
+      const email = String(body.email || '').trim().toLowerCase();
+      if (!email) return json(res, 400, { error: 'Email required' });
+      const row = revealRow(await regStore.findByEmail(email));
+      if (!row) return json(res, 404, { error: 'Registration not found — register first' });
+      if (!dashStore) return json(res, 503, { error: 'Dashboard sync unavailable' });
+      json(res, 200, {
+        ok: true,
+        id: row.id,
+        fullName: row.fullName,
+        email: row.email,
+        emailVerified: !!row.emailVerified,
+        dashboardToken: dashStore.makeDashboardToken(row.id, row.email),
+        cloudSync: dashStore.storageInfo().backend === 'neon'
+      });
+    })
+    .catch((e) => json(res, 400, { error: e.message }));
+}
+
+function handleDashboardJournalGet(req, res) {
+  const auth = dashboardAuth(req);
+  if (!auth) return json(res, 403, { error: 'Sign in required — link your registration' });
+  dashStore.getJournal(auth.id)
+    .then((entries) => json(res, 200, { ok: true, entries, cloudSync: dashStore.storageInfo().backend === 'neon' }))
+    .catch((e) => json(res, 500, { error: e.message }));
+}
+
+function handleDashboardJournalPost(req, res) {
+  const auth = dashboardAuth(req);
+  if (!auth) return json(res, 403, { error: 'Sign in required' });
+  readBody(req)
+    .then(async (body) => {
+      const entries = await dashStore.saveJournal(auth.id, auth.email, body.entries || []);
+      json(res, 200, { ok: true, entries, saved: entries.length });
+    })
+    .catch((e) => json(res, 400, { error: e.message }));
+}
+
+function handleDashboardHistory(req, res, rawUrl) {
+  const q = rawUrl.includes('?') ? rawUrl.slice(rawUrl.indexOf('?')) : '';
+  const range = new URLSearchParams(q).get('range') || '1h';
+  if (!dashStore) return json(res, 200, { points: [] });
+  dashStore.getHistory(range)
+    .then((points) => json(res, 200, { range, points }))
+    .catch((e) => json(res, 500, { error: e.message }));
+}
+
+function handleDashboardEvents(req, res, rawUrl) {
+  const q = rawUrl.includes('?') ? rawUrl.slice(rawUrl.indexOf('?')) : '';
+  const limit = new URLSearchParams(q).get('limit') || '40';
+  if (!dashStore) return json(res, 200, { events: [] });
+  dashStore.getEvents(limit)
+    .then((events) => json(res, 200, { events }))
+    .catch((e) => json(res, 500, { error: e.message }));
+}
+
 function apiProSummary() {
+  const quotesSource = quotesService ? 'Yahoo Finance / CoinGecko (public APIs)' : 'Server cache';
   return {
     mood: cache.mood,
     sessionRisk: 'MEDIUM',
@@ -624,11 +763,15 @@ function apiProSummary() {
     bullishProb: 58,
     bearishProb: 42,
     score: 78,
-    sentiment: 'Bullish',
+    sentiment: 'Neutral-bullish',
     crashAlert: false,
     exposureLots: 0,
     dailyPnlPct: 0,
-    updatedAt: cache.updatedAt
+    updatedAt: cache.updatedAt,
+    dataMode: 'live',
+    dataSource: quotesSource,
+    apiStatus: 'online',
+    disclaimer: 'Educational software only. Not financial advice.'
   };
 }
 
@@ -658,6 +801,37 @@ const server = http.createServer((req, res) => {
   if (url === '/api/resend-verification' && req.method === 'POST') return handleResendVerify(req, res);
   if (url === '/api/payment' && req.method === 'POST') return handlePayment(req, res);
   if (url === '/api/config') return json(res, 200, apiConfig());
+  if (url === '/api/admin/session' && req.method === 'GET') {
+    return json(res, 200, {
+      authenticated: adminAuthOk(req),
+      totpEnabled: adminAuth ? adminAuth.totpEnabled() : false,
+      configured: adminAuth ? adminAuth.isConfigured() : false
+    });
+  }
+  if (url === '/api/admin/login' && req.method === 'POST') {
+    if (!adminAuth) return json(res, 503, { error: 'Admin auth unavailable' });
+    return readBody(req)
+      .then((body) => {
+        const result = adminAuth.login(req, body);
+        if (!result.ok) return json(res, result.status || 403, { error: result.error });
+        adminAuth.setSessionCookie(res);
+        return json(res, 200, { ok: true, totpRequired: result.totpRequired });
+      })
+      .catch((e) => json(res, 400, { error: e.message }));
+  }
+  if (url === '/api/admin/logout' && req.method === 'POST') {
+    if (adminAuth) {
+      adminAuth.logout(req);
+      adminAuth.clearSessionCookie(res);
+    }
+    return json(res, 200, { ok: true });
+  }
+  if (url === '/api/dashboard/session' && req.method === 'POST') return handleDashboardSession(req, res);
+  if (url === '/api/dashboard/journal' && req.method === 'GET') return handleDashboardJournalGet(req, res);
+  if (url === '/api/dashboard/journal' && req.method === 'POST') return handleDashboardJournalPost(req, res);
+  if (url === '/api/dashboard/history' && req.method === 'GET') return handleDashboardHistory(req, res, rawUrl);
+  if (url === '/api/dashboard/events' && req.method === 'GET') return handleDashboardEvents(req, res, rawUrl);
+
   if (url === '/api/institutional-live' && req.method === 'GET') return handleInstitutionalLive(req, res);
   if (url === '/api/email/subscribers' && req.method === 'GET') return handleEmailSubscribers(req, res);
   if (url === '/api/email/status' && req.method === 'GET') return handleEmailStatus(req, res);
@@ -665,7 +839,7 @@ const server = http.createServer((req, res) => {
   if (url === '/api/email/send' && req.method === 'POST') return handleEmailSend(req, res);
 
   if (url === '/api/registrations' && req.method === 'GET') {
-    if (!ownerKeyOk(req)) return json(res, 403, { error: 'Forbidden' });
+    if (!requireAdminApi(req, res)) return;
     return regStore.getRegistrations()
       .then((list) => {
         const revealed = secureFields ? secureFields.revealList(list) : list;
@@ -674,14 +848,28 @@ const server = http.createServer((req, res) => {
       .catch((e) => json(res, 500, { error: e.message }));
   }
 
-  if (url === '/api/health') return json(res, 200, { ok: true, mode: 'simple-server', port: PORT });
-  if (url === '/api/wiring') return json(res, 200, apiWiring());
+  if (url === '/api/health') {
+    return json(res, 200, {
+      ok: true,
+      mode: 'production',
+      site: business.website,
+      updatedAt: cache.updatedAt,
+      quotes: quotesService ? 'available' : 'unavailable'
+    });
+  }
+  if (url === '/api/wiring') {
+    if (!requireAdminApi(req, res)) return;
+    return json(res, 200, apiWiring());
+  }
   if (url === '/api/status') {
     return json(res, 200, {
       website: 'online',
       mood: cache.mood,
       nextEvent: cache.nextEvent,
-      updatedAt: cache.updatedAt
+      updatedAt: cache.updatedAt,
+      dataMode: 'live',
+      dataSource: quotesService ? 'Yahoo Finance / CoinGecko' : 'Server cache',
+      apiStatus: 'online'
     });
   }
   if (url === '/api/pro-summary') return json(res, 200, apiProSummary());
@@ -692,7 +880,10 @@ const server = http.createServer((req, res) => {
       nextEvent: cache.nextEvent,
       calendar: cache.calendar,
       breakingNews: cache.news,
-      updatedAt: cache.updatedAt
+      updatedAt: cache.updatedAt,
+      dataMode: 'live',
+      dataSource: quotesService ? 'Yahoo Finance / CoinGecko' : 'Server cache',
+      apiStatus: 'online'
     });
   }
   if (url === '/api/news') return json(res, 200, { items: cache.news, breaking: cache.news });
@@ -734,6 +925,11 @@ const server = http.createServer((req, res) => {
 
   let file = url === '/' ? '/index.html' : url;
   const safe = path.normalize(file).replace(/^(\.\.[/\\])+/, '');
+
+  if (adminAuth && adminAuth.isAdminPage(safe) && !adminAuthOk(req)) {
+    return redirectAdminLogin(res, safe);
+  }
+
   const full = path.join(PUBLIC, safe);
   if (!full.startsWith(PUBLIC)) {
     res.writeHead(403);
@@ -766,6 +962,19 @@ function startServer() {
         .then((q) => console.log('  Quotes:     LIVE — XAUUSD $' + (q.metals.XAUUSD || '—') + ' · ' + q.source))
         .catch(() => console.log('  Quotes:     warming up…'));
     }
+    if (dashStore) {
+      const s = apiProSummary();
+      dashStore.appendHistory({
+        ts: new Date().toISOString(),
+        mood: s.mood,
+        score: s.score,
+        bullishProb: s.bullishProb,
+        sessionRisk: s.sessionRisk
+      }).catch(() => {});
+      dashStore.appendEvent('info', 'AuraFX Pro dashboard server online')
+        .catch(() => {});
+      console.log('  Dashboard:  history + journal store (' + dashStore.storageInfo().backend + ')');
+    }
     console.log('');
     if (HOST === '127.0.0.1') console.log('  DO NOT CLOSE THIS WINDOW (local mode)');
     console.log('');
@@ -773,6 +982,7 @@ function startServer() {
 }
 
 regStore.init()
+  .then(() => (dashStore ? dashStore.init() : null))
   .then(startServer)
   .catch((e) => {
     console.error('[AuraFX] Storage init warning (starting anyway):', e.message);
