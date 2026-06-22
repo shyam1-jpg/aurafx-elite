@@ -1,0 +1,170 @@
+/* AuraFX Hub — resources, learn, symbols, mega footer */
+
+.hub-mega-footer {
+  border-top: 1px solid rgba(212, 175, 55, 0.15);
+  background: linear-gradient(180deg, rgba(8, 10, 16, 0.98), #06080c);
+  padding: 2.5rem 1.5rem 1.5rem;
+  margin-top: 2rem;
+}
+.hub-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto 1.5rem;
+}
+.hub-footer-col h4 {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  margin-bottom: 0.65rem;
+}
+.hub-footer-col a {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--muted);
+  padding: 0.2rem 0;
+  text-decoration: none;
+}
+.hub-footer-col a:hover { color: var(--text); text-decoration: none; }
+.hub-footer-bottom {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.hub-breadcrumb {
+  font-size: 0.78rem;
+  color: var(--muted);
+  max-width: 1100px;
+  margin: 0 auto 1rem;
+  padding: 0 1.5rem;
+}
+.hub-breadcrumb a { color: var(--gold); }
+
+.hub-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.hub-card {
+  padding: 1.15rem 1.25rem;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  background: linear-gradient(145deg, rgba(18, 24, 42, 0.92), rgba(10, 12, 18, 0.88));
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.hub-card:hover {
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  text-decoration: none;
+  color: inherit;
+}
+.hub-card h3 { font-size: 0.95rem; color: var(--gold); margin-bottom: 0.35rem; }
+.hub-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.hub-card .hub-arrow { font-size: 0.75rem; color: var(--gold); margin-top: 0.5rem; }
+
+.hub-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.hub-data-table th {
+  text-align: left;
+  padding: 0.55rem 0.65rem;
+  color: var(--gold);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+.hub-data-table td {
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+}
+.hub-data-table td strong { color: var(--text); }
+.hub-data-table .live-px { font-variant-numeric: tabular-nums; color: var(--text); }
+
+.hub-accordion details {
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  background: rgba(18, 24, 42, 0.5);
+}
+.hub-accordion summary {
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.hub-accordion .hub-acc-body {
+  padding: 0 1rem 1rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.hub-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+.hub-toc a {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 999px;
+  text-decoration: none;
+}
+.hub-toc a:hover { background: rgba(212, 175, 55, 0.1); }
+
+.hub-section { max-width: 900px; margin: 0 auto 2rem; padding: 0 1.5rem; }
+.hub-section h2 { font-size: 1.15rem; color: var(--gold); margin-bottom: 0.75rem; }
+
+.nav-dropdown { position: relative; display: inline-block; }
+.nav-dropdown > summary {
+  list-style: none;
+  cursor: pointer;
+  color: inherit;
+  font-size: 0.9rem;
+}
+.nav-dropdown > summary::-webkit-details-marker { display: none; }
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: rgba(12, 14, 22, 0.98);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 10px;
+  padding: 0.5rem 0;
+  z-index: 200;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+.nav-dropdown-menu a {
+  display: block;
+  padding: 0.45rem 1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+.nav-dropdown-menu a:hover { background: rgba(212, 175, 55, 0.08); color: var(--text); }
+
+.explore-hub {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}

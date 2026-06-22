@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="How AuraFX Elite analysis works — EMA, RSI, MTF, scoring, news block, and checklist logic. Transparent methodology." />
+  <title>Methodology — AuraFX Elite</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+  <link rel="stylesheet" href="css/hub.css" />
+  <script src="js/font-loader.js"></script>
+</head>
+<body class="lux-body">
+  <nav class="nav"><a href="index.html" class="logo">AuraFX <span>Elite</span></a>
+    <div class="nav-links"><a href="learn.html">Learn</a><a href="dashboard.html" class="btn btn-gold">Dashboard</a></div>
+  </nav>
+  <div class="hub-breadcrumb"><a href="resources.html">Resources</a> / Methodology</div>
+
+  <header class="section" style="text-align:center;padding-top:1rem">
+    <h1 class="lux-title">Analysis <em>Methodology</em></h1>
+    <p style="color:var(--muted);max-width:680px;margin:1rem auto">Transparent logic behind AuraFX labels — no black box promises. Educational scoring only.</p>
+  </header>
+
+  <section class="hub-section">
+    <h2>Signal engine (MT5 &amp; web)</h2>
+    <div class="lux-glass" style="padding:1.25rem">
+      <table class="hub-data-table">
+        <thead><tr><th>Layer</th><th>What it does</th><th>Typical parameters</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Trend</strong></td><td>EMA fast vs slow crossover &amp; alignment</td><td>EMA 9/21 (gold), 9/26 (forex)</td></tr>
+          <tr><td><strong>Momentum</strong></td><td>RSI filter — avoid overbought buys / oversold sells</td><td>RSI 14; thresholds ~38–62 (Pro)</td></tr>
+          <tr><td><strong>MACD</strong></td><td>Histogram direction for Elite signals</td><td>12, 26, 9</td></tr>
+          <tr><td><strong>Volatility</strong></td><td>ATR context for SL distance &amp; checklist</td><td>ATR 14, multiplier filters</td></tr>
+          <tr><td><strong>MTF</strong></td><td>Multiple timeframes must agree (Pro)</td><td>M5, M15, H1, H4, D1</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="hub-section">
+    <h2>Pro score (0–100)</h2>
+    <div class="grid-3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+      <div class="card lux-glass"><h3>Trend alignment</h3><p style="font-size:.85rem;color:var(--muted)">EMA stack, structure bias</p></div>
+      <div class="card lux-glass"><h3>Momentum</h3><p style="font-size:.85rem;color:var(--muted)">RSI zone, MACD histogram</p></div>
+      <div class="card lux-glass"><h3>Volatility</h3><p style="font-size:.85rem;color:var(--muted)">ATR vs average — avoid dead markets</p></div>
+      <div class="card lux-glass"><h3>News proximity</h3><p style="font-size:.85rem;color:var(--muted)">Penalty if high-impact event soon</p></div>
+      <div class="card lux-glass"><h3>R:R setup</h3><p style="font-size:.85rem;color:var(--muted)">Suggested SL/TP vs min R:R setting</p></div>
+      <div class="card lux-glass"><h3>Checklist</h3><p style="font-size:.85rem;color:var(--muted)">Trend, volume, structure, news, vol</p></div>
+    </div>
+    <p style="color:var(--muted);font-size:.82rem;margin-top:1rem">Grades like Excellent / Marginal / Avoid are labels — not guarantees. Past patterns do not predict future results.</p>
+  </section>
+
+  <section class="hub-section">
+    <h2>Risk &amp; news block</h2>
+    <div class="lux-glass" style="padding:1.25rem;color:var(--muted);font-size:.88rem;line-height:1.7">
+      <p><strong>Risk Guardian</strong> reads MT5 economic calendar (broker-dependent) or web calendar API. Default: block new entries 30 minutes before high-impact events. <strong>Daily/weekly loss locks</strong> pause automation when drawdown limits hit.</p>
+      <p style="margin-top:.75rem"><strong>Crash alert</strong> — elevated volatility flag on dashboard when mood = HIGH VOL. Consider reducing exposure — your decision.</p>
+    </div>
+  </section>
+
+  <section class="hub-section">
+    <h2>Web dashboard data</h2>
+    <div class="lux-glass" style="padding:1.25rem;color:var(--muted);font-size:.88rem;line-height:1.7">
+      <p>Quotes: Yahoo Finance, CoinGecko, open.er-api.com. Calendar: Finnhub when keyed, else reference schedule. Mood index blends quote changes + calendar proximity. See server status on <a href="dashboard.html">dashboard</a> health panel.</p>
+    </div>
+  </section>
+
+  <section class="hub-section trust-strip">
+    <p class="trust-statement">AuraFX does not guarantee profits, win rates, or accuracy. All outputs are for education and self-directed research. You are the trader; we provide software.</p>
+  </section>
+
+  <footer class="footer"></footer>
+  <script src="js/site-boot.js"></script>
+  <script src="js/site-chrome.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Live forex, gold, and crypto symbols with real-time prices from AuraFX Elite." />
+  <title>Symbols &amp; Instruments — AuraFX Elite</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+  <link rel="stylesheet" href="css/hub.css" />
+  <link rel="stylesheet" href="css/elite-command.css" />
+  <script src="js/font-loader.js"></script>
+</head>
+<body class="lux-body">
+  <nav class="nav"><a href="index.html" class="logo">AuraFX <span>Elite</span></a>
+    <div class="nav-links"><a href="markets.html">Markets</a><a href="dashboard.html" class="btn btn-gold">Dashboard</a></div>
+  </nav>
+  <div class="hub-breadcrumb"><a href="resources.html">Resources</a> / Symbols</div>
+
+  <header class="section" style="text-align:center;padding-top:1rem">
+    <h1 class="lux-title">Symbols &amp; <em>Instruments</em></h1>
+    <p id="symSourceBadge" style="color:var(--muted);font-size:.82rem;margin-top:.5rem">Loading prices…</p>
+    <span class="edu-badge">Prices from public APIs · May differ from your broker</span>
+  </header>
+
+  <section class="hub-section">
+    <h2>Forex majors</h2>
+    <div class="lux-glass" style="padding:1rem;overflow-x:auto">
+      <table class="hub-data-table">
+        <thead><tr><th>Symbol</th><th>Description</th><th>Live price</th><th>24h</th><th>Typical session</th></tr></thead>
+        <tbody>
+          <tr data-sym-row="EURUSD" data-sym-cat="forex"><td><strong>EURUSD</strong></td><td>Euro / US Dollar</td><td class="live-px">—</td><td class="live-ch">—</td><td>London &amp; NY overlap</td></tr>
+          <tr data-sym-row="GBPUSD" data-sym-cat="forex"><td><strong>GBPUSD</strong></td><td>British Pound / USD</td><td class="live-px">—</td><td class="live-ch">—</td><td>London open</td></tr>
+          <tr data-sym-row="USDJPY" data-sym-cat="forex"><td><strong>USDJPY</strong></td><td>US Dollar / Japanese Yen</td><td class="live-px">—</td><td class="live-ch">—</td><td>Tokyo &amp; NY</td></tr>
+          <tr data-sym-row="USDCHF" data-sym-cat="forex"><td><strong>USDCHF</strong></td><td>US Dollar / Swiss Franc</td><td class="live-px">—</td><td class="live-ch">—</td><td>London</td></tr>
+          <tr data-sym-row="AUDUSD" data-sym-cat="forex"><td><strong>AUDUSD</strong></td><td>Australian Dollar / USD</td><td class="live-px">—</td><td class="live-ch">—</td><td>Sydney open</td></tr>
+          <tr data-sym-row="USDCAD" data-sym-cat="forex"><td><strong>USDCAD</strong></td><td>US Dollar / Canadian Dollar</td><td class="live-px">—</td><td class="live-ch">—</td><td>NY session</td></tr>
+          <tr data-sym-row="NZDUSD" data-sym-cat="forex"><td><strong>NZDUSD</strong></td><td>New Zealand Dollar / USD</td><td class="live-px">—</td><td class="live-ch">—</td><td>Sydney</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="hub-section">
+    <h2>Metals &amp; commodities</h2>
+    <div class="lux-glass" style="padding:1rem;overflow-x:auto">
+      <table class="hub-data-table">
+        <thead><tr><th>Symbol</th><th>Description</th><th>Live price</th><th>24h</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr data-sym-row="XAUUSD" data-sym-cat="metals"><td><strong>XAUUSD</strong></td><td>Gold vs USD</td><td class="live-px">—</td><td class="live-ch">—</td><td>AuraFX gold specialist presets</td></tr>
+          <tr data-sym-row="XAGUSD" data-sym-cat="metals"><td><strong>XAGUSD</strong></td><td>Silver vs USD</td><td class="live-px">—</td><td class="live-ch">—</td><td>Higher volatility vs gold</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="hub-section">
+    <h2>Crypto (reference)</h2>
+    <div class="lux-glass" style="padding:1rem;overflow-x:auto">
+      <table class="hub-data-table">
+        <thead><tr><th>Symbol</th><th>Name</th><th>Live price</th><th>24h</th></tr></thead>
+        <tbody>
+          <tr data-sym-row="BTC" data-sym-cat="crypto"><td><strong>BTC</strong></td><td>Bitcoin</td><td class="live-px">—</td><td class="live-ch">—</td></tr>
+          <tr data-sym-row="ETH" data-sym-cat="crypto"><td><strong>ETH</strong></td><td>Ethereum</td><td class="live-px">—</td><td class="live-ch">—</td></tr>
+          <tr data-sym-row="SOL" data-sym-cat="crypto"><td><strong>SOL</strong></td><td>Solana</td><td class="live-px">—</td><td class="live-ch">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p style="text-align:center;margin:2rem"><a href="markets.html" class="btn btn-gold">Full market terminal</a></p>
+  <footer class="footer"></footer>
+  <script src="js/site-boot.js"></script>
+  <script src="js/live-quotes.js"></script>
+  <script src="js/symbols-live.js"></script>
+  <script src="js/site-chrome.js"></script>
+</body>
+</html>
