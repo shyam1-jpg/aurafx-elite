@@ -1,22 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 198" role="img" aria-label="AuraFX Elite">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 188" role="img" aria-label="AuraFX Elite">
   <defs>
     <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#f8e6a0"/>
       <stop offset="42%" stop-color="#d4af37"/>
       <stop offset="100%" stop-color="#8a7020"/>
     </linearGradient>
-    <filter id="lift" x="-15%" y="-15%" width="130%" height="130%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.35"/>
-    </filter>
   </defs>
-  <g filter="url(#lift)" transform="translate(50, 0)">
+  <g transform="translate(40, 0)">
     <rect x="42" y="118" width="10" height="28" rx="1.5" fill="#2ecc71" opacity="0.92"/>
     <rect x="58" y="108" width="10" height="38" rx="1.5" fill="#e74c3c" opacity="0.92"/>
     <rect x="132" y="112" width="10" height="34" rx="1.5" fill="#2ecc71" opacity="0.78"/>
     <path d="M100 48 L128 152 H112 L105 128 H95 L88 152 H72 Z M97 114 H103 L100 88 Z" fill="url(#gold)"/>
   </g>
-  <text x="150" y="162" text-anchor="middle" font-family="Georgia, 'Times New Roman', Times, serif" font-size="40" font-weight="700" letter-spacing="0.16em" fill="url(#gold)">AURAFX</text>
-  <line x1="78" y1="176" x2="128" y2="176" stroke="#d4af37" stroke-width="1.5" opacity="0.65"/>
-  <text x="150" y="192" text-anchor="middle" font-family="Georgia, 'Times New Roman', Times, serif" font-size="20" font-weight="400" letter-spacing="0.44em" fill="#d4af37">ELITE</text>
-  <line x1="172" y1="176" x2="222" y2="176" stroke="#d4af37" stroke-width="1.5" opacity="0.65"/>
+  <text x="140" y="152" text-anchor="middle" font-family="Georgia, 'Times New Roman', Times, serif" font-size="38" font-weight="700" letter-spacing="0.14em" fill="url(#gold)">AURAFX</text>
+  <line x1="68" y1="164" x2="118" y2="164" stroke="#d4af37" stroke-width="1.5" opacity="0.6"/>
+  <text x="140" y="180" text-anchor="middle" font-family="Georgia, 'Times New Roman', Times, serif" font-size="18" font-weight="400" letter-spacing="0.42em" fill="#d4af37">ELITE</text>
+  <line x1="162" y1="164" x2="212" y2="164" stroke="#d4af37" stroke-width="1.5" opacity="0.6"/>
 </svg>
