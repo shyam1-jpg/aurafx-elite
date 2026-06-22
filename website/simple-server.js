@@ -122,6 +122,13 @@ try {
   console.warn('[AuraFX] economic-calendar-service not loaded:', e.message);
 }
 
+let liveMarkets = null;
+try {
+  liveMarkets = require('./live-markets-service');
+} catch (e) {
+  console.warn('[AuraFX] live-markets-service not loaded:', e.message);
+}
+
 function applyCalendarToCache(calPayload) {
   if (!calPayload) return;
   cache.calendar = calPayload.calendar || calPayload.items || [];
@@ -1040,12 +1047,34 @@ const server = http.createServer((req, res) => {
     return json(res, 200, apiInstitutional(null));
   }
   if (url === '/api/markets') {
+    const marketWarnings = [
+      'HIGH IMPACT: ' + (cache.nextEvent.title || 'Economic release') + ' in ' +
+        (cache.nextEvent.minutesUntil || 45) + ' min — reduce exposure',
+      'Volatility alert: spreads may widen on ' + (cache.nextEvent.currency || 'USD') + ' pairs'
+    ];
+    if (liveMarkets) {
+      const force = req.url.includes('force=1');
+      return liveMarkets.getMarkets(cache.news, marketWarnings, force)
+        .then((payload) => json(res, 200, {
+          ...payload,
+          mood: cache.calendarMood || cache.mood,
+          nextEvent: cache.nextEvent,
+          finnhubEnabled: cache.finnhubEnabled,
+          calendarSource: cache.calendarSource
+        }))
+        .catch((e) => {
+          console.warn('[AuraFX] /api/markets:', e.message);
+          return json(res, 200, {
+            live: false,
+            warnings: marketWarnings,
+            mood: cache.mood,
+            nextEvent: cache.nextEvent,
+            updatedAt: cache.updatedAt
+          });
+        });
+    }
     return json(res, 200, {
-      warnings: [
-        'HIGH IMPACT: ' + (cache.nextEvent.title || 'Economic release') + ' in ' +
-          (cache.nextEvent.minutesUntil || 45) + ' min — reduce exposure',
-        'Volatility alert: spreads may widen on ' + (cache.nextEvent.currency || 'USD') + ' pairs'
-      ],
+      warnings: marketWarnings,
       mood: cache.mood,
       nextEvent: cache.nextEvent,
       updatedAt: cache.updatedAt

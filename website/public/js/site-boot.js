@@ -6,7 +6,8 @@
   var isLiveSite = /aurafxelite\.com|onrender\.com/i.test(window.location.hostname || '');
   window.AURAFX_API_BASE = isFile ? '' : '';
   window.AURAFX_IS_FILE_MODE = isFile;
-  var LOGO = '/assets/aura-icon-140.png';
+  var LOGO = '/assets/aura-logo.svg';
+  var LOGO_WIDE = '/assets/aura-logo-wide.svg';
 
   function assetUrl(path) {
     return (window.AURAFX_API_BASE || '') + path;
@@ -16,20 +17,19 @@
     if (!document.querySelector('link[data-aurafx-icon]')) {
       var link = document.createElement('link');
       link.rel = 'icon';
-      link.type = 'image/png';
+      link.type = 'image/svg+xml';
       link.href = assetUrl(LOGO);
       link.setAttribute('data-aurafx-icon', '1');
       document.head.appendChild(link);
     }
-    var src = assetUrl(LOGO);
-    document.querySelectorAll('.logo, .nav-logo').forEach(function (el) {
+    var src = assetUrl(LOGO_WIDE);
+    document.querySelectorAll('.logo, .nav-logo, .dash-sidebar-brand a').forEach(function (el) {
       if (el.querySelector('.logo-img')) return;
       var img = document.createElement('img');
       img.src = src;
       img.alt = 'AuraFX Elite logo';
       img.className = 'logo-img';
-      img.width = 36;
-      img.height = 36;
+      el.setAttribute('aria-label', 'AuraFX Elite home');
       el.insertBefore(img, el.firstChild);
     });
   }

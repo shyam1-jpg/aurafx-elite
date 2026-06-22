@@ -1,6 +1,5 @@
 /**
- * AuraFX Global Multi-Asset Terminal — additive expansion only.
- * Generates scalable demo data; ready for live API field mapping.
+ * AuraFX Global Multi-Asset Terminal — live data from /api/markets when available.
  */
 (function () {
   function esc(s) {
@@ -52,15 +51,49 @@
     return p + ' pips';
   }
 
-  function priceSourceNote() {
-    var q = window.AURAFX_LIVE_QUOTES || {};
-    var t = q.updatedAt ? new Date(q.updatedAt).toLocaleTimeString() : '—';
-    var live = q.live ? 'LIVE' : 'OFFLINE';
-    var refresh = q.refreshSeconds || 30;
+  function priceSourceNote(d) {
+    var src = (d && d.source) || (window.AURAFX_LIVE_QUOTES || {}).source || 'Reference';
+    var t = (d && d.updatedAt) ? new Date(d.updatedAt).toLocaleTimeString() :
+      ((window.AURAFX_LIVE_QUOTES || {}).updatedAt ? new Date(window.AURAFX_LIVE_QUOTES.updatedAt).toLocaleTimeString() : '—');
+    var live = (d && d.live) || (window.AURAFX_LIVE_QUOTES || {}).live ? 'LIVE' : 'OFFLINE';
     return '<p class="muted" style="font-size:.72rem;margin-bottom:.5rem">' +
       '<span id="gmPriceLiveBadge" class="live-tick-badge">● ' + live + '</span> ' +
-      'Prices: <strong>' + esc(q.source || 'Reference') + '</strong> · last update ' + t +
-      ' · auto-refresh every ' + refresh + 's · gold/FX from market feeds</p>';
+      'Prices: <strong>' + esc(src) + '</strong> · last update ' + t +
+      ' · auto-refresh every 60s</p>';
+  }
+
+  function formatNewsItems(items) {
+    if (!items) return {};
+    if (Array.isArray(items)) {
+      return {
+        'Market headlines': items.map(function (n) {
+          if (typeof n === 'string') return n;
+          var line = n.title || n.headline || '';
+          if (n.source) line += ' — ' + n.source;
+          return line || 'Update';
+        })
+      };
+    }
+    return items;
+  }
+
+  function buildFromServer(extra) {
+    return {
+      live: true,
+      source: extra.source,
+      forex: extra.forex || { majors: [], minors: [], exotics: [] },
+      crypto: extra.crypto || [],
+      metals: extra.metals || [],
+      energy: extra.energy || [],
+      indices: extra.indices || [],
+      ag: extra.ag || [],
+      warnings: extra.warnings || [],
+      news: formatNewsItems(extra.news),
+      marketOverview: extra.marketOverview,
+      scanner: extra.scanner,
+      vix: extra.vix,
+      updatedAt: extra.updatedAt
+    };
   }
 
   function realChangePct(sym, fallbackScale) {
@@ -71,7 +104,15 @@
     return pct(sym + 'd', fallbackScale || 0.35);
   }
 
-  function dataHonestyBanner() {
+  function dataHonestyBanner(d) {
+    if (d && d.live) {
+      return '<div class="inst-data-honesty inst-data-live" role="note">' +
+        '<strong><span class="inst-tag-live">LIVE</span> market data</strong> — ' +
+        'Prices, 24h changes, crypto market cap &amp; volume from <strong>' + esc(d.source || 'Yahoo Finance · CoinGecko') + '</strong>. ' +
+        'Updated ' + esc(String(d.updatedAt || '').slice(0, 19).replace('T', ' ')) +
+        '. Educational software only — not financial advice. Verify with your broker.' +
+        '</div>';
+    }
     var q = window.AURAFX_LIVE_QUOTES || {};
     var liveN = Object.keys(q.forex || {}).length + Object.keys(q.metals || {}).length + Object.keys(q.crypto || {}).length;
     return '<div class="inst-data-honesty" role="note">' +
@@ -79,8 +120,7 @@
       '<span class="inst-tag-live">LIVE</span> prices: forex, gold, silver' +
       (Object.keys(q.crypto || {}).length ? ', major crypto' : ' (crypto feed loading)') +
       ' from <strong>' + esc(q.source || 'market APIs') + '</strong>. ' +
-      '<span class="inst-tag-context">CONTEXT</span> columns (market cap, sentiment, AI %, whale activity, generic news, COT) are ' +
-      '<strong>educational placeholders</strong> — not live institutional data. Not financial advice.' +
+      '<span class="inst-tag-context">CONTEXT</span> columns are educational placeholders. Not financial advice.' +
       (liveN ? ' · ' + liveN + ' live instruments' : '') +
       '</div>';
   }
@@ -190,6 +230,10 @@
   }
 
   function buildMarketsData(extra) {
+    extra = extra || {};
+    if (extra.live && extra.forex) {
+      return buildFromServer(extra);
+    }
     var u = window.AURAFX_UNIVERSE || {};
     var fx = u.forex || {};
     var data = {
@@ -251,7 +295,17 @@
     return data;
   }
 
-  function fxTableRows(rows) {
+  function fxTableRows(rows, live) {
+    if (live) {
+      return rows.map(function (r) {
+        var ch = r.dailyChange || '—';
+        var cls = String(ch).indexOf('+') === 0 ? 'up' : (String(ch).indexOf('-') === 0 ? 'down' : '');
+        return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
+          '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="forex">' + r.price + '</td>' +
+          '<td class="' + cls + '">' + ch + '</td><td>' + esc(r.trend || '—') + '</td>' +
+          '<td>' + r.support + '</td><td>' + r.resistance + '</td></tr>';
+      }).join('');
+    }
     return rows.map(function (r) {
       return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
         '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="forex">' + r.price + '</td><td>' + r.spread + '</td><td class="' + (r.dailyChange[0] === '+' ? 'up' : 'down') + '">' + r.dailyChange + '</td>' +
@@ -261,29 +315,44 @@
     }).join('');
   }
 
-  function fxTable(rows) {
+  function fxTable(rows, live) {
+    if (live) {
+      return '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' +
+        '<th>Pair</th><th>Price</th><th>24h %</th><th>Trend</th><th>Support</th><th>Resist</th></tr>' +
+        fxTableRows(rows, true) + '</table></div>';
+    }
     return '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' +
       '<th>Pair</th><th>Price</th><th>Spread</th><th>D%</th><th>W%</th><th>M%</th><th>Trend</th>' +
       '<th>Volume</th><th>Vol</th><th>Support</th><th>Resist</th><th>Sentiment</th><th>Inst</th><th>AI</th></tr>' +
-      fxTableRows(rows) + '</table></div>';
+      fxTableRows(rows, false) + '</table></div>';
   }
 
   function renderForexGlobal(d) {
     var fx = d.forex || {};
+    var live = !!d.live;
     return '<section class="card inst-wide" id="gm-forex"><h2>Global forex — majors, minors &amp; exotics</h2>' +
-      priceSourceNote() +
+      priceSourceNote(d) +
       '<input type="search" class="inst-search" placeholder="Search pair…" data-filter="gm-forex-table" />' +
       '<div class="inst-tabs" data-tabs="fx-global">' +
-      '<button type="button" class="inst-tab active" data-panel="fx-maj">Majors (7)</button>' +
-      '<button type="button" class="inst-tab" data-panel="fx-min">Minors (12)</button>' +
-      '<button type="button" class="inst-tab" data-panel="fx-exo">Exotics (10)</button></div>' +
-      '<div class="inst-tab-panel active" id="fx-maj" data-table="gm-forex-table">' + fxTable(fx.majors || []) + '</div>' +
-      '<div class="inst-tab-panel" id="fx-min" data-table="gm-forex-table">' + fxTable(fx.minors || []) + '</div>' +
-      '<div class="inst-tab-panel" id="fx-exo" data-table="gm-forex-table">' + fxTable(fx.exotics || []) + '</div></section>';
+      '<button type="button" class="inst-tab active" data-panel="fx-maj">Majors (' + (fx.majors || []).length + ')</button>' +
+      '<button type="button" class="inst-tab" data-panel="fx-min">Minors (' + (fx.minors || []).length + ')</button>' +
+      '<button type="button" class="inst-tab" data-panel="fx-exo">Exotics (' + (fx.exotics || []).length + ')</button></div>' +
+      '<div class="inst-tab-panel active" id="fx-maj" data-table="gm-forex-table">' + fxTable(fx.majors || [], live) + '</div>' +
+      '<div class="inst-tab-panel" id="fx-min" data-table="gm-forex-table">' + fxTable(fx.minors || [], live) + '</div>' +
+      '<div class="inst-tab-panel" id="fx-exo" data-table="gm-forex-table">' + fxTable(fx.exotics || [], live) + '</div></section>';
   }
 
   function renderCrypto(d) {
+    var live = !!d.live;
     var rows = (d.crypto || []).map(function (r) {
+      var ch = r.change24h || r.dailyChange || '—';
+      var cls = String(ch).indexOf('+') === 0 ? 'up' : (String(ch).indexOf('-') === 0 ? 'down' : '');
+      if (live) {
+        return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
+          '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="crypto">' + r.price + '</td>' +
+          '<td class="' + cls + '">' + ch + '</td><td>' + esc(r.marketCap || '—') + '</td>' +
+          '<td>' + esc(r.volume24h || '—') + '</td><td>' + esc(r.supply || '—') + '</td><td>' + esc(r.trend || '—') + '</td></tr>';
+      }
       return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
         '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="crypto">' + r.price + '</td>' +
         '<td>' + (r.change24h || '—') + '</td>' +
@@ -291,73 +360,157 @@
         '<td>' + r.volatility + '</td><td>' + r.aiForecast + '</td><td>' + r.whaleActivity + '</td>' +
         '<td>' + r.institutionalActivity + '</td><td>' + r.riskRating + '</td><td>' + r.newsImpact + '</td></tr>';
     }).join('');
+    var head = live
+      ? '<th>Asset</th><th>Price</th><th>24h %</th><th>Mkt Cap</th><th>Vol 24h</th><th>Supply</th><th>Trend</th>'
+      : '<th>Asset</th><th>Price</th><th>24h %</th><th>Mkt Cap (edu.)</th><th>Vol (edu.)</th><th>Supply</th><th>Trend</th>' +
+        '<th>Volatility</th><th>Forecast</th><th>Whales</th><th>Inst.</th><th>Risk</th><th>News</th>';
     return '<section class="card inst-wide" id="gm-crypto"><h2>Cryptocurrency markets</h2>' +
-      priceSourceNote() +
+      priceSourceNote(d) +
       '<input type="search" class="inst-search" placeholder="Search crypto…" data-filter="gm-crypto-table" />' +
       '<div class="inst-scroll"><table class="inst-table inst-table-compact" id="gm-crypto-table"><tr>' +
-      '<th>Asset</th><th>Price</th><th>24h %</th><th>Mkt Cap (edu.)</th><th>Vol (edu.)</th><th>Supply</th><th>Trend</th>' +
-      '<th>Volatility</th><th>Forecast</th><th>Whales</th><th>Inst.</th><th>Risk</th><th>News</th></tr>' +
-      rows + '</table></div></section>';
+      head + '</tr>' + rows + '</table></div></section>';
   }
 
   function renderMetals(d) {
+    var live = !!d.live;
     var rows = (d.metals || []).map(function (r) {
+      var ch = r.dailyChange || '';
+      var cls = ch && ch[0] === '+' ? 'up' : (ch && ch[0] === '-' ? 'down' : '');
+      if (live) {
+        return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
+          '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="metals">' + r.spotPrice + '</td>' +
+          '<td class="' + cls + '">' + (ch || '—') + '</td><td>' + esc(r.trend || '—') + '</td>' +
+          '<td>' + r.support + '</td><td>' + r.resistance + '</td></tr>';
+      }
       return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
         '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="metals">' + r.spotPrice + '</td><td>' + r.trend + '</td>' +
         '<td>' + r.support + '</td><td>' + r.resistance + '</td><td>' + r.inflationImpact + '</td>' +
         '<td>' + r.usdCorrelation + '</td><td>' + r.safeHaven + '</td><td>' + r.centralBankBuying + '</td><td>' + r.institutionalSentiment + '</td></tr>';
     }).join('');
+    var head = live
+      ? '<th>Metal</th><th>Spot</th><th>24h %</th><th>Trend</th><th>Support</th><th>Resist</th>'
+      : '<th>Metal</th><th>Spot</th><th>Trend</th><th>Support</th><th>Resist</th><th>Inflation</th>' +
+        '<th>USD corr</th><th>Safe haven</th><th>CB buying</th><th>Inst sentiment</th>';
     return '<section class="card inst-wide"><h2>Precious metals &amp; industrial</h2>' +
-      priceSourceNote() +
-      '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' +
-      '<th>Metal</th><th>Spot</th><th>Trend</th><th>Support</th><th>Resist</th><th>Inflation</th>' +
-      '<th>USD corr</th><th>Safe haven</th><th>CB buying</th><th>Inst sentiment</th></tr>' + rows + '</table></div></section>';
+      priceSourceNote(d) +
+      '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' + head + '</tr>' + rows + '</table></div></section>';
   }
 
   function renderEnergy(d) {
+    var live = !!d.live;
     var rows = (d.energy || []).map(function (r) {
+      var ch = r.dailyChange || '—';
+      var cls = String(ch).indexOf('+') === 0 ? 'up' : (String(ch).indexOf('-') === 0 ? 'down' : '');
+      if (live) {
+        return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
+          '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="energy">' + r.price + '</td>' +
+          '<td class="' + cls + '">' + ch + '</td><td>' + esc(r.trend || '—') + '</td></tr>';
+      }
       return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
         '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="energy">' + r.price + '</td><td>' + r.supplyAnalysis + '</td>' +
         '<td>' + r.demandAnalysis + '</td><td>' + r.opecNews + '</td><td>' + r.geopoliticalRisk + '</td>' +
         '<td>' + r.inventory + '</td><td>' + r.priceForecast + '</td></tr>';
     }).join('');
-    return '<section class="card inst-wide"><h2>Energy markets</h2>' +
-      '<p class="muted" style="font-size:.72rem;margin-bottom:.5rem">Reference prices — not live exchange feeds. Educational context only.</p>' +
-      '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' +
-      '<th>Energy</th><th>Price</th><th>Supply</th><th>Demand</th><th>OPEC</th><th>Geo risk</th><th>Inventory</th><th>Forecast</th></tr>' +
-      rows + '</table></div></section>';
+    var note = live
+      ? priceSourceNote(d)
+      : '<p class="muted" style="font-size:.72rem;margin-bottom:.5rem">Reference prices — not live exchange feeds. Educational context only.</p>';
+    var head = live
+      ? '<th>Energy</th><th>Price</th><th>24h %</th><th>Trend</th>'
+      : '<th>Energy</th><th>Price</th><th>Supply</th><th>Demand</th><th>OPEC</th><th>Geo risk</th><th>Inventory</th><th>Forecast</th>';
+    return '<section class="card inst-wide"><h2>Energy markets</h2>' + note +
+      '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' + head + '</tr>' + rows + '</table></div></section>';
   }
 
   function renderIndices(d) {
+    var live = !!d.live;
     var heat = (d.indices || []).map(function (r) {
-      var style = 'background:rgba(46,204,113,' + (0.15 + Math.max(0, r.heatScore) * 0.4) + ')';
-      if (r.heatScore < 0) style = 'background:rgba(231,76,60,' + (0.15 + Math.abs(r.heatScore) * 0.4) + ')';
-      return '<div class="inst-heat-cell" style="' + style + '">' + esc(r.symbol) + '<br>' + r.dailyChange + '</div>';
+      var style = 'background:rgba(46,204,113,' + (0.15 + Math.max(0, r.heatScore || 0) * 0.4) + ')';
+      if ((r.heatScore || 0) < 0) style = 'background:rgba(231,76,60,' + (0.15 + Math.abs(r.heatScore) * 0.4) + ')';
+      return '<div class="inst-heat-cell" style="' + style + '">' + esc(r.symbol) + '<br>' + (r.dailyChange || '—') + '</div>';
     }).join('');
     var rows = (d.indices || []).map(function (r) {
+      var ch = r.dailyChange || '—';
+      var cls = String(ch).indexOf('+') === 0 ? 'up' : (String(ch).indexOf('-') === 0 ? 'down' : '');
+      if (live) {
+        return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
+          '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="indices">' + r.value + '</td>' +
+          '<td class="' + cls + '">' + ch + '</td><td>' + esc(r.trend || '—') + '</td></tr>';
+      }
       return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
         '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="indices">' + r.value + '</td><td>' + r.dailyChange + '</td>' +
         '<td>' + r.sectorBreakdown + '</td><td>' + r.institutionalPositioning + '</td><td>' + r.marketBreadth + '</td>' +
         '<td>' + r.volumeAnalysis + '</td><td>' + r.riskRating + '</td></tr>';
     }).join('');
-    return '<section class="card inst-wide"><h2>Global indices</h2>' +
-      '<p class="muted" style="font-size:.72rem;margin-bottom:.5rem">Reference index levels — not live exchange feeds. Educational context only.</p>' +
+    var note = live ? priceSourceNote(d) :
+      '<p class="muted" style="font-size:.72rem;margin-bottom:.5rem">Reference index levels — not live exchange feeds. Educational context only.</p>';
+    var head = live
+      ? '<th>Index</th><th>Value</th><th>24h %</th><th>Trend</th>'
+      : '<th>Index</th><th>Value</th><th>Change</th><th>Sectors</th><th>Institutional</th><th>Breadth</th><th>Volume</th><th>Risk</th>';
+    return '<section class="card inst-wide"><h2>Global indices</h2>' + note +
       '<h3 style="font-size:.8rem;color:var(--gold)">Index heat map</h3><div class="inst-heatmap">' + heat + '</div>' +
       '<div class="inst-scroll" style="margin-top:.75rem"><table class="inst-table inst-table-compact"><tr>' +
-      '<th>Index</th><th>Value</th><th>Change</th><th>Sectors</th><th>Institutional</th><th>Breadth</th><th>Volume</th><th>Risk</th></tr>' +
-      rows + '</table></div></section>';
+      head + '</tr>' + rows + '</table></div></section>';
   }
 
   function renderAg(d) {
+    var live = !!d.live;
     var rows = (d.ag || []).map(function (r) {
+      var ch = r.dailyChange || '—';
+      var cls = String(ch).indexOf('+') === 0 ? 'up' : (String(ch).indexOf('-') === 0 ? 'down' : '');
+      if (live) {
+        return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
+          '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="ag">' + r.price + '</td>' +
+          '<td class="' + cls + '">' + ch + '</td><td>' + esc(r.trend || '—') + '</td></tr>';
+      }
       return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
         '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="ag">' + r.price + '</td><td>' + r.supplyConditions + '</td>' +
         '<td>' + r.harvestReports + '</td><td>' + r.weatherImpact + '</td><td>' + r.demandAnalysis + '</td><td>' + r.priceTrend + '</td></tr>';
     }).join('');
+    var head = live
+      ? '<th>Commodity</th><th>Price</th><th>24h %</th><th>Trend</th>'
+      : '<th>Commodity</th><th>Price</th><th>Supply</th><th>Harvest</th><th>Weather</th><th>Demand</th><th>Trend</th>';
     return '<section class="card inst-wide"><h2>Agricultural commodities</h2>' +
-      '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' +
-      '<th>Commodity</th><th>Price</th><th>Supply</th><th>Harvest</th><th>Weather</th><th>Demand</th><th>Trend</th></tr>' +
-      rows + '</table></div></section>';
+      (live ? priceSourceNote(d) : '') +
+      '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' + head + '</tr>' + rows + '</table></div></section>';
+  }
+
+  function renderMarketOverview(d) {
+    var ov = d.marketOverview || {};
+    var gainers = (ov.gainers || []).map(function (g) {
+      return '<li><strong>' + esc(g.n) + '</strong> <span class="up">' + esc(g.v) + '</span></li>';
+    }).join('') || '<li class="muted">Loading…</li>';
+    var losers = (ov.losers || []).map(function (g) {
+      return '<li><strong>' + esc(g.n) + '</strong> <span class="down">' + esc(g.v) + '</span></li>';
+    }).join('') || '<li class="muted">Loading…</li>';
+    var vix = d.vix ? ('VIX ' + esc(d.vix.value) + ' (' + esc(d.vix.change) + ')') : (ov.vix ? 'VIX ' + esc(ov.vix) : '—');
+    return '<section class="card inst-wide"><h2>Market overview <span class="inst-live-tag">LIVE</span></h2>' +
+      '<div class="grid-3">' +
+      '<div><h3 style="font-size:.8rem;color:var(--gold)">Top gainers (24h)</h3><ul class="feed-list">' + gainers + '</ul></div>' +
+      '<div><h3 style="font-size:.8rem;color:var(--gold)">Top losers (24h)</h3><ul class="feed-list">' + losers + '</ul></div>' +
+      '<div><h3 style="font-size:.8rem;color:var(--gold)">Volatility</h3><p style="font-size:1.1rem;margin:.5rem 0">' + vix + '</p>' +
+      '<p class="muted" style="font-size:.75rem">Fear gauge from Yahoo Finance · refreshes every 60s</p></div>' +
+      '</div></section>';
+  }
+
+  function renderLiveScanner(d) {
+    var scannerRows = d.scanner || d._liveScanner || [];
+    var scannerHtml = scannerRows.map(function (row) {
+      return '<tr><td>' + esc(row.name) + '</td><td>' + esc(row.type) + '</td><td>' + row.score + '</td></tr>';
+    }).join('');
+    var watchItems = (d.forex.majors || []).slice(0, 4).concat((d.crypto || []).slice(0, 4));
+    var watch = watchItems.map(function (r) {
+      var ch = r.dailyChange || r.change24h || '';
+      var cls = String(ch).indexOf('+') === 0 ? 'up' : 'down';
+      var sym = r.symbol;
+      var cat = sym.length <= 5 ? 'forex' : 'crypto';
+      var price = r.price || r.value || r.spotPrice;
+      return '<span class="inst-watch-pill ' + cls + '" data-live-price="' + esc(sym) + '" data-live-cat="' + esc(cat) + '">' +
+        esc(sym) + ' ' + price + '</span>';
+    }).join('');
+    return '<section class="card inst-wide"><h2>Watchlist &amp; momentum scanner <span class="inst-live-tag">LIVE</span></h2>' +
+      '<h3 style="font-size:.8rem;color:var(--gold)">Watchlist</h3><div class="inst-watchlist">' + watch + '</div>' +
+      '<h3 style="margin-top:.75rem;font-size:.8rem;color:var(--gold)">24h momentum (by move size)</h3>' +
+      '<table class="inst-table"><tr><th>Asset</th><th>Signal</th><th>Score</th></tr>' + scannerHtml + '</table></section>';
   }
 
   function renderTechnical(d) {
@@ -491,8 +644,12 @@
   }
 
   function renderAll(d) {
-    return dataHonestyBanner() + renderLivePreviewBanner(d) + renderForexGlobal(d) + renderCrypto(d) + renderMetals(d) + renderEnergy(d) +
-      renderIndices(d) + renderAg(d) + renderTechnical(d) + renderSMC(d) + renderAIHub(d) +
+    var core = dataHonestyBanner(d) + renderLivePreviewBanner(d) + renderForexGlobal(d) + renderCrypto(d) + renderMetals(d) + renderEnergy(d) +
+      renderIndices(d) + renderAg(d);
+    if (d.live) {
+      return core + renderMarketOverview(d) + renderLiveScanner(d) + renderNews(d) + renderCalcs();
+    }
+    return core + renderTechnical(d) + renderSMC(d) + renderAIHub(d) +
       renderNews(d) + renderCalcs() + renderJournalPro() + renderInstitutional(d) + renderTerminalPanels(d);
   }
 
@@ -583,7 +740,11 @@
 
   function mergeServerQuotes(quotes) {
     if (!quotes) return;
+    if (!window.AURAFX_LIVE_QUOTES) window.AURAFX_LIVE_QUOTES = { forex: {}, crypto: {}, metals: {} };
     var live = window.AURAFX_LIVE_QUOTES;
+    if (!live.forex) live.forex = {};
+    if (!live.crypto) live.crypto = {};
+    if (!live.metals) live.metals = {};
     Object.keys(quotes.forex || {}).forEach(function (sym) {
       live.forex[sym] = quotes.forex[sym];
     });
@@ -632,6 +793,7 @@
 
   function mountMarkets(extra, liveOverlay) {
     extra = extra || {};
+    if (extra.quotes) mergeServerQuotes(extra.quotes);
     var data = buildMarketsData(extra);
     data = applyLiveOverlay(data, liveOverlay);
     if (extra.warnings && extra.warnings.length) {

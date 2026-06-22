@@ -146,6 +146,9 @@ td.price-flash-down, strong.price-flash-down { background: rgba(231,76,60,0.35) 
   background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25);
   border-radius: 8px; font-size: 0.78rem; color: var(--muted); line-height: 1.55;
 }
+.inst-data-honesty.inst-data-live {
+  background: rgba(46, 204, 113, 0.08); border-color: rgba(46, 204, 113, 0.35);
+}
 .inst-tag-live {
   font-size: 0.62rem; font-weight: 800; padding: 0.1rem 0.4rem;
   background: rgba(46, 204, 113, 0.15); color: var(--bull); border-radius: 4px;

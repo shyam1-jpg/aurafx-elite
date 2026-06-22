@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 80" role="img" aria-label="AuraFX Elite">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f4d67a"/>
+      <stop offset="50%" style="stop-color:#d4af37"/>
+      <stop offset="100%" style="stop-color:#9a7b28"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(0, 2) scale(0.34)">
+    <rect x="42" y="118" width="10" height="28" rx="1" fill="#2ecc71" opacity="0.88"/>
+    <rect x="58" y="108" width="10" height="38" rx="1" fill="#e74c3c" opacity="0.88"/>
+    <rect x="132" y="112" width="10" height="34" rx="1" fill="#2ecc71" opacity="0.72"/>
+    <path d="M100 48 L128 152 H112 L105 128 H95 L88 152 H72 Z M97 114 H103 L100 88 Z" fill="url(#gold)"/>
+  </g>
+  <text x="88" y="36" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" letter-spacing="0.1em" fill="url(#gold)">AURAFX</text>
+  <text x="88" y="62" font-family="Georgia, 'Times New Roman', serif" font-size="14" font-weight="400" letter-spacing="0.38em" fill="#d4af37">ELITE</text>
+</svg>

@@ -55,7 +55,29 @@ async function fetchForexYahoo() {
     'USDCHF=X': 'USDCHF',
     'AUDUSD=X': 'AUDUSD',
     'NZDUSD=X': 'NZDUSD',
-    'USDCAD=X': 'USDCAD'
+    'USDCAD=X': 'USDCAD',
+    'EURGBP=X': 'EURGBP',
+    'EURJPY=X': 'EURJPY',
+    'EURAUD=X': 'EURAUD',
+    'EURNZD=X': 'EURNZD',
+    'EURCAD=X': 'EURCAD',
+    'GBPJPY=X': 'GBPJPY',
+    'GBPAUD=X': 'GBPAUD',
+    'GBPCAD=X': 'GBPCAD',
+    'AUDJPY=X': 'AUDJPY',
+    'AUDNZD=X': 'AUDNZD',
+    'AUDCAD=X': 'AUDCAD',
+    'NZDJPY=X': 'NZDJPY',
+    'USDTRY=X': 'USDTRY',
+    'USDZAR=X': 'USDZAR',
+    'USDMXN=X': 'USDMXN',
+    'USDSGD=X': 'USDSGD',
+    'USDHKD=X': 'USDHKD',
+    'USDSEK=X': 'USDSEK',
+    'USDNOK=X': 'USDNOK',
+    'USDDKK=X': 'USDDKK',
+    'USDPLN=X': 'USDPLN',
+    'USDCNH=X': 'USDCNH'
   };
   const forex = {};
   const changes = {};
@@ -162,30 +184,67 @@ async function fetchMetals() {
   return { metals, changes, times, source: sources.join(' + ') || 'Metals API' };
 }
 
+async function fetchCryptoFinnhub() {
+  if (!FINNHUB_KEY) return { crypto: {}, changes: {}, times: {}, source: '' };
+  const map = {
+    'BINANCE:BTCUSDT': 'BTC', 'BINANCE:ETHUSDT': 'ETH', 'BINANCE:BNBUSDT': 'BNB',
+    'BINANCE:SOLUSDT': 'SOL', 'BINANCE:XRPUSDT': 'XRP', 'BINANCE:ADAUSDT': 'ADA',
+    'BINANCE:DOGEUSDT': 'DOGE', 'BINANCE:TRXUSDT': 'TRX', 'BINANCE:AVAXUSDT': 'AVAX',
+    'BINANCE:LINKUSDT': 'LINK', 'BINANCE:DOTUSDT': 'DOT', 'BINANCE:LTCUSDT': 'LTC'
+  };
+  const crypto = {};
+  const changes = {};
+  await Promise.all(Object.keys(map).map(async (sym) => {
+    try {
+      const res = await httpsJson(
+        'https://finnhub.io/api/v1/quote?symbol=' + encodeURIComponent(sym) +
+        '&token=' + encodeURIComponent(FINNHUB_KEY)
+      );
+      if (res.status !== 200 || !res.body || !res.body.c) return;
+      crypto[map[sym]] = res.body.c;
+      if (res.body.dp != null) changes[map[sym]] = res.body.dp;
+    } catch (_) { /* skip */ }
+  }));
+  return {
+    crypto,
+    changes,
+    times: { _crypto: new Date().toISOString() },
+    source: Object.keys(crypto).length ? 'Finnhub crypto' : ''
+  };
+}
+
 async function fetchCrypto() {
+  const finn = await fetchCryptoFinnhub();
+  if (Object.keys(finn.crypto).length >= 6) return finn;
   const ids = 'bitcoin,ethereum,binancecoin,solana,ripple,cardano,dogecoin,tron,avalanche-2,chainlink,polkadot,litecoin';
   const res = await httpsJson(
     'https://api.coingecko.com/api/v3/simple/price?ids=' + ids + '&vs_currencies=usd&include_24hr_change=true'
   );
-  if (res.status !== 200) return { crypto: {}, changes: {}, times: {}, source: '' };
   const map = {
     bitcoin: 'BTC', ethereum: 'ETH', binancecoin: 'BNB', solana: 'SOL', ripple: 'XRP',
     cardano: 'ADA', dogecoin: 'DOGE', tron: 'TRX', 'avalanche-2': 'AVAX', chainlink: 'LINK',
     polkadot: 'DOT', litecoin: 'LTC'
   };
-  const crypto = {};
-  const changes = {};
-  Object.keys(map).forEach((id) => {
-    if (res.body[id] && res.body[id].usd) {
-      crypto[map[id]] = res.body[id].usd;
-      if (res.body[id].usd_24h_change != null) changes[map[id]] = res.body[id].usd_24h_change;
-    }
-  });
+  const cgCrypto = {};
+  const cgChanges = {};
+  if (res.status === 200 && res.body) {
+    Object.keys(map).forEach((id) => {
+      if (res.body[id] && res.body[id].usd) {
+        cgCrypto[map[id]] = res.body[id].usd;
+        if (res.body[id].usd_24h_change != null) cgChanges[map[id]] = res.body[id].usd_24h_change;
+      }
+    });
+  }
+  const crypto = { ...finn.crypto, ...cgCrypto };
+  const changes = { ...finn.changes, ...cgChanges };
+  const parts = [];
+  if (finn.source) parts.push(finn.source);
+  if (Object.keys(cgCrypto).length) parts.push('CoinGecko');
   return {
     crypto,
     changes,
     times: { _crypto: new Date().toISOString() },
-    source: 'CoinGecko'
+    source: parts.join(' + ') || ''
   };
 }
 

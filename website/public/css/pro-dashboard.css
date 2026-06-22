@@ -30,9 +30,18 @@ a:hover { text-decoration: underline; }
   position: sticky; top: 0; height: 100vh; z-index: 50;
 }
 body.theme-light .dash-sidebar { background: #e8eaf2; border-color: #ccc; }
-.dash-sidebar-brand { padding: 1rem; border-bottom: 1px solid rgba(212,175,55,.1); }
-.dash-sidebar-brand a { font-size: 1.1rem; font-weight: 700; color: var(--gold); text-decoration: none; }
-.dash-sidebar-brand span { color: var(--text); font-weight: 400; }
+.dash-sidebar-brand { padding: 0.85rem 0.65rem; border-bottom: 1px solid rgba(212,175,55,.1); }
+.dash-sidebar-brand a {
+  display: inline-flex; align-items: center; font-size: 0; line-height: 0;
+  color: transparent; text-decoration: none;
+}
+.dash-sidebar-brand a:hover { text-decoration: none; opacity: 0.95; }
+.dash-sidebar-brand .logo-img {
+  width: 100%;
+  max-width: 100%;
+  max-height: 52px;
+  height: auto;
+}
 .dash-nav { list-style: none; padding: .75rem 0; flex: 1; overflow-y: auto; }
 .dash-nav li button {
   width: 100%; text-align: left; padding: .65rem 1rem; background: transparent; border: none;

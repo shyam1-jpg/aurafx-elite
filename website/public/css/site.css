@@ -22,11 +22,23 @@ a:hover { text-decoration: underline; }
   display: inline-flex; align-items: center; gap: .55rem;
   font-size: 1.35rem; font-weight: 700; color: var(--gold); text-decoration: none;
 }
+.logo:has(.logo-img), .nav-logo:has(.logo-img) {
+  font-size: 0; line-height: 0; color: transparent; gap: 0;
+}
 .logo:hover, .nav-logo:hover { text-decoration: none; opacity: .95; }
 .logo span, .nav-logo span { color: var(--text); font-weight: 400; }
 .logo-img {
-  width: 36px; height: 36px; flex-shrink: 0; border-radius: 8px;
-  display: block; box-shadow: 0 0 12px rgba(212, 175, 55, .2);
+  width: min(380px, 58vw);
+  height: auto;
+  max-height: 64px;
+  flex-shrink: 0;
+  display: block;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+}
+.logo-img-square {
+  width: 36px; height: 36px; max-width: 36px; border-radius: 8px;
 }
 .nav-links { display: flex; gap: 1.5rem; align-items: center; font-size: .9rem; }
 .btn {
@@ -59,9 +71,17 @@ a:hover { text-decoration: underline; }
 
 .hero { text-align: center; padding: 4rem 1.5rem 3rem; max-width: 900px; margin: 0 auto; }
 .hero-logo {
-  border-radius: 18px;
-  width: 96px; height: 96px; margin: 0 auto 1rem; display: block;
-  border-radius: 20px; box-shadow: 0 0 32px rgba(212, 175, 55, .25);
+  width: min(300px, 82vw);
+  height: auto;
+  margin: 0 auto 1rem;
+  display: block;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+  filter: drop-shadow(0 4px 24px rgba(212, 175, 55, 0.15));
+}
+.hero-logo-square {
+  width: 140px; height: 140px; max-width: 140px; border-radius: 20px;
 }
 .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); margin-bottom: 1rem; }
 .hero h1 em { color: var(--gold); font-style: normal; }
