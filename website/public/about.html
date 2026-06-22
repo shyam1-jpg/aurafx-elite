@@ -3,54 +3,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="About AuraFX Elite — educational trading analysis software for MT5 and web. UK-operated, not FCA-authorised." />
+  <meta name="description" content="About AuraFX Elite — UK educational trading software, MT5 publisher, mission, and regulatory status." />
   <title>About — AuraFX Elite</title>
   <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
   <script src="js/font-loader.js"></script>
 </head>
-<body>
+<body class="lux-body">
   <nav class="nav" aria-label="Primary">
     <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
     <div class="nav-links">
       <a href="how-it-works.html">How it works</a>
-      <a href="faq.html">FAQ</a>
-      <a href="support.html">Support</a>
+      <a href="products.html">Products</a>
+      <a href="markets.html">Live markets</a>
       <a href="register.html">Register</a>
       <a href="dashboard.html" class="btn btn-gold">Dashboard</a>
     </div>
   </nav>
-  <article class="section trust-page" style="max-width:820px">
-    <h1>About AuraFX Elite</h1>
-    <p class="edu-badge">Educational software only — not financial advice</p>
-    <p style="color:var(--muted);margin:1rem 0">AuraFX Elite provides chart analysis tools, economic calendar integration, and MetaTrader 5 indicators for self-directed traders. We help you organise market information — we do not trade on your behalf.</p>
 
-    <div class="card">
+  <header class="section lux-hero" style="text-align:center;padding-top:2rem">
+    <h1 class="lux-title">About <em>AuraFX Elite</em></h1>
+    <p style="color:var(--muted);max-width:680px;margin:1rem auto">Educational forex and gold analysis software — web dashboard and MetaTrader 5 tools for self-directed traders.</p>
+  </header>
+
+  <article class="section trust-page" style="max-width:900px;margin:0 auto">
+    <span class="edu-badge">Educational software only — not financial advice</span>
+
+    <div class="lux-glass" style="padding:1.35rem;margin:1.5rem 0">
+      <h2 style="color:var(--gold);font-size:1.1rem;margin-bottom:.75rem">Our mission</h2>
+      <p style="color:var(--muted);line-height:1.75">AuraFX Elite helps traders organise market information — live quotes, economic calendar, risk checklists, and chart overlays — so you can make your own decisions with your own broker. We build software, not brokerage services.</p>
+    </div>
+
+    <div class="grid-3" style="margin-bottom:1.5rem">
+      <div class="card lux-glass">
+        <h3>Web platform</h3>
+        <p style="font-size:.88rem;color:var(--muted)">Pro dashboard with live ticker, mood index, journal, and institutional-style panels. Free registration.</p>
+      </div>
+      <div class="card lux-glass">
+        <h3>MT5 suite</h3>
+        <p style="font-size:.88rem;color:var(--muted)">Five MQL5 products: indicators, EAs, risk tools. Sold on MQL5 Market.</p>
+      </div>
+      <div class="card lux-glass">
+        <h3>UK operated</h3>
+        <p style="font-size:.88rem;color:var(--muted)">Shyam Prasad trading as AuraFX Elite. Not FCA-authorised. See regulatory page.</p>
+      </div>
+    </div>
+
+    <div class="card lux-glass">
       <h3>What we are</h3>
-      <ul>
-        <li>Educational software publisher (web dashboard + MT5 tools)</li>
-        <li>UK-operated by Shyam Prasad trading as AuraFX Elite</li>
-        <li>Not authorised by the Financial Conduct Authority (FCA)</li>
+      <ul style="line-height:1.8">
+        <li>Educational software publisher (web + MT5)</li>
+        <li>Analysis and journaling tools — not trade execution</li>
+        <li>Live data from public APIs (Yahoo Finance, CoinGecko, etc.)</li>
       </ul>
     </div>
 
-    <div class="card">
+    <div class="card lux-glass" style="margin-top:1rem">
       <h3>What we are not</h3>
-      <ul>
+      <ul style="line-height:1.8">
         <li>Not a broker, bank, or investment manager</li>
         <li>We do not hold client money or access your trading account</li>
         <li>We do not introduce you to brokers or receive referral commissions</li>
         <li>We do not provide personalised regulated investment advice</li>
+        <li>We do not guarantee profits or win rates</li>
       </ul>
     </div>
 
-    <div class="card">
+    <div class="card lux-glass" style="margin-top:1rem">
+      <h3>Technology stack</h3>
+      <p style="color:var(--muted);font-size:.9rem;line-height:1.7">
+        <strong>Website:</strong> Node.js server on Render, custom domain aurafxelite.com<br>
+        <strong>Data:</strong> Yahoo Finance, CoinGecko, open.er-api.com for live quotes<br>
+        <strong>Database:</strong> Neon PostgreSQL for journal sync (when configured)<br>
+        <strong>MT5:</strong> MQL5 indicators and expert advisors compiled in MetaEditor<br>
+        <strong>Email:</strong> Resend for verification (when configured)
+      </p>
+    </div>
+
+    <div class="card lux-glass" style="margin-top:1rem">
       <h3>Contact</h3>
       <p style="color:var(--muted);font-size:.9rem">Support: <a href="mailto:support@aurafxelite.com">support@aurafxelite.com</a><br>
-      Regulatory details: <a href="regulatory.html">Regulatory disclosure</a></p>
+      Regulatory: <a href="regulatory.html">Regulatory disclosure</a> · <a href="roadmap.html">Product roadmap</a></p>
     </div>
   </article>
+
   <footer class="footer"><p>© AuraFX Elite · <a href="index.html">Home</a></p></footer>
   <script src="js/site-boot.js"></script>
   <script src="js/cookie-consent.js"></script>
+  <script src="js/luxury-fx.js"></script>
 </body>
 </html>

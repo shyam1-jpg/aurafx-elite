@@ -67,7 +67,8 @@ let cache = {
   ],
   news: [{ title: 'AuraFX live server running', risk: 'LOW', time: new Date().toISOString(), source: 'AuraFX' }],
   updatedAt: new Date().toISOString(),
-  lastHistoryMood: null
+  lastHistoryMood: null,
+  lastQuoteChanges: null
 };
 
 const OWNER_KEY = process.env.AURAFX_OWNER_KEY || (IS_PRODUCTION ? '' : 'aurafx-local-dev');
@@ -105,6 +106,13 @@ try {
   quotesService = require('./live-quotes-service');
 } catch (e) {
   console.warn('[AuraFX] live-quotes-service not loaded:', e.message);
+}
+
+let marketSessions = null;
+try {
+  marketSessions = require('./market-sessions');
+} catch (e) {
+  console.warn('[AuraFX] market-sessions not loaded:', e.message);
 }
 
 function ownerKeyOk(req) {
@@ -511,26 +519,43 @@ function handleInstitutionalLive(req, res) {
 function apiInstitutional(quotes) {
   const xau = quotes && quotes.metals && quotes.metals.XAUUSD;
   const eur = quotes && quotes.forex && quotes.forex.EURUSD;
+  const changes = (quotes && quotes.changes) || {};
+  const sessions = marketSessions ? marketSessions.getFxSessionsUTC() : null;
+  const sessionLabel = sessions && marketSessions
+    ? marketSessions.activeSessionLabel(sessions)
+    : 'London';
+  const ranked = marketSessions
+    ? marketSessions.rankByChange(changes)
+    : { gainers: [{ n: 'XAUUSD', v: '+0.42%' }], losers: [{ n: 'USDJPY', v: '-0.21%' }] };
+  const strength = marketSessions && quotes
+    ? marketSessions.currencyStrengthFromForex(quotes.forex || {}, changes)
+    : [
+      { c: 'USD', s: 88 }, { c: 'EUR', s: 72 }, { c: 'GBP', s: 65 },
+      { c: 'JPY', s: 41 }, { c: 'AUD', s: 58 }, { c: 'XAU', s: 76 }
+    ];
+  const goldCh = changes.XAUUSD;
+  const goldDaily = goldCh != null ? ((goldCh >= 0 ? '+' : '') + goldCh.toFixed(2) + '%') : 'Live feed';
   const goldSupport = xau
     ? [(xau * 0.995).toFixed(0), (xau * 0.988).toFixed(0)]
     : ['—', '—'];
   const goldResist = xau
     ? [(xau * 1.005).toFixed(0), (xau * 1.012).toFixed(0)]
     : ['—', '—'];
+  const heatmap = strength.slice(0, 6).map((s) => ({
+    s: s.c,
+    v: Math.round((s.s - 50) / 25 * 10) / 10
+  }));
   return {
     marketOverview: {
-      sentiment: 'Risk-On',
-      riskMode: 'Moderate Risk-On',
-      fearGreed: 62,
-      vix: 18.4,
-      currencyStrength: [
-        { c: 'USD', s: 88 }, { c: 'EUR', s: 72 }, { c: 'GBP', s: 65 },
-        { c: 'JPY', s: 41 }, { c: 'AUD', s: 58 }, { c: 'XAU', s: 76 }
-      ],
-      gainers: [{ n: 'XAUUSD', v: '+0.42%' }, { n: 'EURUSD', v: '+0.18%' }],
-      losers: [{ n: 'USDJPY', v: '-0.21%' }],
-      volumeNote: 'Forex cash session volume +8% vs 20d avg',
-      globalStatus: 'US open · Europe active · Asia closed'
+      sentiment: cache.mood === 'RISK-ON' ? 'Risk-On' : cache.mood === 'RISK-OFF' ? 'Risk-Off' : 'Mixed',
+      riskMode: cache.mood,
+      fearGreed: Math.min(95, Math.max(15, 50 + Math.round((ranked.top[0] && ranked.top[0].pct) || 0) * 5)),
+      vix: 17.8,
+      currencyStrength: strength,
+      gainers: ranked.gainers.length ? ranked.gainers : [{ n: 'XAUUSD', v: '—' }],
+      losers: ranked.losers.length ? ranked.losers : [{ n: '—', v: '—' }],
+      volumeNote: 'Live quote refresh every 30s · ' + (quotes ? quotes.source : 'server'),
+      globalStatus: sessionLabel
     },
     calendar: {
       high: [
@@ -554,7 +579,7 @@ function apiInstitutional(quotes) {
     },
     gold: {
       price: xau || null,
-      daily: 'Live feed',
+      daily: goldDaily,
       weekly: 'See chart',
       monthly: 'See chart',
       support: goldSupport,
@@ -568,11 +593,15 @@ function apiInstitutional(quotes) {
       quotesSource: quotes ? quotes.source : 'pending'
     },
     forex: {
-      strengthRank: ['USD', 'EUR', 'GBP', 'AUD', 'JPY'],
+      strengthRank: strength.map((s) => s.c),
       volRank: ['GBPJPY', 'XAUUSD', 'EURUSD'],
-      trending: ['XAUUSD up', 'EURUSD up'],
-      sessions: { asian: 'Range', london: 'Trend', ny: 'Volatile' },
-      smartMoney: 'USD accumulation on dips'
+      trending: ranked.top.slice(0, 3).map((r) => r.symbol + ' ' + (r.pct >= 0 ? 'up' : 'down')),
+      sessions: {
+        asian: sessions && sessions.tokyo ? 'Open' : 'Closed',
+        london: sessions && sessions.london ? 'Open' : 'Closed',
+        ny: sessions && sessions.newYork ? 'Open' : 'Closed'
+      },
+      smartMoney: eur ? 'EURUSD ' + Number(eur).toFixed(5) + ' live' : 'USD flows monitored'
     },
     technical: {
       ema: 'EMA 9 > 21 bullish H1', sma: 'Above SMA 200 D1', rsi: 'RSI 58',
@@ -604,7 +633,7 @@ function apiInstitutional(quotes) {
       { name: 'XAUUSD', type: 'Breakout', score: 84 },
       { name: 'EURUSD', type: 'Trend', score: 78 }
     ],
-    heatmap: [
+    heatmap: heatmap.length ? heatmap : [
       { s: 'XAU', v: 0.8 }, { s: 'EUR', v: 0.4 }, { s: 'USD', v: 0.6 },
       { s: 'JPY', v: -0.5 }, { s: 'BTC', v: -0.2 }
     ],
@@ -662,6 +691,17 @@ function tickLiveData() {
   cache.updatedAt = new Date().toISOString();
   if (cache.nextEvent && cache.nextEvent.minutesUntil > 0) {
     cache.nextEvent.minutesUntil = Math.max(0, cache.nextEvent.minutesUntil - 1);
+  }
+  if (quotesService) {
+    quotesService.getQuotes()
+      .then((q) => {
+        if (q && q.changes) {
+          cache.lastQuoteChanges = q.changes;
+          if (marketSessions) cache.mood = marketSessions.deriveMood(q.changes);
+        }
+        cache.updatedAt = new Date().toISOString();
+      })
+      .catch(() => { /* keep last mood */ });
   }
   if (dashStore) {
     const summary = apiProSummary();
@@ -755,16 +795,33 @@ function handleDashboardEvents(req, res, rawUrl) {
 
 function apiProSummary() {
   const quotesSource = quotesService ? 'Yahoo Finance / CoinGecko (public APIs)' : 'Server cache';
+  const sessions = marketSessions ? marketSessions.getFxSessionsUTC() : null;
+  const sessionLabel = sessions && marketSessions
+    ? marketSessions.activeSessionLabel(sessions)
+    : 'London';
+  const sessionRisk = sessions && marketSessions
+    ? marketSessions.sessionRiskLevel(sessions)
+    : 'MEDIUM';
+  let bullishProb = 58;
+  let bearishProb = 42;
+  if (quotesService && cache.lastQuoteChanges) {
+    const vals = Object.values(cache.lastQuoteChanges).filter((v) => typeof v === 'number');
+    if (vals.length) {
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      bullishProb = Math.min(72, Math.max(28, Math.round(50 + avg * 8)));
+      bearishProb = 100 - bullishProb;
+    }
+  }
   return {
     mood: cache.mood,
-    sessionRisk: 'MEDIUM',
-    session: 'London',
+    sessionRisk,
+    session: sessionLabel,
     nextEvent: cache.nextEvent,
-    bullishProb: 58,
-    bearishProb: 42,
-    score: 78,
-    sentiment: 'Neutral-bullish',
-    crashAlert: false,
+    bullishProb,
+    bearishProb,
+    score: Math.min(92, Math.max(45, 68 + Math.round((bullishProb - 50) / 3))),
+    sentiment: bullishProb >= 55 ? 'Neutral-bullish' : bullishProb <= 45 ? 'Neutral-bearish' : 'Neutral',
+    crashAlert: cache.mood === 'HIGH VOL',
     exposureLots: 0,
     dailyPnlPct: 0,
     updatedAt: cache.updatedAt,

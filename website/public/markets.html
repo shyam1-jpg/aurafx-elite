@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Live forex, gold, and crypto market intelligence — real-time prices, sessions, calendar, and analysis from AuraFX Elite." />
+  <title>Live Markets — AuraFX Elite</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/institutional.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+  <link rel="stylesheet" href="css/elite-command.css" />
+  <script src="js/font-loader.js"></script>
+</head>
+<body class="lux-body">
+  <nav class="nav" aria-label="Primary">
+    <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="products.html">Products</a>
+      <a href="get-started.html">Get started</a>
+      <a href="dashboard.html" class="btn btn-gold">Dashboard</a>
+    </div>
+  </nav>
+
+  <header class="section lux-hero" style="text-align:center;padding-top:2rem">
+    <span class="lux-badge-elite">Live intelligence</span>
+    <h1 class="lux-title" style="margin-top:1rem">Global <em>Market Terminal</em></h1>
+    <p style="color:var(--muted);max-width:680px;margin:1rem auto;font-size:1.02rem">
+      Real-time gold, forex, and crypto prices from public market feeds. Session clocks, economic calendar,
+      and institutional-style panels — educational context only, not trading advice.
+    </p>
+    <span class="edu-badge">Prices refresh every 30 seconds · Source shown on strip</span>
+  </header>
+
+  <section class="section" style="max-width:1100px;margin:0 auto">
+    <h2>Trading sessions (local time)</h2>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:.75rem">Sydney, Tokyo, London, and New York — highlighted when the cash session is active in UTC.</p>
+    <div id="eliteSessions" class="elite-sessions"></div>
+  </section>
+
+  <section class="section" style="max-width:1100px;margin:0 auto">
+    <h2>Command center</h2>
+    <div id="eliteCommandCenter"></div>
+  </section>
+
+  <section class="section" style="max-width:1100px;margin:0 auto">
+    <div id="eliteStats"></div>
+  </section>
+
+  <div id="aurafx-inst-home" style="max-width:1100px;margin:0 auto;padding:0 1.5rem"></div>
+  <div id="aurafx-global-home" style="max-width:1100px;margin:0 auto;padding:0 1.5rem 3rem"></div>
+
+  <section class="section trust-strip" style="max-width:900px;margin:2rem auto">
+    <p class="trust-statement">
+      <strong>Data disclaimer.</strong> Prices come from third-party public APIs (Yahoo Finance, CoinGecko, open.er-api.com).
+      They may differ from your broker's quotes. Spreads, execution, and slippage are broker-specific.
+      AuraFX does not execute trades or hold client funds.
+    </p>
+  </section>
+
+  <footer class="footer">
+    <p>© AuraFX Elite · <a href="index.html">Home</a> · <a href="products.html">Products</a> · <a href="register.html">Register</a></p>
+  </footer>
+
+  <script src="js/site-boot.js"></script>
+  <script src="js/cookie-consent.js"></script>
+  <script src="js/market-price-bases.js"></script>
+  <script src="js/live-quotes.js"></script>
+  <script src="js/live-price-ticker.js"></script>
+  <script src="js/elite-command.js"></script>
+  <script src="js/institutional-data.js"></script>
+  <script src="js/institutional.js"></script>
+  <script src="js/markets-universe.js"></script>
+  <script src="js/global-markets.js"></script>
+  <script src="js/luxury-fx.js"></script>
+</body>
+</html>

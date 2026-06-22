@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/institutional.css" />
   <link rel="stylesheet" href="css/luxury.css" />
+  <link rel="stylesheet" href="css/elite-command.css" />
   <link rel="icon" href="assets/aura-icon-140.png" type="image/png" />
   <script src="js/font-loader.js"></script>
 </head>
@@ -21,6 +22,8 @@
   <nav class="nav" aria-label="Primary">
     <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
     <div class="nav-links">
+      <a href="markets.html">Live markets</a>
+      <a href="products.html">Products</a>
       <a href="get-started.html">Get started</a>
       <a href="about.html">About</a>
       <a href="how-it-works.html">How it works</a>
@@ -73,6 +76,21 @@
         <p>Sync your trade journal when registered — Neon-backed when configured on server.</p>
       </div>
     </div>
+  </section>
+
+  <section class="section lux-reveal" style="max-width:1100px;margin:0 auto">
+    <h2>Global trading sessions</h2>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:.75rem;text-align:center">Live session clocks — Sydney, Tokyo, London, New York</p>
+    <div id="eliteSessions" class="elite-sessions"></div>
+  </section>
+
+  <div id="eliteStats"></div>
+
+  <section class="section lux-reveal" style="max-width:1100px;margin:0 auto">
+    <h2>Live command center</h2>
+    <p style="color:var(--muted);font-size:.88rem;margin-bottom:1rem;text-align:center">Real mood index, economic calendar, and activity feed from AuraFX server APIs</p>
+    <div id="eliteCommandCenter"></div>
+    <p style="text-align:center;margin-top:1.25rem"><a href="markets.html" class="btn btn-gold">Full market terminal →</a></p>
   </section>
 
   <section id="features" class="section lux-reveal">
@@ -209,6 +227,7 @@
     <p>© 2026 AuraFX Elite · Educational software only · Not financial advice · Past performance is not indicative of future results</p>
     <p style="margin-top:.5rem">
       <a href="dashboard.html">Dashboard</a> · <a href="register.html">Register</a> ·
+      <a href="markets.html">Live markets</a> · <a href="products.html">Products</a> ·
       <a href="get-started.html">Get started</a> · <a href="about.html">About</a> · <a href="faq.html">FAQ</a> · <a href="support.html">Support</a> · <a href="roadmap.html">Roadmap</a>
     </p>
     <p style="margin-top:.4rem;font-size:.72rem">
@@ -226,6 +245,7 @@
   <script src="js/market-price-bases.js"></script>
   <script src="js/live-quotes.js"></script>
   <script src="js/live-price-ticker.js"></script>
+  <script src="js/elite-command.js"></script>
   <script src="js/institutional-data.js"></script>
   <script src="js/institutional.js"></script>
   <script src="js/markets-universe.js"></script>
