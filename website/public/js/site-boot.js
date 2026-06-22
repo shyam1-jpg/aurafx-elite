@@ -7,7 +7,7 @@
   window.AURAFX_API_BASE = isFile ? '' : '';
   window.AURAFX_IS_FILE_MODE = isFile;
   var LOGO = '/assets/aura-logo.svg';
-  var LOGO_WIDE = '/assets/aura-logo-wide.svg';
+  var LOGO_WIDE = '/assets/aura-logo-wide.svg?v=3';
 
   function assetUrl(path) {
     return (window.AURAFX_API_BASE || '') + path;

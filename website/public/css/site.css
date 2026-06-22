@@ -28,14 +28,15 @@ a:hover { text-decoration: underline; }
 .logo:hover, .nav-logo:hover { text-decoration: none; opacity: .95; }
 .logo span, .nav-logo span { color: var(--text); font-weight: 400; }
 .logo-img {
-  width: min(380px, 58vw);
+  width: min(420px, 62vw);
   height: auto;
-  max-height: 64px;
+  max-height: 72px;
   flex-shrink: 0;
   display: block;
+  border: none;
   border-radius: 0;
   box-shadow: none;
-  background: none;
+  background: transparent;
 }
 .logo-img-square {
   width: 36px; height: 36px; max-width: 36px; border-radius: 8px;
@@ -71,14 +72,15 @@ a:hover { text-decoration: underline; }
 
 .hero { text-align: center; padding: 4rem 1.5rem 3rem; max-width: 900px; margin: 0 auto; }
 .hero-logo {
-  width: min(300px, 82vw);
+  width: min(340px, 88vw);
   height: auto;
   margin: 0 auto 1rem;
   display: block;
+  border: none;
   border-radius: 0;
   box-shadow: none;
-  background: none;
-  filter: drop-shadow(0 4px 24px rgba(212, 175, 55, 0.15));
+  background: transparent;
+  filter: none;
 }
 .hero-logo-square {
   width: 140px; height: 140px; max-width: 140px; border-radius: 20px;
