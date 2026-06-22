@@ -208,13 +208,18 @@
   }
 
   function renderFeeds(risk, news) {
-    const cal = risk.calendar || [];
-    $('calendarList').innerHTML = cal.length === 0
-      ? '<li>Loading calendar…</li>'
-      : cal.slice(0, 12).map((e) =>
-          '<li><span class="risk-tag">' + e.risk + '</span> <strong>' + e.title + '</strong><br><span class="muted">' +
-          new Date(e.time).toLocaleString() + '</span></li>'
-        ).join('');
+    const calEl = $('calendarList');
+    if (calEl && window.AURAFX_renderCalendarList) {
+      window.AURAFX_renderCalendarList(calEl, 15);
+    } else {
+      const cal = risk.calendar || [];
+      calEl.innerHTML = cal.length === 0
+        ? '<li>Loading calendar…</li>'
+        : cal.slice(0, 12).map((e) =>
+            '<li><span class="risk-tag">' + e.risk + '</span> <strong>' + e.title + '</strong><br><span class="muted">' +
+            new Date(e.time).toLocaleString() + '</span></li>'
+          ).join('');
+    }
     const items = news.items || news.breakingNews || [];
     $('newsList').innerHTML = items.length === 0
       ? '<li>Loading news…</li>'

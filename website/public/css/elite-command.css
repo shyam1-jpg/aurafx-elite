@@ -178,3 +178,56 @@
 .price-flash-down { animation: flash-down 0.45s ease; }
 @keyframes flash-up { from { background: rgba(46, 204, 113, 0.25); } to { background: transparent; } }
 @keyframes flash-down { from { background: rgba(231, 76, 60, 0.25); } to { background: transparent; } }
+
+/* Economic calendar */
+.elite-cal-hero { padding: 1.35rem 1.5rem; margin-bottom: 1rem; }
+.elite-cal-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+.elite-cal-countdown { text-align: center; min-width: 120px; }
+.elite-cal-countdown .num {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.elite-cal-countdown .lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.elite-cal-source { font-size: 0.72rem; color: var(--muted); margin-top: 0.75rem; }
+.elite-cal-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+.elite-cal-filters label { font-size: 0.72rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.25rem; }
+.elite-cal-filters select {
+  background: var(--card);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: var(--text);
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+}
+.elite-cal-day { padding: 1rem; margin-bottom: 1rem; overflow-x: auto; }
+.elite-cal-day-title { color: var(--gold); font-size: 0.9rem; margin-bottom: 0.65rem; }
+.elite-cal-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; min-width: 640px; }
+.elite-cal-table th {
+  text-align: left;
+  padding: 0.5rem;
+  color: var(--gold);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+.elite-cal-table td { padding: 0.55rem 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); vertical-align: top; }
+.elite-cal-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.elite-tag-lo { color: var(--muted); font-weight: 600; font-size: 0.65rem; }
+.elite-cal-li { padding: 0.5rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); list-style: none; }
+@media (max-width: 640px) {
+  .elite-cal-hero-grid { grid-template-columns: 1fr; }
+}

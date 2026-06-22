@@ -115,6 +115,27 @@ try {
   console.warn('[AuraFX] market-sessions not loaded:', e.message);
 }
 
+let economicCalendar = null;
+try {
+  economicCalendar = require('./economic-calendar-service');
+} catch (e) {
+  console.warn('[AuraFX] economic-calendar-service not loaded:', e.message);
+}
+
+function applyCalendarToCache(calPayload) {
+  if (!calPayload) return;
+  cache.calendar = calPayload.calendar || calPayload.items || [];
+  cache.nextEvent = calPayload.nextEvent || cache.nextEvent;
+  if (calPayload.mood) cache.calendarMood = calPayload.mood;
+  if (calPayload.sessionRisk) cache.sessionRisk = calPayload.sessionRisk;
+  if (calPayload.news && calPayload.news.length) {
+    cache.news = calPayload.news;
+  }
+  cache.calendarSource = calPayload.source;
+  cache.finnhubEnabled = calPayload.finnhubEnabled;
+  cache.highImpactToday = calPayload.highImpactToday;
+}
+
 function ownerKeyOk(req) {
   if (!OWNER_KEY) return false;
   return req.headers['x-owner-key'] === OWNER_KEY;
@@ -516,6 +537,27 @@ function handleInstitutionalLive(req, res) {
     .catch((e) => json(res, 500, { error: e.message }));
 }
 
+function calendarForInstitutional() {
+  const fmt = (e) => ({
+    t: e.title,
+    cur: e.currency || '—',
+    time: new Date(e.time).toLocaleString('en-GB', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short', timeZone: 'UTC' }) + ' UTC',
+    impact: e.category || e.impact || e.risk
+  });
+  const cal = cache.calendar || [];
+  const high = cal.filter((e) => e.risk === 'HIGH').slice(0, 8).map(fmt);
+  const medium = cal.filter((e) => e.risk === 'MEDIUM').slice(0, 6).map(fmt);
+  const low = cal.filter((e) => e.risk === 'LOW').slice(0, 6).map(fmt);
+  if (!high.length && cache.nextEvent) {
+    high.push(fmt({ ...cache.nextEvent, time: cache.nextEvent.time || new Date().toISOString() }));
+  }
+  return {
+    high: high.length ? high : [{ t: 'No high-impact events in window', cur: '—', time: '—', impact: '—' }],
+    medium: medium.length ? medium : [{ t: 'See full calendar page', cur: '—', time: '—', impact: '—' }],
+    low: low.length ? low : [{ t: 'Low-impact releases throughout session', cur: '—', time: '—', impact: '—' }]
+  };
+}
+
 function apiInstitutional(quotes) {
   const xau = quotes && quotes.metals && quotes.metals.XAUUSD;
   const eur = quotes && quotes.forex && quotes.forex.EURUSD;
@@ -557,14 +599,7 @@ function apiInstitutional(quotes) {
       volumeNote: 'Live quote refresh every 30s · ' + (quotes ? quotes.source : 'server'),
       globalStatus: sessionLabel
     },
-    calendar: {
-      high: [
-        { t: cache.nextEvent.title || 'US CPI m/m', cur: 'USD', time: '14:30 UTC', impact: 'Inflation' },
-        { t: 'FOMC Rate Decision', cur: 'USD', time: '19:00 UTC', impact: 'Interest rate' }
-      ],
-      medium: [{ t: 'US Retail Sales', cur: 'USD', time: '13:30 UTC', impact: 'Retail sales' }],
-      low: [{ t: 'JP Trade Balance', cur: 'JPY', time: '23:50 UTC', impact: 'Trade balance' }]
-    },
+    calendar: calendarForInstitutional(),
     newsCategories: {
       forex: ['Dollar firms ahead of CPI'],
       gold: ['Gold holds bid on haven flows'],
@@ -659,7 +694,7 @@ function apiWiring() {
   ];
   const apis = [
     '/api/health', '/api/status', '/api/quotes', '/api/pro-summary', '/api/risk-summary',
-    '/api/news', '/api/institutional', '/api/institutional-live', '/api/markets', '/api/wiring'
+    '/api/calendar', '/api/news', '/api/institutional', '/api/institutional-live', '/api/markets', '/api/wiring'
   ];
   return {
     ok: true,
@@ -703,6 +738,14 @@ function tickLiveData() {
       })
       .catch(() => { /* keep last mood */ });
   }
+  if (economicCalendar) {
+    economicCalendar.refresh()
+      .then((p) => {
+        applyCalendarToCache(p);
+        cache.updatedAt = new Date().toISOString();
+      })
+      .catch(() => {});
+  }
   if (dashStore) {
     const summary = apiProSummary();
     dashStore.appendHistory({
@@ -725,6 +768,10 @@ function tickLiveData() {
 }
 
 setInterval(tickLiveData, 60000);
+if (economicCalendar) {
+  economicCalendar.refresh(true).then(applyCalendarToCache).catch(() => {});
+}
+tickLiveData();
 
 function dashboardAuth(req) {
   const id = req.headers['x-dashboard-id'] || '';
@@ -813,8 +860,8 @@ function apiProSummary() {
     }
   }
   return {
-    mood: cache.mood,
-    sessionRisk,
+    mood: cache.calendarMood || cache.mood,
+    sessionRisk: cache.sessionRisk || sessionRisk,
     session: sessionLabel,
     nextEvent: cache.nextEvent,
     bullishProb,
@@ -932,16 +979,50 @@ const server = http.createServer((req, res) => {
   if (url === '/api/pro-summary') return json(res, 200, apiProSummary());
   if (url === '/api/risk-summary') {
     return json(res, 200, {
-      mood: cache.mood,
-      sessionRisk: 'MEDIUM',
+      mood: cache.calendarMood || cache.mood,
+      sessionRisk: cache.sessionRisk || 'MEDIUM',
       nextEvent: cache.nextEvent,
       calendar: cache.calendar,
       breakingNews: cache.news,
+      highImpactToday: cache.highImpactToday || 0,
+      calendarSource: cache.calendarSource || 'server',
+      finnhubEnabled: !!cache.finnhubEnabled,
       updatedAt: cache.updatedAt,
-      dataMode: 'live',
-      dataSource: quotesService ? 'Yahoo Finance / CoinGecko' : 'Server cache',
-      apiStatus: 'online'
+      dataMode: cache.finnhubEnabled ? 'live' : 'reference',
+      dataSource: cache.calendarSource || (quotesService ? 'Yahoo Finance / CoinGecko' : 'Server cache'),
+      apiStatus: 'online',
+      disclaimer: 'Educational calendar only — not financial advice.'
     });
+  }
+  if (url === '/api/calendar' && req.method === 'GET') {
+    const q = rawUrl.includes('?') ? rawUrl.split('?')[1] : '';
+    const params = new URLSearchParams(q);
+    const opts = {
+      hours: params.get('hours') || '168',
+      risk: params.get('risk') || '',
+      currency: params.get('currency') || ''
+    };
+    const respond = (payload) => {
+      const items = economicCalendar
+        ? economicCalendar.filterCalendar(opts)
+        : (payload.calendar || []).slice(0, 50);
+      return json(res, 200, {
+        items,
+        calendar: items,
+        nextEvent: payload.nextEvent,
+        highImpactToday: payload.highImpactToday,
+        source: payload.source,
+        finnhubEnabled: payload.finnhubEnabled,
+        updatedAt: payload.updatedAt,
+        disclaimer: payload.disclaimer || 'Educational only — not financial advice.'
+      });
+    };
+    if (economicCalendar) {
+      return economicCalendar.refresh()
+        .then((p) => { applyCalendarToCache(p); return respond(economicCalendar.getPayload()); })
+        .catch(() => respond(economicCalendar.getPayload()));
+    }
+    return respond({ calendar: cache.calendar, nextEvent: cache.nextEvent, updatedAt: cache.updatedAt });
   }
   if (url === '/api/news') return json(res, 200, { items: cache.news, breaking: cache.news });
   if (url === '/api/quotes' && req.method === 'GET') {
