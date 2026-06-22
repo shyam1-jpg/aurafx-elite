@@ -127,7 +127,9 @@ body.theme-light .dash-topbar { background: #fff; }
   display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1rem; max-width: 1280px;
 }
-.card { background: var(--card); border: 1px solid rgba(212,175,55,.12); border-radius: 14px; padding: 1rem; }
+.card { background: var(--card); border: 1px solid rgba(212,175,55,.12); border-radius: 14px; padding: 1rem; transition: border-color 0.25s ease; }
+.lux-body .dash-content .card { background: linear-gradient(145deg, rgba(18,24,42,.95), rgba(12,16,26,.9)); }
+.lux-body .kpi-card { background: linear-gradient(145deg, rgba(18,24,42,.95), rgba(12,16,26,.9)); }
 .card h2 { font-size: .78rem; color: var(--gold); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .75rem; }
 .card-wide { grid-column: 1 / -1; }
 .chart-wrap { position: relative; height: 220px; margin-top: .5rem; }

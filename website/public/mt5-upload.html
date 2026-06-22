@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Publish AuraFX Elite on MQL5 Market — seller upload guide and product list for MetaTrader 5." />
+  <title>Publish on MQL5 Market — AuraFX Elite</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+  <script src="js/font-loader.js"></script>
+</head>
+<body class="lux-body">
+  <nav class="nav">
+    <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="get-started.html">Get started</a>
+      <a href="mt5-install.html">Client install</a>
+      <a href="register.html">Register</a>
+    </div>
+  </nav>
+
+  <header class="section" style="text-align:center;padding-top:2.5rem">
+    <span class="lux-badge-elite">Seller &amp; client guide</span>
+    <h1 class="lux-title" style="margin-top:1rem">Upload to <em>MQL5 Market</em></h1>
+    <p style="color:var(--muted);max-width:680px;margin:1rem auto">How <strong>you</strong> publish AuraFX products for clients to buy, and how <strong>clients</strong> install after purchase.</p>
+  </header>
+
+  <section class="section" style="max-width:900px;margin:0 auto">
+    <div class="lux-glass lux-shimmer" style="padding:1.35rem;margin-bottom:1.25rem">
+      <h2 style="color:var(--gold);font-size:1.1rem;margin-bottom:.75rem">Your MT5 products (in this project)</h2>
+      <table class="product-table">
+        <thead>
+          <tr><th>Product</th><th>File</th><th>Type</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Elite Signals</td><td><code>MQL5/Indicators/AuraFX_Elite_Signals.mq5</code></td><td>Indicator</td></tr>
+          <tr><td>Pro Assistant</td><td><code>MQL5/Indicators/AuraFX_Pro_Assistant.mq5</code></td><td>Indicator</td></tr>
+          <tr><td>Risk Guardian</td><td><code>MQL5/Indicators/AuraFX_Risk_Guardian.mq5</code></td><td>Indicator</td></tr>
+          <tr><td>Elite EA</td><td><code>MQL5/Experts/AuraFX_Elite_EA.mq5</code></td><td>Expert Advisor</td></tr>
+          <tr><td>Pro EA</td><td><code>MQL5/Experts/AuraFX_Pro_EA.mq5</code></td><td>Expert Advisor</td></tr>
+          <tr><td>Core library</td><td><code>MQL5/Include/AuraFX_Core.mqh</code></td><td>Include (required)</td></tr>
+        </tbody>
+      </table>
+      <p style="color:var(--muted);font-size:.82rem;margin-top:.75rem">Compile each <code>.mq5</code> in MetaEditor (F7) → produces <code>.ex5</code> files. MQL5 Market accepts source upload; MetaQuotes compiles on their side when you publish.</p>
+    </div>
+
+    <div class="lux-glass" style="padding:1.35rem;margin-bottom:1.25rem">
+      <h2 style="color:var(--gold);font-size:1.1rem;margin-bottom:.75rem">Step-by-step — publish as seller</h2>
+      <ol style="color:var(--muted);font-size:.9rem;line-height:1.85;margin-left:1.25rem">
+        <li>Create account at <a href="https://www.mql5.com" target="_blank" rel="noopener noreferrer">mql5.com</a> (same login as MT5).</li>
+        <li>Complete <strong>Seller</strong> registration in your MQL5 profile.</li>
+        <li>In MT5: <strong>Tools → Market</strong> → your profile → <strong>Sell a Product</strong>.</li>
+        <li>Choose product type (Indicator or Expert Advisor).</li>
+        <li>Upload <code>.mq5</code> source + include files, or follow MQL5 wizard for bundle.</li>
+        <li>Add screenshots from MT5 charts, icon from <code>marketplace/icons/aura-icon-200.png</code>.</li>
+        <li>Write description — use compliant wording (educational, no profit guarantees). See <code>docs/MARKETPLACE_LISTING.md</code> in project folder.</li>
+        <li>Set price ($49–$149 bundle suggested) and submit for MetaQuotes review (usually a few days).</li>
+        <li>Once approved, clients find you by searching <strong>AuraFX</strong> in Market.</li>
+      </ol>
+      <p style="margin-top:1rem">
+        <a href="https://www.mql5.com/en/market/new" class="btn btn-gold" target="_blank" rel="noopener noreferrer">MQL5 — Sell a product →</a>
+      </p>
+    </div>
+
+    <div class="lux-glass" style="padding:1.35rem;margin-bottom:1.25rem">
+      <h2 style="color:var(--gold);font-size:1.1rem;margin-bottom:.75rem">Step-by-step — client install after purchase</h2>
+      <ol style="color:var(--muted);font-size:.9rem;line-height:1.85;margin-left:1.25rem">
+        <li>Client buys on MQL5 Market (one-time or monthly rent).</li>
+        <li>MT5 → <strong>Tools → Market → Purchases</strong> → Install.</li>
+        <li>Navigator → Indicators/Experts → drag onto chart.</li>
+        <li>Client trades via <strong>their broker</strong> in MT5 — AuraFX shows analysis only.</li>
+      </ol>
+      <p style="margin-top:.75rem"><a href="get-started.html" class="btn btn-outline">Full client journey →</a></p>
+    </div>
+
+    <div class="lux-glass" style="padding:1.35rem">
+      <h2 style="color:var(--gold);font-size:1.1rem;margin-bottom:.75rem">Manual install (private / testing)</h2>
+      <p style="color:var(--muted);font-size:.88rem;line-height:1.6">
+        Copy files from <code>Desktop\AuraFX-Elite\MQL5\</code> into MT5 data folder → compile in MetaEditor.
+        Use for your own testing before publishing. Do not redistribute compiled <code>.ex5</code> without licence.
+      </p>
+      <p style="margin-top:.75rem"><a href="mt5-install.html">Manual install details →</a></p>
+    </div>
+  </section>
+
+  <footer class="footer"><p>© AuraFX Elite · Educational software · <a href="index.html">Home</a></p></footer>
+  <script src="js/site-boot.js"></script>
+  <script src="js/luxury-fx.js"></script>
+</body>
+</html>

@@ -255,6 +255,42 @@
     ).join('');
   }
 
+  function renderPulseRing(pro) {
+    const score = pro.score ?? moodToNum(pro.mood);
+    const ring = $('pulseRingFg');
+    const label = $('pulseScore');
+    const cap = $('pulseCaption');
+    if (label) label.textContent = String(Math.round(score));
+    if (ring) {
+      const circ = 327;
+      ring.setAttribute('stroke-dashoffset', String(circ - (circ * Math.min(100, score) / 100)));
+    }
+    if (cap) {
+      cap.textContent = 'Mood: ' + (pro.mood || '—') + ' · Session risk: ' + (pro.sessionRisk || 'MEDIUM') +
+        ' — educational context only.';
+    }
+  }
+
+  function renderSessionOrbs() {
+    const h = new Date().getUTCHours();
+    let active = 'off';
+    if (h >= 12 && h < 16) active = 'overlap';
+    else if (h >= 7 && h < 16) active = 'london';
+    else if (h >= 12 && h < 21) active = 'ny';
+    else if (h >= 0 && h < 9) active = 'asian';
+    document.querySelectorAll('.session-orb').forEach((el) => {
+      el.classList.toggle('active', el.getAttribute('data-session') === active);
+    });
+  }
+
+  function updateWelcomeRail() {
+    const rail = $('welcomeRail');
+    if (!rail) return;
+    if (client && client.fullName) {
+      rail.classList.add('hidden');
+    }
+  }
+
   function renderEvents(events) {
     const el = $('eventLog');
     if (!el) return;
@@ -381,6 +417,8 @@
     renderChecklist({ ...pro, nextEvent: pro.nextEvent || risk.nextEvent });
     renderKpis(pro, risk);
     renderHealth(pro, risk);
+    renderPulseRing(pro);
+    renderSessionOrbs();
     renderRiskGauge(pro.sessionRisk || risk.sessionRisk);
   }
 
@@ -470,6 +508,7 @@
         dashboardToken: d.dashboardToken,
         emailVerified: d.emailVerified
       });
+      updateWelcomeRail();
       $('linkMsg').textContent = d.cloudSync ? 'Linked — cloud sync enabled.' : 'Linked — local server storage.';
       await pullJournalCloud();
       renderJournal();
@@ -543,6 +582,7 @@
   loadClient();
   if (client && client.email) $('linkEmail').value = client.email;
   renderUser();
+  updateWelcomeRail();
   renderJournal();
   pullJournalCloud().then(renderJournal);
 

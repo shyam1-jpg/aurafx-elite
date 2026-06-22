@@ -8,10 +8,11 @@
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/pro-dashboard.css" />
   <link rel="stylesheet" href="css/institutional.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
   <script src="js/font-loader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
-<body>
+<body class="lux-body">
   <div class="dash-app">
     <aside class="dash-sidebar" id="dashSidebar" aria-label="Dashboard sections">
       <div class="dash-sidebar-brand">
@@ -26,7 +27,9 @@
         <li><button type="button" data-panel="settings" role="tab">Settings</button></li>
       </ul>
       <div class="dash-sidebar-foot">
+        <a href="get-started.html">Register &amp; trade guide</a>
         <a href="mt5-install.html">MT5 install</a>
+        <a href="mt5-upload.html">Publish MQL5</a>
         <a href="index.html">Marketing home</a>
         <a href="support.html">Support</a>
       </div>
@@ -65,7 +68,12 @@
       </header>
 
       <div class="dash-content">
-        <!-- KPI row (all panels) -->
+        <div id="welcomeRail" class="welcome-rail lux-glass">
+          <p><strong>New here?</strong> Register free → link email in Settings → install MT5 tools → trade with <em>your broker</em>. <a href="get-started.html">Full guide →</a></p>
+          <a href="register.html" class="btn-dash btn-dash-primary">Register</a>
+        </div>
+
+        <!-- KPI row -->
         <div class="kpi-row" id="kpiRow" aria-label="Key metrics">
           <div class="kpi-card"><div class="kpi-label">Session</div><div class="kpi-value" id="kpiSession">—</div></div>
           <div class="kpi-card"><div class="kpi-label">Market mood</div><div class="kpi-value" id="kpiMood">—</div></div>
@@ -78,7 +86,35 @@
         <!-- OVERVIEW -->
         <section id="panel-overview" class="dash-panel active" role="tabpanel">
           <div class="grid">
-            <div class="card card-wide">
+            <div class="card card-wide lux-glass lux-shimmer">
+              <h2>Market pulse</h2>
+              <div class="pulse-ring-wrap">
+                <div class="pulse-ring" id="marketPulse" aria-hidden="true">
+                  <svg viewBox="0 0 120 120">
+                    <defs>
+                      <linearGradient id="luxGoldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#f4e4a6"/>
+                        <stop offset="100%" stop-color="#d4af37"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="pulse-ring-bg" cx="60" cy="60" r="52"/>
+                    <circle class="pulse-ring-fg" id="pulseRingFg" cx="60" cy="60" r="52"
+                      stroke-dasharray="327" stroke-dashoffset="327"/>
+                  </svg>
+                  <div class="pulse-ring-label"><strong id="pulseScore">—</strong>Mood index</div>
+                </div>
+                <div style="flex:1;min-width:200px">
+                  <p id="pulseCaption" class="muted" style="font-size:.88rem;line-height:1.55">Live educational context from server feeds — not a trade signal.</p>
+                  <div class="session-orbs" id="sessionOrbs" aria-label="Trading sessions">
+                    <div class="session-orb" data-session="asian"><span>Asian</span><span class="orb-dot"></span></div>
+                    <div class="session-orb" data-session="london"><span>London</span><span class="orb-dot"></span></div>
+                    <div class="session-orb" data-session="ny"><span>New York</span><span class="orb-dot"></span></div>
+                    <div class="session-orb" data-session="overlap"><span>Overlap</span><span class="orb-dot"></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card card-wide lux-glass">
               <h2>Mood &amp; setup score history</h2>
               <div class="chart-wrap"><canvas id="moodChart" aria-label="Mood and score over time chart"></canvas></div>
             </div>
@@ -229,5 +265,6 @@
   <script src="js/institutional.js"></script>
   <script src="js/markets-universe.js"></script>
   <script src="js/global-markets.js"></script>
+  <script src="js/luxury-fx.js"></script>
 </body>
 </html>

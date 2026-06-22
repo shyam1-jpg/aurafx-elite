@@ -12,16 +12,19 @@
   <title>AuraFX Elite — Educational Forex &amp; Gold Analysis Software</title>
   <link rel="stylesheet" href="css/site.css" />
   <link rel="stylesheet" href="css/institutional.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
   <link rel="icon" href="assets/aura-icon-140.png" type="image/png" />
   <script src="js/font-loader.js"></script>
 </head>
-<body>
+<body class="lux-body">
   <a href="#main" class="skip-link">Skip to main content</a>
   <nav class="nav" aria-label="Primary">
     <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
     <div class="nav-links">
+      <a href="get-started.html">Get started</a>
       <a href="about.html">About</a>
       <a href="how-it-works.html">How it works</a>
+      <a href="mt5-upload.html">MT5 / MQL5</a>
       <a href="#features">Features</a>
       <a href="#pricing">Pricing</a>
       <a href="support.html">Support</a>
@@ -31,25 +34,56 @@
   </nav>
 
   <main id="main">
-  <section class="hero">
-    <img src="assets/aura-icon-140.png" alt="AuraFX Elite logo" class="hero-logo" width="140" height="140" />
-    <div id="livePill" class="live-pill" aria-live="polite"><span class="dot"></span> Loading market status…</div>
-    <span class="edu-badge" role="note">Educational software only — not financial advice</span>
-    <h1>Professional <em>Forex &amp; Gold</em> Analysis Tools</h1>
-    <p>Live economic calendar, volatility alerts, multi-timeframe chart helpers, and risk dashboard — designed for self-directed traders using their own broker account.</p>
-    <a href="dashboard.html" class="btn btn-gold">Open analysis dashboard</a>
-    <a href="how-it-works.html" class="btn btn-outline" style="margin-left:.5rem">See how it works</a>
+  <section class="hero lux-hero">
+    <div class="lux-aurora" aria-hidden="true"></div>
+    <img src="assets/aura-icon-140.png" alt="AuraFX Elite logo" class="hero-logo lux-reveal" width="140" height="140" />
+    <span class="lux-badge-elite lux-reveal">Elite edition</span>
+    <div id="livePill" class="live-pill lux-reveal" aria-live="polite"><span class="dot"></span> Loading market status…</div>
+    <span class="edu-badge lux-reveal" role="note">Educational software only — not financial advice</span>
+    <h1 class="lux-title lux-reveal">Deluxe <em>Forex &amp; Gold</em> Intelligence</h1>
+    <p class="lux-reveal" style="color:var(--muted);max-width:640px;margin:0 auto 1.5rem;font-size:1.08rem">Live calendar, institutional-style panels, MT5 indicators &amp; EAs, and a pro web dashboard — built for traders who use their own broker.</p>
+    <p class="lux-reveal">
+      <a href="register.html" class="btn btn-gold">Register free</a>
+      <a href="dashboard.html" class="btn btn-outline" style="margin-left:.5rem">Open pro dashboard</a>
+      <a href="get-started.html" class="btn btn-outline" style="margin-left:.5rem">How to trade</a>
+    </p>
   </section>
 
-  <section id="features" class="section">
+  <section class="section lux-reveal">
+    <h2>Premium capabilities</h2>
+    <div class="lux-grid-showcase">
+      <div class="lux-feature lux-glass lux-shimmer">
+        <div class="lux-feature-icon">◈</div>
+        <h3>Live market pulse</h3>
+        <p>Real-time gold &amp; FX quotes, mood index, and session orbs on the pro dashboard.</p>
+      </div>
+      <div class="lux-feature lux-glass lux-shimmer">
+        <div class="lux-feature-icon">▣</div>
+        <h3>Institutional panels</h3>
+        <p>Calendar, headlines, currency context, and checklist — educational analysis layers.</p>
+      </div>
+      <div class="lux-feature lux-glass lux-shimmer">
+        <div class="lux-feature-icon">⬡</div>
+        <h3>MT5 suite</h3>
+        <p>Signals, Pro Assistant, Risk Guardian, and EAs — publish on MQL5 Market for clients.</p>
+      </div>
+      <div class="lux-feature lux-glass lux-shimmer">
+        <div class="lux-feature-icon">☁</div>
+        <h3>Cloud journal</h3>
+        <p>Sync your trade journal when registered — Neon-backed when configured on server.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section lux-reveal">
     <h2>Everything in one system</h2>
     <div class="grid-3">
-      <div class="card"><h3>Live news &amp; risk</h3><p>NFP, CPI, FOMC warnings. Optional entry blocks before major events.</p></div>
-      <div class="card"><h3>Setup checklist</h3><p>Trend, volume, structure, news, and volatility checks — Excellent / Marginal / Avoid labels.</p></div>
-      <div class="card"><h3>Market bias display</h3><p>Bullish vs bearish weighting, sentiment labels, session context.</p></div>
-      <div class="card"><h3>Market structure</h3><p>FVG, order blocks, BOS, CHOCH, liquidity zones (educational overlays).</p></div>
-      <div class="card"><h3>Gold specialist</h3><p>XAUUSD presets, DXY proxy context, session overlap notes.</p></div>
-      <div class="card"><h3>Trade journal</h3><p>Log trades, emotion, screenshots — review your own process.</p></div>
+      <div class="card lux-glass"><h3>Live news &amp; risk</h3><p>NFP, CPI, FOMC warnings. Optional entry blocks before major events.</p></div>
+      <div class="card lux-glass"><h3>Setup checklist</h3><p>Trend, volume, structure, news, and volatility checks — Excellent / Marginal / Avoid labels.</p></div>
+      <div class="card lux-glass"><h3>Market bias display</h3><p>Bullish vs bearish weighting, sentiment labels, session context.</p></div>
+      <div class="card lux-glass"><h3>Market structure</h3><p>FVG, order blocks, BOS, CHOCH, liquidity zones (educational overlays).</p></div>
+      <div class="card lux-glass"><h3>Gold specialist</h3><p>XAUUSD presets, DXY proxy context, session overlap notes.</p></div>
+      <div class="card lux-glass"><h3>Trade journal</h3><p>Log trades, emotion, screenshots — review your own process.</p></div>
     </div>
   </section>
 
@@ -83,8 +117,10 @@
       </a>
     </div>
     <p style="text-align:center;margin-top:1.25rem">
-      <a href="installation-guide.html">Full installation guide</a> ·
-      <a href="dashboard.html">View live dashboard screenshots</a>
+      <a href="get-started.html" class="btn btn-gold">Register &amp; trade guide</a>
+      <a href="installation-guide.html">Installation guide</a> ·
+      <a href="mt5-upload.html">Publish on MQL5</a> ·
+      <a href="dashboard.html">Live dashboard</a>
     </p>
   </section>
 
@@ -173,7 +209,7 @@
     <p>© 2026 AuraFX Elite · Educational software only · Not financial advice · Past performance is not indicative of future results</p>
     <p style="margin-top:.5rem">
       <a href="dashboard.html">Dashboard</a> · <a href="register.html">Register</a> ·
-      <a href="about.html">About</a> · <a href="faq.html">FAQ</a> · <a href="support.html">Support</a> · <a href="roadmap.html">Roadmap</a>
+      <a href="get-started.html">Get started</a> · <a href="about.html">About</a> · <a href="faq.html">FAQ</a> · <a href="support.html">Support</a> · <a href="roadmap.html">Roadmap</a>
     </p>
     <p style="margin-top:.4rem;font-size:.72rem">
       <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a> · <a href="risk-warning.html">Risk warning</a> ·
@@ -194,5 +230,6 @@
   <script src="js/institutional.js"></script>
   <script src="js/markets-universe.js"></script>
   <script src="js/global-markets.js"></script>
+  <script src="js/luxury-fx.js"></script>
 </body>
 </html>
