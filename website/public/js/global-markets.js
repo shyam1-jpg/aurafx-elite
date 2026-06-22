@@ -63,6 +63,28 @@
       ' · auto-refresh every ' + refresh + 's · gold/FX from market feeds</p>';
   }
 
+  function realChangePct(sym, fallbackScale) {
+    var ch = (window.AURAFX_LIVE_QUOTES || {}).changes;
+    if (ch && ch[sym] != null && isFinite(ch[sym])) {
+      return (ch[sym] >= 0 ? '+' : '') + Number(ch[sym]).toFixed(2) + '%';
+    }
+    return pct(sym + 'd', fallbackScale || 0.35);
+  }
+
+  function dataHonestyBanner() {
+    var q = window.AURAFX_LIVE_QUOTES || {};
+    var liveN = Object.keys(q.forex || {}).length + Object.keys(q.metals || {}).length + Object.keys(q.crypto || {}).length;
+    return '<div class="inst-data-honesty" role="note">' +
+      '<strong>Data transparency</strong> — ' +
+      '<span class="inst-tag-live">LIVE</span> prices: forex, gold, silver' +
+      (Object.keys(q.crypto || {}).length ? ', major crypto' : ' (crypto feed loading)') +
+      ' from <strong>' + esc(q.source || 'market APIs') + '</strong>. ' +
+      '<span class="inst-tag-context">CONTEXT</span> columns (market cap, sentiment, AI %, whale activity, generic news, COT) are ' +
+      '<strong>educational placeholders</strong> — not live institutional data. Not financial advice.' +
+      (liveN ? ' · ' + liveN + ' live instruments' : '') +
+      '</div>';
+  }
+
   function trendFrom(s) {
     var t = seed(s + 't') % 3;
     return t === 0 ? 'Bullish' : t === 1 ? 'Bearish' : 'Neutral';
@@ -75,7 +97,7 @@
       symbol: sym,
       price: Number(base).toFixed(dec),
       spread: spreadLabel(sym),
-      dailyChange: pct(sym + 'd', 0.35),
+      dailyChange: realChangePct(sym, 0.35),
       weeklyChange: pct(sym + 'w', 0.8),
       monthlyChange: pct(sym + 'm', 1.5),
       trend: trendFrom(sym),
@@ -91,17 +113,19 @@
 
   function genCrypto(sym) {
     var base = getBase('crypto', sym) || rnd(sym, 0.01, 100, 4);
+    var ch24 = realChangePct(sym, 0.8);
     return {
       symbol: sym,
       price: Number(base).toFixed(base < 1 ? 6 : 2),
-      marketCap: '$' + rnd(sym + 'mc', 1, 980, 0) + 'B',
-      volume24h: '$' + rnd(sym + 'vol', 10, 890, 0) + 'M',
+      change24h: ch24,
+      marketCap: '~$' + rnd(sym + 'mc', 1, 980, 0) + 'B',
+      volume24h: '~$' + rnd(sym + 'vol', 10, 890, 0) + 'M',
       supply: rnd(sym + 'sup', 1, 99, 1) + 'B circ.',
       trend: trendFrom(sym),
       volatility: rnd(sym + 'cv', 12, 85, 0) + '%',
-      aiForecast: trendFrom(sym) + ' bias next 24h',
-      whaleActivity: seed(sym + 'wh') % 2 ? 'Accumulation' : 'Distribution',
-      institutionalActivity: seed(sym + 'in') % 3 === 0 ? 'ETF inflows' : 'Neutral',
+      aiForecast: trendFrom(sym) + ' bias (edu.)',
+      whaleActivity: seed(sym + 'wh') % 2 ? 'Accumulation (edu.)' : 'Distribution (edu.)',
+      institutionalActivity: seed(sym + 'in') % 3 === 0 ? 'ETF context (edu.)' : 'Neutral',
       riskRating: seed(sym + 'rk') % 3 === 0 ? 'High' : seed(sym + 'rk') % 3 === 1 ? 'Medium' : 'Low',
       newsImpact: seed(sym + 'ni') % 2 ? 'Moderate' : 'Low'
     };
@@ -262,6 +286,7 @@
     var rows = (d.crypto || []).map(function (r) {
       return '<tr data-sym="' + esc(r.symbol) + '"><td><strong>' + esc(r.symbol) + '</strong></td>' +
         '<td class="live-price-cell" data-live-price="' + esc(r.symbol) + '" data-live-cat="crypto">' + r.price + '</td>' +
+        '<td>' + (r.change24h || '—') + '</td>' +
         '<td>' + r.marketCap + '</td><td>' + r.volume24h + '</td><td>' + r.supply + '</td><td>' + r.trend + '</td>' +
         '<td>' + r.volatility + '</td><td>' + r.aiForecast + '</td><td>' + r.whaleActivity + '</td>' +
         '<td>' + r.institutionalActivity + '</td><td>' + r.riskRating + '</td><td>' + r.newsImpact + '</td></tr>';
@@ -270,8 +295,8 @@
       priceSourceNote() +
       '<input type="search" class="inst-search" placeholder="Search crypto…" data-filter="gm-crypto-table" />' +
       '<div class="inst-scroll"><table class="inst-table inst-table-compact" id="gm-crypto-table"><tr>' +
-      '<th>Asset</th><th>Price</th><th>Mkt Cap</th><th>24h Vol</th><th>Supply</th><th>Trend</th>' +
-      '<th>Volatility</th><th>AI Forecast</th><th>Whales</th><th>Institutional</th><th>Risk</th><th>News</th></tr>' +
+      '<th>Asset</th><th>Price</th><th>24h %</th><th>Mkt Cap (edu.)</th><th>Vol (edu.)</th><th>Supply</th><th>Trend</th>' +
+      '<th>Volatility</th><th>Forecast</th><th>Whales</th><th>Inst.</th><th>Risk</th><th>News</th></tr>' +
       rows + '</table></div></section>';
   }
 
@@ -297,6 +322,7 @@
         '<td>' + r.inventory + '</td><td>' + r.priceForecast + '</td></tr>';
     }).join('');
     return '<section class="card inst-wide"><h2>Energy markets</h2>' +
+      '<p class="muted" style="font-size:.72rem;margin-bottom:.5rem">Reference prices — not live exchange feeds. Educational context only.</p>' +
       '<div class="inst-scroll"><table class="inst-table inst-table-compact"><tr>' +
       '<th>Energy</th><th>Price</th><th>Supply</th><th>Demand</th><th>OPEC</th><th>Geo risk</th><th>Inventory</th><th>Forecast</th></tr>' +
       rows + '</table></div></section>';
@@ -315,6 +341,7 @@
         '<td>' + r.volumeAnalysis + '</td><td>' + r.riskRating + '</td></tr>';
     }).join('');
     return '<section class="card inst-wide"><h2>Global indices</h2>' +
+      '<p class="muted" style="font-size:.72rem;margin-bottom:.5rem">Reference index levels — not live exchange feeds. Educational context only.</p>' +
       '<h3 style="font-size:.8rem;color:var(--gold)">Index heat map</h3><div class="inst-heatmap">' + heat + '</div>' +
       '<div class="inst-scroll" style="margin-top:.75rem"><table class="inst-table inst-table-compact"><tr>' +
       '<th>Index</th><th>Value</th><th>Change</th><th>Sectors</th><th>Institutional</th><th>Breadth</th><th>Volume</th><th>Risk</th></tr>' +
@@ -464,7 +491,7 @@
   }
 
   function renderAll(d) {
-    return renderLivePreviewBanner(d) + renderForexGlobal(d) + renderCrypto(d) + renderMetals(d) + renderEnergy(d) +
+    return dataHonestyBanner() + renderLivePreviewBanner(d) + renderForexGlobal(d) + renderCrypto(d) + renderMetals(d) + renderEnergy(d) +
       renderIndices(d) + renderAg(d) + renderTechnical(d) + renderSMC(d) + renderAIHub(d) +
       renderNews(d) + renderCalcs() + renderJournalPro() + renderInstitutional(d) + renderTerminalPanels(d);
   }

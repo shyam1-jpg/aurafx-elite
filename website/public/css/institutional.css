@@ -141,3 +141,16 @@ td.price-flash-down, strong.price-flash-down { background: rgba(231,76,60,0.35) 
   font-size: .65rem; vertical-align: middle; padding: .15rem .45rem;
   border: 1px solid var(--bull); color: var(--bull); border-radius: 4px; margin-left: .35rem;
 }
+.inst-data-honesty {
+  max-width: 1280px; margin: 0 auto 1rem; padding: 0.75rem 1rem;
+  background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 8px; font-size: 0.78rem; color: var(--muted); line-height: 1.55;
+}
+.inst-tag-live {
+  font-size: 0.62rem; font-weight: 800; padding: 0.1rem 0.4rem;
+  background: rgba(46, 204, 113, 0.15); color: var(--bull); border-radius: 4px;
+}
+.inst-tag-context {
+  font-size: 0.62rem; font-weight: 800; padding: 0.1rem 0.4rem;
+  background: rgba(230, 126, 34, 0.15); color: #e67e22; border-radius: 4px;
+}
