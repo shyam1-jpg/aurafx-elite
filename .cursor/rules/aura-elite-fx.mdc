@@ -1,0 +1,35 @@
+---
+description: Aura Elite FX platform scope — trading app only, never mix with Kiteline
+alwaysApply: true
+---
+
+# Aura Elite FX — Project Rules
+
+## Scope
+- **Only** Aura Elite FX (`AuraFX-Elite/`). Never mix with Kiteline, kitchen apps, or other projects.
+- Separate branding, database, admin, payments, user accounts, and content.
+
+## Claims
+- Never promise guaranteed profit or fixed accuracy (90%, 96%, etc.).
+- Use: AI confidence score, backtested win rate, live verified win rate, profit factor, drawdown, risk/reward.
+- Required disclaimer: *"Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed."*
+
+## Trading modes (default: Analysis Only)
+1. **Analysis Only** — no trade execution
+2. **Manual Confirmation** — user confirms before action
+3. **Auto Trading** — OFF by default; requires risk limits + explicit consent
+
+## Risk defaults
+- Risk per trade: 1% | Max daily loss: 3% | Max weekly loss: 7% | Max open trades: 3 | Auto trading: OFF
+
+## Security
+- No secrets in frontend or GitHub. Encrypt API keys and broker credentials at rest.
+- No plain-text MT4/MT5 passwords. Admin: 2FA, audit logs, hidden URLs.
+
+## Signal engine
+- Signals from **rule-based + data engine** (MA, RSI, MACD, ATR, news, spread, session). AI explains; engine calculates.
+- Support **NO_TRADE** / **WAIT** when conditions unclear.
+
+## MT integration
+- MT5: MQL5 suite + optional EA bridge. MT4: planned via MQL4 bridge.
+- Document integration route; do not fake broker connection.

@@ -34,7 +34,27 @@
     });
   }
 
+  function injectTestingBanner() {
+    fetch(window.AURAFX_API_BASE + '/api/testing/status', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (st) {
+        if (!st.testingMode) return;
+        window.AURAFX_TESTING_MODE = true;
+        window.AURAFX_PREVIEW_ACCESS = !!st.previewAccess;
+        var bar = document.createElement('div');
+        bar.setAttribute('role', 'status');
+        bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9998;background:#5c3d0a;color:#fff;text-align:center;padding:.55rem .75rem;font-size:.82rem;border-bottom:2px solid #d4af37';
+        bar.innerHTML = st.previewAccess
+          ? 'Owner testing mode — you have full access. Public users are blocked.'
+          : 'Private testing — registration &amp; MT5 tools are not public yet. <a href="/private-testing.html" style="color:#fff;font-weight:700">Owner unlock</a>';
+        document.body.prepend(bar);
+        document.body.style.paddingTop = '2.4rem';
+      })
+      .catch(function () {});
+  }
+
   injectBranding();
+  injectTestingBanner();
 
   if (isFile) {
     var banner = document.getElementById('fileModeBanner');

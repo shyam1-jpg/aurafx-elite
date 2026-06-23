@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aura Elite FX multi-currency scanner — live pair analysis, confidence scores, and no-trade protection." />
+  <title>Market Scanner — Aura Elite FX</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+  <link rel="stylesheet" href="css/hub.css" />
+  <link rel="icon" href="assets/aurafx-elite-logo.png" type="image/png" />
+  <script src="js/font-loader.js"></script>
+  <style>
+    .scan-toolbar { display:flex; flex-wrap:wrap; gap:.75rem; align-items:center; justify-content:center; margin-bottom:1.25rem; }
+    .scan-summary { display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; margin-bottom:1rem; }
+    .scan-pill { padding:.35rem .75rem; border-radius:999px; font-size:.78rem; font-weight:600; background:#1a2030; border:1px solid #333; }
+    .scan-pill.buy { border-color:rgba(46,204,113,.5); color:#2ecc71; }
+    .scan-pill.sell { border-color:rgba(231,76,60,.5); color:#e74c3c; }
+    .scan-pill.wait { border-color:rgba(212,175,55,.4); color:#d4af37; }
+    .scan-pill.none { color:var(--muted); }
+    .scan-table-wrap { overflow-x:auto; max-width:1100px; margin:0 auto; }
+    .scan-table { width:100%; border-collapse:collapse; font-size:.85rem; }
+    .scan-table th, .scan-table td { padding:.65rem .5rem; text-align:left; border-bottom:1px solid rgba(212,175,55,.12); }
+    .scan-table th { color:var(--gold); font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; }
+    .act-buy { color:#2ecc71; font-weight:700; }
+    .act-sell { color:#e74c3c; font-weight:700; }
+    .act-wait { color:#d4af37; }
+    .act-none { color:var(--muted); }
+    .conf-bar { display:inline-block; width:48px; height:6px; background:#1a2030; border-radius:3px; vertical-align:middle; margin-left:.35rem; overflow:hidden; }
+    .conf-fill { height:100%; background:var(--gold); border-radius:3px; }
+  </style>
+</head>
+<body class="lux-body">
+  <nav class="nav" aria-label="Primary">
+    <a href="index.html" class="logo">Aura Elite <span>FX</span></a>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="scanner.html" aria-current="page">Scanner</a>
+      <a href="risk-calculator.html">Risk</a>
+      <a href="register.html">Register</a>
+      <a href="dashboard.html" class="btn btn-gold">Open dashboard</a>
+    </div>
+  </nav>
+
+  <main class="section lux-reveal" style="padding-top:2rem">
+    <h1 style="text-align:center;color:var(--gold);margin-bottom:.35rem">Multi-Currency <em>Scanner</em></h1>
+    <p style="text-align:center;color:var(--muted);max-width:640px;margin:0 auto 1.5rem;font-size:.92rem">
+      Rule-based analysis with confidence scoring. No guaranteed accuracy — educational only.
+    </p>
+
+    <div class="scan-toolbar">
+      <label style="color:var(--muted);font-size:.88rem">Timeframe
+        <select id="tfSelect" style="margin-left:.35rem;padding:.35rem .5rem;background:#12182a;color:var(--text);border:1px solid #333;border-radius:6px">
+          <option value="M15">M15</option>
+          <option value="M30">M30</option>
+          <option value="H1" selected>H1</option>
+          <option value="H4">H4</option>
+          <option value="D1">Daily</option>
+        </select>
+      </label>
+      <button type="button" class="btn btn-gold" id="btnRefresh">Refresh scan</button>
+    </div>
+
+    <div class="scan-summary" id="scanSummary" aria-live="polite"></div>
+    <p id="scanUpdated" style="text-align:center;color:var(--muted);font-size:.78rem;margin-bottom:1rem"></p>
+
+    <div class="scan-table-wrap lux-glass" style="padding:1rem">
+      <table class="scan-table" id="scanTable">
+        <thead>
+          <tr>
+            <th>Pair</th>
+            <th>Trend</th>
+            <th>Action</th>
+            <th>Confidence</th>
+            <th>Volatility</th>
+            <th>Entry zone</th>
+            <th>SL</th>
+            <th>TP1</th>
+            <th>R:R</th>
+            <th>News</th>
+          </tr>
+        </thead>
+        <tbody id="scanBody">
+          <tr><td colspan="10" style="text-align:center;color:var(--muted)">Loading scanner…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="text-align:center;color:var(--muted);font-size:.78rem;max-width:720px;margin:1.5rem auto 0;line-height:1.6">
+      Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools.
+      Trading involves risk and no result is guaranteed. Past performance does not guarantee future results.
+    </p>
+  </main>
+
+  <footer class="footer">
+    <p>© Aura Elite FX · <a href="risk-warning.html">Risk warning</a> · <a href="terms.html">Terms</a> · <a href="privacy.html">Privacy</a></p>
+  </footer>
+  <script src="js/site-boot.js"></script>
+  <script src="js/scanner-page.js"></script>
+</body>
+</html>

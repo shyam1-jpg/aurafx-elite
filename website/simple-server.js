@@ -122,6 +122,27 @@ try {
   console.warn('[AuraFX] economic-calendar-service not loaded:', e.message);
 }
 
+let signalEngine = null;
+try {
+  signalEngine = require('./signal-engine');
+} catch (e) {
+  console.warn('[AuraFX] signal-engine not loaded:', e.message);
+}
+
+let riskService = null;
+try {
+  riskService = require('./risk-service');
+} catch (e) {
+  console.warn('[AuraFX] risk-service not loaded:', e.message);
+}
+
+let testingGate = null;
+try {
+  testingGate = require('./testing-gate');
+} catch (e) {
+  console.warn('[AuraFX] testing-gate not loaded:', e.message);
+}
+
 let liveMarkets = null;
 try {
   liveMarkets = require('./live-markets-service');
@@ -146,6 +167,18 @@ function applyCalendarToCache(calPayload) {
 function ownerKeyOk(req) {
   if (!OWNER_KEY) return false;
   return req.headers['x-owner-key'] === OWNER_KEY;
+}
+
+function previewAccessOk(req) {
+  if (!testingGate) return true;
+  return testingGate.hasPreviewAccess(req, OWNER_KEY, adminAuthOk(req));
+}
+
+function requirePreviewApi(req, res) {
+  if (!testingGate || !testingGate.isTestingMode()) return true;
+  if (previewAccessOk(req)) return true;
+  json(res, 403, testingGate.blockedPayload());
+  return false;
 }
 
 function adminAuthOk(req) {
@@ -281,6 +314,9 @@ function handleResendVerify(req, res) {
 }
 
 function handleRegister(req, res) {
+  if (testingGate && testingGate.isTestingMode() && !previewAccessOk(req)) {
+    return json(res, 403, testingGate.blockedPayload());
+  }
   readBody(req)
     .then(async (body) => {
       const email = String(body.email || '').trim().toLowerCase();
@@ -376,6 +412,9 @@ function handleRegister(req, res) {
 }
 
 function handlePayment(req, res) {
+  if (testingGate && testingGate.isTestingMode() && !previewAccessOk(req)) {
+    return json(res, 403, testingGate.blockedPayload());
+  }
   readBody(req)
     .then(async (body) => {
       const email = String(body.email || '').trim().toLowerCase();
@@ -444,8 +483,28 @@ function apiConfig() {
       tradingName: business.tradingName,
       supportEmail: business.supportEmail,
       website: business.website
-    }
+    },
+    platform: {
+      name: 'Aura Elite FX',
+      tradingModes: riskService ? riskService.TRADING_MODES : {},
+      riskDefaults: riskService ? riskService.DEFAULTS : {},
+      scannerPairs: signalEngine ? signalEngine.SCANNER_PAIRS : [],
+      timeframes: signalEngine ? signalEngine.TIMEFRAMES : [],
+      disclaimer: 'Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.'
+    },
+    testing: testingGate ? testingGate.testingConfig() : { testingMode: false, publicLaunch: true }
   };
+}
+
+function apiConfigForRequest(req) {
+  const cfg = apiConfig();
+  if (testingGate) {
+    cfg.testing = {
+      ...testingGate.testingConfig(),
+      previewAccess: previewAccessOk(req)
+    };
+  }
+  return cfg;
 }
 
 function handleEmailSubscribers(req, res) {
@@ -910,8 +969,37 @@ const server = http.createServer((req, res) => {
   if (url === '/api/register' && req.method === 'POST') return handleRegister(req, res);
   if (url === '/api/verify-email' && req.method === 'GET') return handleVerifyEmail(req, res, rawUrl);
   if (url === '/api/resend-verification' && req.method === 'POST') return handleResendVerify(req, res);
-  if (url === '/api/payment' && req.method === 'POST') return handlePayment(req, res);
-  if (url === '/api/config') return json(res, 200, apiConfig());
+  if (url === '/api/payment' && req.method === 'POST') {
+    if (!requirePreviewApi(req, res)) return;
+    return handlePayment(req, res);
+  }
+  if (url === '/api/config') return json(res, 200, apiConfigForRequest(req));
+  if (url === '/api/testing/status' && req.method === 'GET') {
+    if (!testingGate) return json(res, 200, { testingMode: false, previewAccess: true });
+    return json(res, 200, {
+      ...testingGate.testingConfig(),
+      previewAccess: previewAccessOk(req)
+    });
+  }
+  if (url === '/api/testing/unlock' && req.method === 'POST') {
+    if (!testingGate || !OWNER_KEY) {
+      return json(res, 503, { error: 'Testing unlock not configured on server' });
+    }
+    return readBody(req).then((body) => {
+      let data = {};
+      try { data = JSON.parse(body || '{}'); } catch { return json(res, 400, { error: 'Invalid JSON' }); }
+      if (String(data.key || '') !== OWNER_KEY) {
+        return json(res, 403, { error: 'Invalid owner key' });
+      }
+      const token = testingGate.signPreviewToken(OWNER_KEY);
+      const secure = SITE_URL.startsWith('https://');
+      res.writeHead(200, securityHeaders({
+        'Content-Type': 'application/json; charset=utf-8',
+        'Set-Cookie': testingGate.previewCookieHeader(token, secure)
+      }));
+      return res.end(JSON.stringify({ ok: true, previewAccess: true, expiresInDays: 7 }));
+    });
+  }
   if (url === '/api/admin/session' && req.method === 'GET') {
     return json(res, 200, {
       authenticated: adminAuthOk(req),
@@ -937,11 +1025,26 @@ const server = http.createServer((req, res) => {
     }
     return json(res, 200, { ok: true });
   }
-  if (url === '/api/dashboard/session' && req.method === 'POST') return handleDashboardSession(req, res);
-  if (url === '/api/dashboard/journal' && req.method === 'GET') return handleDashboardJournalGet(req, res);
-  if (url === '/api/dashboard/journal' && req.method === 'POST') return handleDashboardJournalPost(req, res);
-  if (url === '/api/dashboard/history' && req.method === 'GET') return handleDashboardHistory(req, res, rawUrl);
-  if (url === '/api/dashboard/events' && req.method === 'GET') return handleDashboardEvents(req, res, rawUrl);
+  if (url === '/api/dashboard/session' && req.method === 'POST') {
+    if (!requirePreviewApi(req, res)) return;
+    return handleDashboardSession(req, res);
+  }
+  if (url === '/api/dashboard/journal' && req.method === 'GET') {
+    if (!requirePreviewApi(req, res)) return;
+    return handleDashboardJournalGet(req, res);
+  }
+  if (url === '/api/dashboard/journal' && req.method === 'POST') {
+    if (!requirePreviewApi(req, res)) return;
+    return handleDashboardJournalPost(req, res);
+  }
+  if (url === '/api/dashboard/history' && req.method === 'GET') {
+    if (!requirePreviewApi(req, res)) return;
+    return handleDashboardHistory(req, res, rawUrl);
+  }
+  if (url === '/api/dashboard/events' && req.method === 'GET') {
+    if (!requirePreviewApi(req, res)) return;
+    return handleDashboardEvents(req, res, rawUrl);
+  }
 
   if (url === '/api/institutional-live' && req.method === 'GET') return handleInstitutionalLive(req, res);
   if (url === '/api/email/subscribers' && req.method === 'GET') return handleEmailSubscribers(req, res);
@@ -1046,6 +1149,37 @@ const server = http.createServer((req, res) => {
     }
     return json(res, 200, apiInstitutional(null));
   }
+  if (url === '/api/scanner' && req.method === 'GET') {
+    if (!requirePreviewApi(req, res)) return;
+    if (!signalEngine) return json(res, 503, { error: 'Scanner engine unavailable' });
+    const q = rawUrl.includes('?') ? rawUrl.split('?')[1] : '';
+    const params = new URLSearchParams(q);
+    const tf = params.get('timeframe') || 'H1';
+    const riskContext = {
+      news_imminent: !!(cache.nextEvent && (cache.nextEvent.minutesUntil || 99) < 90),
+      next_event: cache.nextEvent
+    };
+    const runScan = (quotes) => json(res, 200, signalEngine.scanAll(quotes, riskContext, { timeframe: tf }));
+    if (quotesService) {
+      return quotesService.getQuotes()
+        .then(runScan)
+        .catch(() => runScan(null));
+    }
+    return runScan(null);
+  }
+  if (url === '/api/risk/config' && req.method === 'GET') {
+    if (!riskService) return json(res, 503, { error: 'Risk service unavailable' });
+    return json(res, 200, riskService.getPlatformRiskConfig());
+  }
+  if (url === '/api/risk/calculate' && req.method === 'POST') {
+    if (!requirePreviewApi(req, res)) return;
+    if (!riskService) return json(res, 503, { error: 'Risk service unavailable' });
+    return readBody(req).then((body) => {
+      let data = {};
+      try { data = JSON.parse(body || '{}'); } catch { return json(res, 400, { error: 'Invalid JSON' }); }
+      return json(res, 200, riskService.calculateLotSize(data));
+    });
+  }
   if (url === '/api/markets') {
     const marketWarnings = [
       'HIGH IMPACT: ' + (cache.nextEvent.title || 'Economic release') + ' in ' +
@@ -1093,6 +1227,17 @@ const server = http.createServer((req, res) => {
   let file = url === '/' ? '/index.html' : url;
   const safe = path.normalize(file).replace(/^(\.\.[/\\])+/, '');
 
+  if (testingGate && testingGate.isBlockedDownload(safe)) {
+    res.writeHead(403, securityHeaders({ 'Content-Type': 'text/plain; charset=utf-8' }));
+    return res.end('Downloads are disabled during private testing.');
+  }
+
+  if (testingGate && testingGate.isTestingMode() && testingGate.isGatedPage(safe) && !previewAccessOk(req)) {
+    const gateUrl = '/private-testing.html?next=' + encodeURIComponent(safe);
+    res.writeHead(302, securityHeaders({ Location: gateUrl, 'Cache-Control': 'no-store' }));
+    return res.end();
+  }
+
   if (adminAuth && adminAuth.isAdminPage(safe) && !adminAuthOk(req)) {
     return redirectAdminLogin(res, safe);
   }
@@ -1123,6 +1268,10 @@ function startServer() {
     console.log('  Owner mail: ' + local + '/owner-email.html');
     console.log('  Domain:     aurafxelite.com');
     console.log('  Storage:    ' + storage.backend + (storage.path ? ' (' + storage.path + ')' : ''));
+    if (testingGate) {
+      console.log('  Site mode:  ' + testingGate.SITE_MODE +
+        (testingGate.isTestingMode() ? ' (PUBLIC BLOCKED — owner preview only)' : ' (PUBLIC)'));
+    }
     if (quotesService) {
       quotesService.startAutoRefresh();
       quotesService.getQuotes(true)

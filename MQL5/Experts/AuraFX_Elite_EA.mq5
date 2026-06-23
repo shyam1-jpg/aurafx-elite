@@ -4,20 +4,28 @@
 //+------------------------------------------------------------------+
 #property copyright   "AuraFX Labs"
 #property link        "https://www.mql5.com"
-#property version     "1.10"
-#property description "AuraFX Elite EA with integrated Risk Guardian warnings."
+#property version     "1.20"
+#property description "AuraFX Elite EA — auto orders, SL/TP, trailing stop, risk % sizing."
 
 #include <Trade\Trade.mqh>
 #include <AuraFX_Core.mqh>
 #include <AuraFX_NewsRisk.mqh>
 
 input group "=== Risk & Lot Sizing ==="
-input double InpLots           = 0.10;
+input double InpLots           = 0.01;
 input double InpRiskPercent   = 1.0;
-input bool   InpAutoLots       = false;
-input int    InpSlPoints       = 300;
-input int    InpTpPoints       = 600;
+input bool   InpAutoLots       = true;    // Size lots from account % risk
+input int    InpSlPoints       = 200;     // Stop loss (points) — limits loss
+input int    InpTpPoints       = 400;     // Take profit (points) — auto close in profit
 input int    InpMagic          = 202605;
+
+input group "=== Auto exit (profit & protection) ==="
+input bool   InpUseTrailing          = true;   // Trail stop when in profit
+input int    InpTrailingPoints       = 120;    // Trailing distance (points)
+input bool   InpUseBreakeven         = true;   // Move SL to entry after profit
+input int    InpBreakevenTriggerPts  = 150;    // Profit needed before breakeven
+input int    InpBreakevenLockPts       = 15;     // Lock profit above entry
+input double InpMaxDailyLossPct      = 3.0;    // Pause new trades if day loss exceeds %
 
 input group "=== Signal Engine ==="
 input double InpTargetWinRate  = 76.0;
@@ -31,7 +39,7 @@ input bool   InpShowPanel      = true;
 input group "=== News Risk Guardian ==="
 input bool   InpEnableNewsGuard      = true;   // Enable news/trade warnings
 input int    InpWarnMinutesBefore    = 90;     // Minutes before event to warn
-input bool   InpBlockNewTradesOnNews = false;  // Block NEW entries (not close)
+input bool   InpBlockNewTradesOnNews = true;   // Block NEW entries before news
 input bool   InpSoundRiskAlerts      = true;   // Sound alerts
 input bool   InpShowRiskDashboard    = true;   // Risk panel on chart
 
@@ -43,6 +51,8 @@ AuraFX_TradeExposure g_exp;
 datetime g_lastTradeBar = 0;
 datetime g_lastRiskCheck = 0;
 datetime g_ignore_until = 0;
+datetime g_dayStart = 0;
+double   g_dayStartBalance = 0;
 bool g_warned_news = false;
 bool g_warned_adverse = false;
 const string PANEL_PREFIX = "AURAFX_EA";
@@ -61,6 +71,8 @@ int OnInit()
    g_stats.losses = 0;
    g_stats.winRate = 0;
    g_risk.disclaimer = AURA_DISCLAIMER;
+   g_dayStart = iTime(_Symbol, PERIOD_D1, 0);
+   g_dayStartBalance = AccountInfoDouble(ACCOUNT_BALANCE);
 
    return INIT_SUCCEEDED;
   }
@@ -84,6 +96,14 @@ void OnTick()
 
    if(InpEnableNewsGuard)
       RunNewsRiskChecks();
+
+   ManageOpenPositions();
+
+   if(DailyLossLimitHit())
+     {
+      Comment("AuraFX: daily loss limit reached — no new trades today. ", AURA_DISCLAIMER);
+      return;
+     }
 
    ENUM_AURA_SIGNAL sig = AuraFX_ComputeSignal(_Symbol, PERIOD_CURRENT, 1,
                                                InpRsiBuyMax, InpRsiSellMin, InpAtrMultMin);
@@ -216,6 +236,78 @@ void OpenTrade(const ENUM_ORDER_TYPE type)
       else                        tp = price - InpTpPoints * _Point;
      }
    trade.PositionOpen(_Symbol, type, CalcLots(), price, sl, tp, "AuraFX Elite");
+  }
+
+//+------------------------------------------------------------------+
+bool DailyLossLimitHit()
+  {
+   if(InpMaxDailyLossPct <= 0) return false;
+   datetime today = iTime(_Symbol, PERIOD_D1, 0);
+   if(today != g_dayStart)
+     {
+      g_dayStart = today;
+      g_dayStartBalance = AccountInfoDouble(ACCOUNT_BALANCE);
+     }
+   double bal = AccountInfoDouble(ACCOUNT_BALANCE);
+   if(g_dayStartBalance <= 0) return false;
+   double lossPct = (g_dayStartBalance - bal) / g_dayStartBalance * 100.0;
+   return (lossPct >= InpMaxDailyLossPct);
+  }
+
+//+------------------------------------------------------------------+
+void ManageOpenPositions()
+  {
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+     {
+      ulong ticket = PositionGetTicket(i);
+      if(!PositionSelectByTicket(ticket)) continue;
+      if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
+
+      double openPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      double currentSL = PositionGetDouble(POSITION_SL);
+      double currentTP = PositionGetDouble(POSITION_TP);
+      ENUM_POSITION_TYPE ptype = (ENUM_POSITION_TYPE)PositionGetInteger(POSITION_TYPE);
+
+      if(ptype == POSITION_TYPE_BUY)
+        {
+         double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+         double profitPts = (bid - openPrice) / _Point;
+
+         if(InpUseBreakeven && profitPts >= InpBreakevenTriggerPts)
+           {
+            double beSL = openPrice + InpBreakevenLockPts * _Point;
+            if(currentSL < beSL - _Point)
+               trade.PositionModify(ticket, beSL, currentTP);
+           }
+
+         if(InpUseTrailing && profitPts >= InpTrailingPoints)
+           {
+            double trailSL = bid - InpTrailingPoints * _Point;
+            if(trailSL > currentSL + _Point)
+               trade.PositionModify(ticket, trailSL, currentTP);
+           }
+        }
+      else if(ptype == POSITION_TYPE_SELL)
+        {
+         double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+         double profitPts = (openPrice - ask) / _Point;
+
+         if(InpUseBreakeven && profitPts >= InpBreakevenTriggerPts)
+           {
+            double beSL = openPrice - InpBreakevenLockPts * _Point;
+            if(currentSL == 0.0 || currentSL > beSL + _Point)
+               trade.PositionModify(ticket, beSL, currentTP);
+           }
+
+         if(InpUseTrailing && profitPts >= InpTrailingPoints)
+           {
+            double trailSL = ask + InpTrailingPoints * _Point;
+            if(currentSL == 0.0 || trailSL < currentSL - _Point)
+               trade.PositionModify(ticket, trailSL, currentTP);
+           }
+        }
+     }
   }
 
 //+------------------------------------------------------------------+

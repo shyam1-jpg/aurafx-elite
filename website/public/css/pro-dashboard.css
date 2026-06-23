@@ -49,6 +49,12 @@ body.theme-light .dash-sidebar { background: #e8eaf2; border-color: #ccc; }
 }
 .dash-nav li button:hover { color: var(--text); background: rgba(212,175,55,.06); }
 .dash-nav li button.active { color: var(--gold); border-left-color: var(--gold); background: rgba(212,175,55,.08); font-weight: 600; }
+.dash-nav-link {
+  display: block; width: 100%; text-align: left; padding: .65rem 1.25rem;
+  color: var(--muted); font-size: .88rem; text-decoration: none;
+  border-left: 3px solid transparent;
+}
+.dash-nav-link:hover { color: var(--text); background: rgba(212,175,55,.06); text-decoration: none; }
 .dash-sidebar-foot { padding: .75rem 1rem; border-top: 1px solid rgba(255,255,255,.06); font-size: .72rem; color: var(--muted); }
 .dash-sidebar-foot a { display: block; margin: .25rem 0; }
 

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aura Elite FX risk calculator — lot size, pip value, daily loss limits." />
+  <title>Risk Calculator — Aura Elite FX</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+  <link rel="icon" href="assets/aurafx-elite-logo.png" type="image/png" />
+  <script src="js/font-loader.js"></script>
+  <style>
+    .risk-form { max-width:420px; margin:0 auto 1.5rem; }
+    .risk-form label { display:block; color:var(--muted); font-size:.85rem; margin-bottom:.35rem; }
+    .risk-form input, .risk-form select { width:100%; padding:.55rem .65rem; margin-bottom:.85rem; background:#12182a; border:1px solid #333; border-radius:8px; color:var(--text); }
+    .risk-result { max-width:480px; margin:0 auto; padding:1.25rem; }
+    .risk-row { display:flex; justify-content:space-between; padding:.45rem 0; border-bottom:1px solid rgba(212,175,55,.1); font-size:.9rem; }
+    .risk-row strong { color:var(--gold); }
+    .mode-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; max-width:900px; margin:2rem auto 0; }
+    .mode-card { padding:1rem; border-radius:10px; border:1px solid rgba(212,175,55,.2); background:rgba(18,22,34,.8); font-size:.85rem; }
+    .mode-card h3 { color:var(--gold); font-size:.95rem; margin-bottom:.35rem; }
+  </style>
+</head>
+<body class="lux-body">
+  <nav class="nav">
+    <a href="index.html" class="logo">Aura Elite <span>FX</span></a>
+    <div class="nav-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="scanner.html">Scanner</a>
+      <a href="risk-calculator.html" aria-current="page">Risk</a>
+      <a href="dashboard.html" class="btn btn-gold">Open dashboard</a>
+    </div>
+  </nav>
+
+  <main class="section" style="padding-top:2rem;text-align:center">
+    <h1 style="color:var(--gold)">Risk <em>Calculator</em></h1>
+    <p style="color:var(--muted);max-width:520px;margin:.75rem auto 1.5rem">Position sizing from account balance and stop loss. Defaults: 1% risk · 3% max daily loss.</p>
+
+    <form class="risk-form lux-glass" style="padding:1.25rem" id="riskForm">
+      <label>Account balance
+        <input type="number" id="balance" value="10000" min="100" step="100" />
+      </label>
+      <label>Risk per trade (%)
+        <input type="number" id="riskPct" value="1" min="0.1" max="5" step="0.1" />
+      </label>
+      <label>Pair
+        <select id="pair">
+          <option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option>
+          <option>XAUUSD</option><option>XAGUSD</option><option>AUDUSD</option>
+        </select>
+      </label>
+      <label>Stop loss (pips)
+        <input type="number" id="slPips" value="25" min="5" max="500" />
+      </label>
+      <button type="submit" class="btn btn-gold" style="width:100%">Calculate lot size</button>
+    </form>
+
+    <div class="risk-result lux-glass" id="riskResult" hidden>
+      <div class="risk-row"><span>Risk amount</span><strong id="outRisk">—</strong></div>
+      <div class="risk-row"><span>Suggested lots</span><strong id="outLots">—</strong></div>
+      <div class="risk-row"><span>Pip value (est.)</span><strong id="outPip">—</strong></div>
+      <div class="risk-row"><span>Max daily loss (3%)</span><strong id="outDaily">—</strong></div>
+      <div class="risk-row"><span>Max weekly loss (7%)</span><strong id="outWeekly">—</strong></div>
+    </div>
+
+    <div class="mode-cards" id="modeCards"></div>
+
+    <p style="color:var(--muted);font-size:.78rem;max-width:640px;margin:2rem auto 0">
+      Auto trading is <strong>OFF</strong> by default. Expert mode requires risk consent and MT4/MT5 connection.
+    </p>
+  </main>
+  <script src="js/site-boot.js"></script>
+  <script src="js/risk-calculator-page.js"></script>
+</body>
+</html>

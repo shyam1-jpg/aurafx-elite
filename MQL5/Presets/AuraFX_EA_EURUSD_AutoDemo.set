@@ -1,0 +1,25 @@
+; AuraFX Elite EA — EURUSD demo auto trade (risk + profit close)
+InpLots=0.01
+InpRiskPercent=1.0
+InpAutoLots=true
+InpSlPoints=200
+InpTpPoints=400
+InpMagic=202605
+InpUseTrailing=true
+InpTrailingPoints=120
+InpUseBreakeven=true
+InpBreakevenTriggerPts=150
+InpBreakevenLockPts=15
+InpMaxDailyLossPct=3.0
+InpTargetWinRate=76.0
+InpRsiBuyMax=62.0
+InpRsiSellMin=38.0
+InpAtrMultMin=0.35
+InpAllowCover=true
+InpOneTradePerBar=true
+InpShowPanel=true
+InpEnableNewsGuard=true
+InpWarnMinutesBefore=90
+InpBlockNewTradesOnNews=true
+InpSoundRiskAlerts=true
+InpShowRiskDashboard=true

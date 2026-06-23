@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Private testing — Aura Elite FX</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+  <link rel="icon" href="assets/aurafx-elite-logo.png" type="image/png" />
+  <style>
+    .gate-box {
+      max-width: 520px; margin: 4rem auto; padding: 2rem 1.5rem; text-align: center;
+      border: 1px solid rgba(212,175,55,.35); border-radius: 14px;
+      background: rgba(18,22,34,.92);
+    }
+    .gate-box h1 { color: var(--gold); font-size: 1.35rem; margin-bottom: .75rem; }
+    .gate-box p { color: var(--muted); font-size: .92rem; line-height: 1.65; margin-bottom: 1rem; }
+    .gate-form input { width: 100%; padding: .6rem .75rem; margin-bottom: .75rem; border-radius: 8px; border: 1px solid #333; background: #12182a; color: var(--text); }
+    .gate-err { color: #e74c3c; font-size: .82rem; min-height: 1.2rem; }
+  </style>
+</head>
+<body class="lux-body">
+  <nav class="nav">
+    <a href="index.html" class="logo">Aura Elite <span>FX</span></a>
+  </nav>
+  <main class="gate-box lux-glass">
+    <img src="assets/aurafx-elite-logo.png" alt="" width="72" height="72" style="border-radius:12px;margin-bottom:1rem" />
+    <h1>Private owner testing</h1>
+    <p>
+      Aura Elite FX is <strong>not open to the public yet</strong>.
+      Registration, MT5 install guides, scanner, and dashboard are locked while testing.
+    </p>
+    <p style="font-size:.85rem">The marketing homepage stays visible. MT5 apps are <strong>not downloadable</strong> from this website — you install from your PC only.</p>
+    <form id="unlockForm">
+      <label for="ownerKey" style="display:block;text-align:left;color:var(--muted);font-size:.82rem;margin-bottom:.35rem">Owner test key (from Render → Environment)</label>
+      <input type="password" id="ownerKey" name="key" autocomplete="off" placeholder="AURAFX_OWNER_KEY" required />
+      <div class="gate-err" id="gateErr" role="alert"></div>
+      <button type="submit" class="btn btn-gold" style="width:100%">Unlock testing access</button>
+    </form>
+    <p style="margin-top:1.25rem;font-size:.78rem">
+      <a href="index.html">← Back to homepage</a> ·
+      <a href="admin-login.html">Admin login</a>
+    </p>
+  </main>
+  <script>
+    document.getElementById('unlockForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var err = document.getElementById('gateErr');
+      err.textContent = '';
+      var key = document.getElementById('ownerKey').value.trim();
+      fetch('/api/testing/unlock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: key })
+      })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (x) {
+          if (!x.ok) { err.textContent = x.d.error || 'Invalid key'; return; }
+          var next = new URLSearchParams(location.search).get('next') || '/dashboard.html';
+          location.href = next;
+        })
+        .catch(function () { err.textContent = 'Could not reach server.'; });
+    });
+  </script>
+</body>
+</html>
