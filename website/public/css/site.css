@@ -7,6 +7,7 @@
   --bull: #2ecc71;
   --bear: #e74c3c;
   --danger: #e74c3c;
+  --logo-frame-mask: url('assets/aura-logo-frame-mask.svg');
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Inter, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
@@ -29,9 +30,9 @@ a:hover { text-decoration: underline; }
 .logo span, .nav-logo span { color: var(--text); font-weight: 400; }
 .logo-img {
   width: auto;
-  height: 52px;
-  max-height: 52px;
-  max-width: min(180px, 42vw);
+  height: 56px;
+  max-height: 56px;
+  max-width: min(190px, 44vw);
   flex-shrink: 0;
   display: block;
   border: none;
@@ -40,8 +41,16 @@ a:hover { text-decoration: underline; }
   background: transparent;
   object-fit: contain;
   mix-blend-mode: lighten;
-  -webkit-mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 66%, transparent 100%);
-  mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 66%, transparent 100%);
+  transform: scale(1.07);
+  transform-origin: center left;
+  -webkit-mask-image: var(--logo-frame-mask);
+  mask-image: var(--logo-frame-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 .logo-img-square {
   width: 36px; height: 36px; max-width: 36px; border-radius: 8px;
@@ -81,20 +90,23 @@ a:hover { text-decoration: underline; }
   z-index: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
   margin: 0 auto 1rem;
-  max-width: min(340px, 92vw);
+  width: min(300px, 84vw);
+  aspect-ratio: 1;
   isolation: isolate;
 }
 .hero-logo-wrap::before {
   content: "";
   position: absolute;
-  inset: -12%;
-  background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.1), transparent 72%);
+  inset: 2%;
+  border-radius: 14%;
+  background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.07), transparent 78%);
   pointer-events: none;
 }
 .hero-logo {
-  width: min(320px, 88vw);
-  height: auto;
+  width: 108%;
+  height: 108%;
   margin: 0;
   display: block;
   border-radius: 0;
@@ -103,9 +115,17 @@ a:hover { text-decoration: underline; }
   box-shadow: none;
   background: transparent;
   mix-blend-mode: lighten;
-  -webkit-mask-image: radial-gradient(ellipse 94% 94% at 50% 46%, #000 72%, transparent 100%);
-  mask-image: radial-gradient(ellipse 94% 94% at 50% 46%, #000 72%, transparent 100%);
-  filter: drop-shadow(0 18px 42px rgba(212, 175, 55, 0.14));
+  transform: scale(1.06);
+  transform-origin: center;
+  -webkit-mask-image: var(--logo-frame-mask);
+  mask-image: var(--logo-frame-mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  filter: drop-shadow(0 14px 36px rgba(212, 175, 55, 0.1));
 }
 .hero-logo-square {
   width: 140px; height: 140px; max-width: 140px; border-radius: 20px;

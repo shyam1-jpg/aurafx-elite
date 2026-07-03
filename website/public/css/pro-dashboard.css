@@ -39,11 +39,19 @@ body.theme-light .dash-sidebar { background: #e8eaf2; border-color: #ccc; }
 .dash-sidebar-brand .logo-img {
   width: 100%;
   max-width: 100%;
-  max-height: 52px;
+  max-height: 56px;
   height: auto;
   mix-blend-mode: lighten;
-  -webkit-mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 66%, transparent 100%);
-  mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 66%, transparent 100%);
+  transform: scale(1.07);
+  transform-origin: center left;
+  -webkit-mask-image: url('../assets/aura-logo-frame-mask.svg');
+  mask-image: url('../assets/aura-logo-frame-mask.svg');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 }
 .dash-nav { list-style: none; padding: .75rem 0; flex: 1; overflow-y: auto; }
 .dash-nav li button {
