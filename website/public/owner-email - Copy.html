@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Email campaigns — AuraFX Admin</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/register.css" />
+  <link rel="stylesheet" href="css/legal.css" />
+  <style>
+    .email-editor { width: 100%; min-height: 220px; padding: .75rem; background: #080c14; border: 1px solid #333; color: var(--text); border-radius: 8px; font-family: inherit; font-size: .85rem; }
+    .email-preview { background: #fff; color: #111; min-height: 200px; border-radius: 8px; border: 1px solid #333; }
+    .stat-pill { display: inline-block; padding: .35rem .75rem; border: 1px solid #333; border-radius: 20px; font-size: .78rem; margin: .25rem; }
+    .stat-pill strong { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="owner-leads.html">Leads</a>
+      <a href="system-status.html">System status</a>
+      <button type="button" class="btn btn-outline" id="btnLogout" style="font-size:.8rem">Sign out</button>
+    </div>
+  </nav>
+
+  <section class="section reg-section" style="max-width:900px">
+    <h2>Auto email — trading forecasts</h2>
+    <p class="reg-lead">Send the same forecast to 100–2000+ clients from your website. AI builds a fancy draft; you check it; one click sends to everyone who opted in.</p>
+
+    <div class="legal-banner" style="margin-bottom:1rem">
+      Requires <strong>Resend.com</strong> API key on server. Only send to clients who ticked <em>marketing opt-in</em> on registration (GDPR-safe). See <code>website/EMAIL-SETUP.txt</code>.
+    </div>
+
+    <div class="card reg-form" style="padding:1rem;margin-bottom:1rem">
+      <button type="button" class="btn btn-outline" id="btnStatus">Check email status</button>
+      <p id="statusMsg" class="reg-msg" style="text-align:left;margin-top:.5rem"></p>
+      <div id="statPills"></div>
+    </div>
+
+    <div class="card reg-form">
+      <h3 style="color:var(--gold);font-size:.95rem">1 — Generate draft (AI optional)</h3>
+      <div class="reg-grid" style="margin-bottom:.75rem">
+        <div class="reg-field">
+          <label>Audience</label>
+          <select id="audience">
+            <option value="marketing" selected>Marketing opt-in only (recommended)</option>
+            <option value="all">All registered emails</option>
+            <option value="paid">Paid + free plans</option>
+          </select>
+        </div>
+        <div class="reg-field">
+          <label>Template</label>
+          <select id="draftType">
+            <option value="forecast" selected>Daily trading forecast</option>
+            <option value="welcome">Welcome (single test)</option>
+          </select>
+        </div>
+      </div>
+      <label style="font-size:.78rem;color:var(--muted)">Your notes (bias, levels, news) — merged into forecast</label>
+      <textarea id="ownerNotes" rows="3" class="email-editor" style="min-height:80px" placeholder="e.g. Gold bullish above 3280, avoid USDJPY before CPI…"></textarea>
+      <label class="reg-check" style="margin-top:.75rem">
+        <input type="checkbox" id="useAi" />
+        Polish with OpenAI (set OPENAI_API_KEY on server — optional)
+      </label>
+      <button type="button" class="btn btn-gold" id="btnDraft" style="margin-top:.5rem">Generate draft</button>
+    </div>
+
+    <div class="card reg-form" style="margin-top:1rem">
+      <h3 style="color:var(--gold);font-size:.95rem">2 — Review &amp; edit</h3>
+      <label style="font-size:.78rem;color:var(--muted)">Subject</label>
+      <input type="text" id="subject" class="email-editor" style="min-height:auto;margin-bottom:.75rem" />
+      <label style="font-size:.78rem;color:var(--muted)">HTML body (uses {{name}} per client)</label>
+      <textarea id="htmlBody" class="email-editor"></textarea>
+      <p style="font-size:.78rem;color:var(--muted);margin:.5rem 0">Preview:</p>
+      <iframe id="previewFrame" class="email-preview" style="width:100%;min-height:280px" title="Email preview"></iframe>
+    </div>
+
+    <div class="card reg-form" style="margin-top:1rem">
+      <h3 style="color:var(--gold);font-size:.95rem">3 — Send to all</h3>
+      <label class="reg-check">
+        <input type="checkbox" id="dryRun" checked />
+        Dry run first (no emails sent — shows who would receive)
+      </label>
+      <div class="reg-actions" style="justify-content:flex-start;margin-top:.75rem">
+        <button type="button" class="btn btn-gold" id="btnSend">Send campaign</button>
+        <button type="button" class="btn btn-outline" id="btnRefreshLog">Refresh log</button>
+      </div>
+      <p id="sendMsg" class="reg-msg" style="text-align:left;margin-top:.75rem"></p>
+      <pre id="campaignLog" style="font-size:.72rem;background:#080c14;padding:1rem;border-radius:8px;overflow:auto;max-height:200px;color:var(--muted)"></pre>
+    </div>
+
+    <p class="reg-note">On register: welcome email auto-sends if <code>EMAIL_AUTO_WELCOME=1</code> and client opted in to marketing.</p>
+  </section>
+
+  <footer class="footer">
+    <p><a href="owner-leads.html">Leads</a> · <a href="system-status.html">System status</a></p>
+  </footer>
+
+  <script src="js/site-boot.js"></script>
+  <script src="js/admin-pages.js"></script>
+  <script>
+  (function () {
+    document.getElementById('btnLogout').onclick = function () { AURAFX_ADMIN.adminLogout(); };
+
+    function jsonHeaders() {
+      return { 'Content-Type': 'application/json' };
+    }
+
+    function setPreview() {
+      var html = document.getElementById('htmlBody').value;
+      document.getElementById('previewFrame').srcdoc = html.replace(/\{\{name\}\}/gi, 'Alex');
+    }
+
+    document.getElementById('htmlBody').addEventListener('input', setPreview);
+
+    document.getElementById('btnStatus').onclick = async function () {
+      var el = document.getElementById('statusMsg');
+      try {
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/email/status');
+        var d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed');
+        var s = d.status || {};
+        el.textContent = s.configured ? 'Email ready — ' + s.provider + ' from ' + s.from : 'Set RESEND_API_KEY on server';
+        el.className = 'reg-msg ' + (s.configured ? 'ok' : 'err');
+        var sub = await AURAFX_ADMIN.adminFetch('/api/email/subscribers');
+        var sd = await sub.json();
+        document.getElementById('statPills').innerHTML =
+          '<span class="stat-pill">Total <strong>' + (sd.total || 0) + '</strong></span>' +
+          '<span class="stat-pill">Marketing <strong>' + (sd.marketingOptIn || 0) + '</strong></span>';
+        if (d.lastCampaign) document.getElementById('campaignLog').textContent = JSON.stringify(d.lastCampaign, null, 2);
+      } catch (e) {
+        el.textContent = e.message;
+        el.className = 'reg-msg err';
+      }
+    };
+
+    document.getElementById('btnDraft').onclick = async function () {
+      var msg = document.getElementById('sendMsg');
+      msg.textContent = 'Generating…';
+      try {
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/email/draft', {
+          method: 'POST',
+          headers: jsonHeaders(),
+          body: JSON.stringify({
+            type: document.getElementById('draftType').value,
+            audience: document.getElementById('audience').value,
+            ownerNotes: document.getElementById('ownerNotes').value,
+            useAi: document.getElementById('useAi').checked
+          })
+        });
+        var d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Draft failed');
+        document.getElementById('subject').value = d.draft.subject;
+        document.getElementById('htmlBody').value = d.draft.html;
+        setPreview();
+        msg.textContent = 'Draft ready for ' + d.recipientCount + ' recipients';
+        msg.className = 'reg-msg ok';
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.className = 'reg-msg err';
+      }
+    };
+
+    document.getElementById('btnSend').onclick = async function () {
+      var msg = document.getElementById('sendMsg');
+      var dry = document.getElementById('dryRun').checked;
+      if (!dry && !confirm('Send this email to ALL selected clients?')) return;
+      msg.textContent = dry ? 'Dry run…' : 'Starting send…';
+      try {
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/email/send', {
+          method: 'POST',
+          headers: jsonHeaders(),
+          body: JSON.stringify({
+            subject: document.getElementById('subject').value,
+            html: document.getElementById('htmlBody').value,
+            audience: document.getElementById('audience').value,
+            dryRun: dry
+          })
+        });
+        var d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Send failed');
+        document.getElementById('campaignLog').textContent = JSON.stringify(d, null, 2);
+        msg.textContent = dry ? 'Dry run: ' + d.total + ' would receive' : 'Sending to ' + d.total + ' clients';
+        msg.className = 'reg-msg ok';
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.className = 'reg-msg err';
+      }
+    };
+
+    document.getElementById('btnRefreshLog').onclick = function () { document.getElementById('btnStatus').click(); };
+    AURAFX_ADMIN.requireAdmin().then(function () { document.getElementById('btnStatus').click(); });
+  })();
+  </script>
+</body>
+</html>

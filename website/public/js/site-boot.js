@@ -15,6 +15,10 @@
     return (window.AURAFX_API_BASE || '') + path;
   }
 
+  function logoFile(path) {
+    return path.split('?')[0].replace(/^\//, '');
+  }
+
   function injectBranding() {
     if (!document.querySelector('link[data-aurafx-icon]')) {
       var link = document.createElement('link');
@@ -28,15 +32,19 @@
     document.querySelectorAll('.logo, .nav-logo, .dash-sidebar-brand a').forEach(function (el) {
       var existing = el.querySelector('.logo-img');
       if (existing) {
-        if (existing.getAttribute('src') !== src && existing.getAttribute('src') !== src.replace(/^\//, '')) {
+        var want = LOGO_WIDE.replace(/^\//, '');
+        if (logoFile(existing.getAttribute('src') || '') !== logoFile(want)) {
           existing.src = src;
         }
+        if (!existing.classList.contains('logo-img')) existing.className = 'logo-img';
         return;
       }
       var img = document.createElement('img');
       img.src = src;
       img.alt = 'AuraFX Elite logo';
       img.className = 'logo-img';
+      img.width = 160;
+      img.height = 160;
       img.decoding = 'sync';
       el.setAttribute('aria-label', 'AuraFX Elite home');
       while (el.firstChild) el.removeChild(el.firstChild);
@@ -44,7 +52,40 @@
     });
   }
 
+  function upgradeHeroLogos() {
+    var png = assetUrl(LOGO_WIDE);
+    document.querySelectorAll('.hero-logo, img[src*="aura-logo-hero"], img[src*="aurafx-elite-logo"]').forEach(function (img) {
+      if (img.closest('.dash-sidebar-brand') || img.classList.contains('logo-img')) return;
+      var src = img.getAttribute('src') || '';
+      if (/aura-logo-hero\.svg/i.test(src) || /aurafx-elite-logo\.png/i.test(src)) {
+        img.src = png;
+        img.classList.add('hero-logo');
+        img.removeAttribute('style');
+        if (!img.parentElement || !img.parentElement.classList.contains('hero-logo-wrap')) {
+          var wrap = document.createElement('div');
+          wrap.className = 'hero-logo-wrap';
+          img.parentNode.insertBefore(wrap, img);
+          wrap.appendChild(img);
+        }
+      }
+    });
+  }
+
+  function syncStylesheets() {
+    document.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
+      var href = link.getAttribute('href') || '';
+      if (/css\/site\.css/i.test(href) && !/v=8/.test(href)) {
+        link.setAttribute('href', 'css/site.css?v=8');
+      }
+      if (/css\/pro-dashboard\.css/i.test(href) && !/v=8/.test(href)) {
+        link.setAttribute('href', 'css/pro-dashboard.css?v=8');
+      }
+    });
+  }
+
+  syncStylesheets();
   injectBranding();
+  upgradeHeroLogos();
 
   if (isFile) {
     var banner = document.getElementById('fileModeBanner');

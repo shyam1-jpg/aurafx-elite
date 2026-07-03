@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AuraFX Elite economic calendar — upcoming CPI, NFP, FOMC, central bank rates, GDP, and high-impact forex events with countdown." />
+  <title>Economic Calendar — AuraFX Elite</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/luxury.css" />
+  <link rel="stylesheet" href="css/elite-command.css" />
+  <script src="js/font-loader.js"></script>
+</head>
+<body class="lux-body">
+  <nav class="nav">
+    <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="markets.html">Live markets</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="get-started.html">Get started</a>
+      <a href="register.html" class="btn btn-gold">Register</a>
+    </div>
+  </nav>
+
+  <header class="section" style="text-align:center;padding-top:2rem;max-width:900px;margin:0 auto">
+    <span class="lux-badge-elite">Macro events</span>
+    <h1 class="lux-title" style="margin-top:1rem">Economic <em>Calendar</em></h1>
+    <p style="color:var(--muted);max-width:680px;margin:1rem auto;font-size:.95rem">
+      What's coming up — CPI, NFP, FOMC, ECB, BOE, GDP, PMI, and more. Filter by impact and currency.
+      Use before trading to plan around volatility. Educational only — not financial advice.
+    </p>
+    <span class="edu-badge">Verify release times with your broker · Spreads often widen on red news</span>
+  </header>
+
+  <section class="section" style="max-width:1100px;margin:0 auto">
+    <div id="eliteCalHero"></div>
+    <div id="eliteCalStats"></div>
+    <div id="eliteCalFilters"></div>
+    <div id="eliteCalTable"></div>
+
+    <div class="lux-glass" style="padding:1.25rem;margin-top:1.5rem">
+      <h3 style="color:var(--gold);font-size:.95rem;margin-bottom:.5rem">What each impact level means</h3>
+      <ul style="color:var(--muted);font-size:.85rem;line-height:1.75;margin-left:1.25rem">
+        <li><strong class="elite-tag-hi">HIGH</strong> — CPI, NFP, FOMC, rate decisions. Expect wider spreads and fast moves.</li>
+        <li><strong class="elite-tag-med">MEDIUM</strong> — PMI, retail sales, jobless claims. Can move USD and gold.</li>
+        <li><strong class="elite-tag-lo">LOW</strong> — Secondary data. Usually lower volatility unless surprise.</li>
+      </ul>
+      <p style="margin-top:1rem;font-size:.8rem;color:var(--muted)">
+        <strong>Live data:</strong> Add <code>FINNHUB_API_KEY</code> on Render for real Finnhub calendar.
+        Without a key, AuraFX shows a reference weekly schedule (CPI, NFP, central banks) so the page still works.
+      </p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>© AuraFX Elite · <a href="dashboard.html">Dashboard</a> · <a href="markets.html">Markets</a> · <a href="index.html">Home</a></p>
+  </footer>
+
+  <script src="js/site-boot.js"></script>
+  <script src="js/cookie-consent.js"></script>
+  <script src="js/elite-calendar.js"></script>
+  <script src="js/luxury-fx.js"></script>
+</body>
+</html>

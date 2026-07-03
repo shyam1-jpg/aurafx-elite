@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Client registrations — AuraFX Admin</title>
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/register.css" />
+  <style>
+    .leads-table { width: 100%; border-collapse: collapse; font-size: .8rem; margin-top: 1rem; }
+    .leads-table th, .leads-table td { border: 1px solid #333; padding: .5rem; text-align: left; }
+    .leads-table th { color: var(--gold); background: #1a2030; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo" style="text-decoration:none">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="owner-email.html">Email campaigns</a>
+      <a href="system-status.html">System status</a>
+      <button type="button" class="btn btn-outline" id="btnLogout" style="font-size:.8rem">Sign out</button>
+    </div>
+  </nav>
+
+  <section class="section reg-section" style="max-width:960px">
+    <h2>Client registrations</h2>
+    <p class="reg-lead">Signed-in admin view. Data is stored securely on the server.</p>
+    <button type="button" class="btn btn-gold" id="btnLoad">Refresh list</button>
+    <p id="leadMsg" class="reg-msg" role="status" aria-live="polite"></p>
+    <div class="inst-scroll" id="leadTableWrap"></div>
+  </section>
+
+  <footer class="footer"><p><a href="index.html">Home</a></p></footer>
+
+  <script src="js/site-boot.js"></script>
+  <script src="js/admin-pages.js"></script>
+  <script>
+  (function () {
+    document.getElementById('btnLogout').onclick = function () { AURAFX_ADMIN.adminLogout(); };
+
+    async function loadLeads() {
+      var msg = document.getElementById('leadMsg');
+      msg.textContent = 'Loading…';
+      msg.className = 'reg-msg';
+      try {
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/registrations');
+        var d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed');
+        if (!d.registrations.length) {
+          msg.textContent = 'No registrations yet.';
+          document.getElementById('leadTableWrap').innerHTML = '';
+          return;
+        }
+        msg.textContent = d.count + ' client(s) registered.';
+        msg.className = 'reg-msg ok';
+        document.getElementById('leadTableWrap').innerHTML =
+          '<table class="leads-table"><caption class="sr-only">Registration list</caption><tr><th>Name</th><th>Email</th><th>Verified</th><th>Found via</th><th>Plan</th><th>Payment</th><th>Date</th></tr>' +
+          d.registrations.map(function (x) {
+            return '<tr><td>' + x.fullName + '</td><td>' + x.email + '</td><td>' + (x.emailVerified ? 'Yes' : 'No') + '</td><td>' +
+              (x.heardFromLabel || x.heardFrom || '—') + '</td><td>' + (x.planName || x.plan || '—') + '</td><td>' + (x.paymentStatus || '—') + '</td><td>' +
+              (x.registeredAt || '').slice(0, 10) + '</td></tr>';
+          }).join('') + '</table>';
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.className = 'reg-msg err';
+      }
+    }
+
+    document.getElementById('btnLoad').onclick = loadLeads;
+    loadLeads();
+  })();
+  </script>
+</body>
+</html>

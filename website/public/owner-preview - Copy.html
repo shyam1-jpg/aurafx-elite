@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Live preview — AuraFX Admin</title>
+  <link rel="stylesheet" href="css/site.css" />
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="logo">AuraFX <span>Elite</span></a>
+    <div class="nav-links">
+      <a href="owner-leads.html">Leads</a>
+      <a href="system-status.html">Status</a>
+      <button type="button" class="btn btn-outline" id="btnLogout" style="font-size:.8rem">Sign out</button>
+    </div>
+  </nav>
+  <section class="section" style="max-width:720px">
+    <h2>Institutional live preview</h2>
+    <p class="reg-lead">Requires server <code>INSTITUTIONAL_MODE=preview</code> and admin sign-in. Public visitors see standard dashboard data only.</p>
+    <div class="card" style="padding:1rem;margin-top:1rem">
+      <button type="button" class="btn btn-gold" id="btnTest">Test live institutional API</button>
+      <button type="button" class="btn btn-outline" id="btnDash" style="margin-left:.5rem">Open dashboard</button>
+      <p id="msg" class="reg-msg" style="margin-top:.75rem"></p>
+      <pre id="out" style="font-size:.72rem;background:#080c14;padding:1rem;border-radius:8px;overflow:auto;max-height:320px;color:var(--muted)"></pre>
+    </div>
+  </section>
+  <script src="js/site-boot.js"></script>
+  <script src="js/admin-pages.js"></script>
+  <script>
+  (function () {
+    document.getElementById('btnLogout').onclick = function () { AURAFX_ADMIN.adminLogout(); };
+    document.getElementById('btnDash').onclick = function () { location.href = 'dashboard.html'; };
+    document.getElementById('btnTest').onclick = async function () {
+      var msg = document.getElementById('msg');
+      msg.textContent = 'Loading…';
+      try {
+        await AURAFX_ADMIN.requireAdmin();
+        var r = await AURAFX_ADMIN.adminFetch('/api/institutional-live');
+        var d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed');
+        document.getElementById('out').textContent = JSON.stringify(d, null, 2);
+        msg.textContent = 'Live preview OK';
+        msg.className = 'reg-msg ok';
+      } catch (e) {
+        msg.textContent = e.message;
+        msg.className = 'reg-msg err';
+      }
+    };
+    AURAFX_ADMIN.requireAdmin();
+  })();
+  </script>
+</body>
+</html>
