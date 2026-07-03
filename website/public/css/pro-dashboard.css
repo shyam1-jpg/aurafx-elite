@@ -41,6 +41,9 @@ body.theme-light .dash-sidebar { background: #e8eaf2; border-color: #ccc; }
   max-width: 100%;
   max-height: 52px;
   height: auto;
+  mix-blend-mode: lighten;
+  -webkit-mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 66%, transparent 100%);
+  mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 66%, transparent 100%);
 }
 .dash-nav { list-style: none; padding: .75rem 0; flex: 1; overflow-y: auto; }
 .dash-nav li button {

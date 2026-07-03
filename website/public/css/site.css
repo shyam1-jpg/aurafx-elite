@@ -35,10 +35,13 @@ a:hover { text-decoration: underline; }
   flex-shrink: 0;
   display: block;
   border: none;
-  border-radius: 8px;
+  border-radius: 0;
   box-shadow: none;
   background: transparent;
   object-fit: contain;
+  mix-blend-mode: lighten;
+  -webkit-mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 66%, transparent 100%);
+  mask-image: radial-gradient(ellipse 92% 92% at 50% 50%, #000 66%, transparent 100%);
 }
 .logo-img-square {
   width: 36px; height: 36px; max-width: 36px; border-radius: 8px;
@@ -73,17 +76,36 @@ a:hover { text-decoration: underline; }
 .badge-soon { background: var(--muted); color: #fff; }
 
 .hero { text-align: center; padding: 4rem 1.5rem 3rem; max-width: 900px; margin: 0 auto; }
+.hero-logo-wrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  max-width: min(340px, 92vw);
+  isolation: isolate;
+}
+.hero-logo-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  background: radial-gradient(ellipse at center, rgba(212, 175, 55, 0.1), transparent 72%);
+  pointer-events: none;
+}
 .hero-logo {
   width: min(320px, 88vw);
   height: auto;
-  margin: 0 auto 1rem;
+  margin: 0;
   display: block;
-  border-radius: 12px;
+  border-radius: 0;
   object-fit: contain;
   border: none;
   box-shadow: none;
   background: transparent;
-  filter: none;
+  mix-blend-mode: lighten;
+  -webkit-mask-image: radial-gradient(ellipse 94% 94% at 50% 46%, #000 72%, transparent 100%);
+  mask-image: radial-gradient(ellipse 94% 94% at 50% 46%, #000 72%, transparent 100%);
+  filter: drop-shadow(0 18px 42px rgba(212, 175, 55, 0.14));
 }
 .hero-logo-square {
   width: 140px; height: 140px; max-width: 140px; border-radius: 20px;
