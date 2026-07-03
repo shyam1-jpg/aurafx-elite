@@ -24,7 +24,9 @@ services:
         value: "0"
       - key: SITE_MODE
         value: testing
-      - key: QUOTES_CACHE_MS
-        value: "30000"
+      - key: QUOTES_UPSTREAM_MS
+        value: "5000"
+      - key: CLIENT_POLL_SEC
+        value: "1"
       - key: AURAFX_OWNER_KEY
         generateValue: true

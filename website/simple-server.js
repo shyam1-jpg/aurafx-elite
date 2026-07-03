@@ -903,7 +903,7 @@ function serveFile(res, filePath) {
     const headers = securityHeaders({ 'Content-Type': MIME[ext] || 'application/octet-stream' });
     if (ext === '.html') {
       headers['Cache-Control'] = 'no-store, no-cache, must-revalidate';
-    } else if (ext === '.js' || ext === '.css' || ext === '.svg') {
+    } else if (ext === '.js' || ext === '.css' || ext === '.svg' || ext === '.png' || ext === '.webp') {
       headers['Cache-Control'] = 'no-cache, must-revalidate';
     }
     res.writeHead(200, headers);

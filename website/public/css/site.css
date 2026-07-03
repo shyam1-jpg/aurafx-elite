@@ -28,15 +28,17 @@ a:hover { text-decoration: underline; }
 .logo:hover, .nav-logo:hover { text-decoration: none; opacity: .95; }
 .logo span, .nav-logo span { color: var(--text); font-weight: 400; }
 .logo-img {
-  width: min(420px, 62vw);
-  height: auto;
-  max-height: 72px;
+  width: auto;
+  height: 52px;
+  max-height: 52px;
+  max-width: min(180px, 42vw);
   flex-shrink: 0;
   display: block;
   border: none;
-  border-radius: 0;
+  border-radius: 8px;
   box-shadow: none;
   background: transparent;
+  object-fit: contain;
 }
 .logo-img-square {
   width: 36px; height: 36px; max-width: 36px; border-radius: 8px;
@@ -72,12 +74,13 @@ a:hover { text-decoration: underline; }
 
 .hero { text-align: center; padding: 4rem 1.5rem 3rem; max-width: 900px; margin: 0 auto; }
 .hero-logo {
-  width: min(380px, 90vw);
+  width: min(320px, 88vw);
   height: auto;
-  margin: 0 auto 0.75rem;
+  margin: 0 auto 1rem;
   display: block;
+  border-radius: 12px;
+  object-fit: contain;
   border: none;
-  border-radius: 0;
   box-shadow: none;
   background: transparent;
   filter: none;

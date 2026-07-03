@@ -7,9 +7,9 @@
   window.AURAFX_API_BASE = isFile ? '' : '';
   window.AURAFX_IS_FILE_MODE = isFile;
   window.AURAFX_CLIENT_POLL_MS = 1000;
-  var LOGO_VER = '5';
-  var LOGO = '/assets/aura-logo.svg?v=' + LOGO_VER;
-  var LOGO_WIDE = '/assets/aura-logo-wide.svg?v=' + LOGO_VER;
+  var LOGO_VER = '6';
+  var LOGO = '/assets/aura-icon-140.png?v=' + LOGO_VER;
+  var LOGO_WIDE = '/assets/aurafx-elite-logo.png?v=' + LOGO_VER;
 
   function assetUrl(path) {
     return (window.AURAFX_API_BASE || '') + path;
@@ -19,7 +19,7 @@
     if (!document.querySelector('link[data-aurafx-icon]')) {
       var link = document.createElement('link');
       link.rel = 'icon';
-      link.type = 'image/svg+xml';
+      link.type = 'image/png';
       link.href = assetUrl(LOGO);
       link.setAttribute('data-aurafx-icon', '1');
       document.head.appendChild(link);
