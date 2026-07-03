@@ -59,7 +59,7 @@
     return '<p class="muted" style="font-size:.72rem;margin-bottom:.5rem">' +
       '<span id="gmPriceLiveBadge" class="live-tick-badge">● ' + live + '</span> ' +
       'Prices: <strong>' + esc(src) + '</strong> · last update ' + t +
-      ' · auto-refresh every 60s</p>';
+      ' · prices refresh every 1s</p>';
   }
 
   function formatNewsItems(items) {
@@ -830,10 +830,7 @@
   function init() {
     loadMarkets();
     if (ownerRefreshTimer) clearInterval(ownerRefreshTimer);
-    ownerRefreshTimer = setInterval(loadMarkets, 60000);
-    setInterval(function () {
-      if (window.AURAFX_refreshLiveQuotes) window.AURAFX_refreshLiveQuotes();
-    }, 30000);
+    ownerRefreshTimer = setInterval(loadMarkets, 30000);
     document.addEventListener('aurafx-quotes-updated', function () {
       if (window.AURAFX_TICKER) window.AURAFX_TICKER.syncFromLiveQuotes();
     });

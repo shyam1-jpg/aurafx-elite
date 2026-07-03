@@ -8,7 +8,8 @@
   const JOURNAL_KEY = 'aurafx_journal';
   const CLIENT_KEY = 'aurafx_client';
   const THEME_KEY = 'aurafx_dash_theme';
-  const REFRESH_MS = 60000;
+  const REFRESH_MS = 5000;
+  const QUOTE_UI_MS = 1000;
   const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
   const IMAGE_EXT = /\.(png|jpe?g|webp)$/i;
 
@@ -161,7 +162,7 @@
       live: false,
       source: 'Reference data (offline)',
       updatedAt: new Date().toISOString(),
-      refreshSeconds: 30,
+      refreshSeconds: 1,
       forex: bases.forex || {},
       metals: bases.metals || {},
       crypto: bases.crypto || {},
@@ -218,6 +219,21 @@
     el.innerHTML = items.length > 1
       ? items.join('')
       : '<span class="dash-ticker-item muted">Live feed temporarily unavailable. Showing demo/reference data.</span>';
+  }
+
+  function updateQuoteAgeUi() {
+    const qa = quoteAgeSec();
+    const kQuoteAge = $('kpiQuoteAge');
+    if (kQuoteAge) kQuoteAge.textContent = qa != null ? qa + 's' : '—';
+    const grid = $('healthGrid');
+    if (grid && grid.children.length) {
+      const first = grid.children[0];
+      if (first) {
+        first.className = 'health-item ' + (qa != null && qa < 10 ? 'ok' : 'fail');
+        const spans = first.querySelectorAll('span');
+        if (spans[1]) spans[1].textContent = qa != null ? qa + 's old' : 'reference';
+      }
+    }
   }
 
   document.addEventListener('aurafx-quotes-updated', renderTicker);
@@ -372,7 +388,7 @@
     if (!grid) return;
     const qa = quoteAgeSec();
     const checks = [
-      ['Quotes API', qa != null && qa < 300, qa != null ? qa + 's old' : 'reference'],
+      ['Quotes API', qa != null && qa < 10, qa != null ? qa + 's old' : 'reference'],
       ['Pro summary', !!pro.updatedAt, pro.dataSource || 'ok'],
       ['Risk feed', !!(risk && risk.updatedAt), 'calendar'],
       ['News feed', true, 'RSS/cache'],
@@ -888,4 +904,5 @@
 
   refresh();
   setInterval(refresh, REFRESH_MS);
+  setInterval(updateQuoteAgeUi, QUOTE_UI_MS);
 })();

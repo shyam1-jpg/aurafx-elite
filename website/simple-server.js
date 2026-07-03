@@ -729,11 +729,8 @@ function apiWiring() {
   };
 }
 
-function tickLiveData() {
+function tickQuotesFast() {
   cache.updatedAt = new Date().toISOString();
-  if (cache.nextEvent && cache.nextEvent.minutesUntil > 0) {
-    cache.nextEvent.minutesUntil = Math.max(0, cache.nextEvent.minutesUntil - 1);
-  }
   if (quotesService) {
     quotesService.getQuotes()
       .then((q) => {
@@ -741,9 +738,15 @@ function tickLiveData() {
           cache.lastQuoteChanges = q.changes;
           if (marketSessions) cache.mood = marketSessions.deriveMood(q.changes);
         }
-        cache.updatedAt = new Date().toISOString();
+        cache.updatedAt = q.updatedAt || new Date().toISOString();
       })
       .catch(() => { /* keep last mood */ });
+  }
+}
+
+function tickLiveDataSlow() {
+  if (cache.nextEvent && cache.nextEvent.minutesUntil > 0) {
+    cache.nextEvent.minutesUntil = Math.max(0, cache.nextEvent.minutesUntil - 1);
   }
   if (economicCalendar) {
     economicCalendar.refresh()
@@ -774,11 +777,14 @@ function tickLiveData() {
   }
 }
 
-setInterval(tickLiveData, 60000);
+const FAST_TICK_MS = Number(process.env.LIVE_TICK_MS) || 5000;
+setInterval(tickQuotesFast, FAST_TICK_MS);
+setInterval(tickLiveDataSlow, 60000);
 if (economicCalendar) {
   economicCalendar.refresh(true).then(applyCalendarToCache).catch(() => {});
 }
-tickLiveData();
+tickQuotesFast();
+tickLiveDataSlow();
 
 function dashboardAuth(req) {
   const id = req.headers['x-dashboard-id'] || '';
@@ -895,7 +901,11 @@ function serveFile(res, filePath) {
     }
     const ext = path.extname(filePath).toLowerCase();
     const headers = securityHeaders({ 'Content-Type': MIME[ext] || 'application/octet-stream' });
-    if (ext === '.html') headers['Cache-Control'] = 'no-store, no-cache, must-revalidate';
+    if (ext === '.html') {
+      headers['Cache-Control'] = 'no-store, no-cache, must-revalidate';
+    } else if (ext === '.js' || ext === '.css' || ext === '.svg') {
+      headers['Cache-Control'] = 'no-cache, must-revalidate';
+    }
     res.writeHead(200, headers);
     res.end(data);
   });

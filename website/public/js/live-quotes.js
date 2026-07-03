@@ -4,12 +4,14 @@
 (function () {
   var API = window.AURAFX_API_BASE || '';
 
+  var POLL_MS = Number(window.AURAFX_CLIENT_POLL_MS) || 1000;
+
   window.AURAFX_LIVE_QUOTES = {
     loaded: false,
     live: false,
     source: 'loading',
     updatedAt: null,
-    refreshSeconds: 30,
+    refreshSeconds: 1,
     forex: {},
     metals: {},
     crypto: {},
@@ -22,7 +24,7 @@
     window.AURAFX_LIVE_QUOTES.live = !!d.live;
     window.AURAFX_LIVE_QUOTES.source = d.source || 'AuraFX server';
     window.AURAFX_LIVE_QUOTES.updatedAt = d.updatedAt || new Date().toISOString();
-    window.AURAFX_LIVE_QUOTES.refreshSeconds = d.refreshSeconds || 30;
+    window.AURAFX_LIVE_QUOTES.refreshSeconds = d.refreshSeconds || 1;
     window.AURAFX_LIVE_QUOTES.forex = d.forex || {};
     window.AURAFX_LIVE_QUOTES.metals = d.metals || {};
     window.AURAFX_LIVE_QUOTES.crypto = d.crypto || {};
@@ -47,7 +49,7 @@
       live: false,
       source: 'Reference data — live feed temporarily unavailable',
       updatedAt: new Date().toISOString(),
-      refreshSeconds: 30,
+      refreshSeconds: 1,
       forex: bases.forex || {},
       metals: bases.metals || {},
       crypto: bases.crypto || {},
@@ -62,5 +64,5 @@
   };
 
   window.AURAFX_refreshLiveQuotes();
-  setInterval(function () { window.AURAFX_refreshLiveQuotes(); }, 30000);
+  setInterval(function () { window.AURAFX_refreshLiveQuotes(); }, POLL_MS);
 })();

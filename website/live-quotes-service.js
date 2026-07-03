@@ -4,7 +4,10 @@
  */
 const https = require('https');
 
-const CACHE_TTL_MS = Number(process.env.QUOTES_CACHE_MS) || 30000;
+const UPSTREAM_MS = Number(process.env.QUOTES_UPSTREAM_MS) || 5000;
+const CLIENT_POLL_SEC = Number(process.env.CLIENT_POLL_SEC) || 1;
+/** @deprecated use UPSTREAM_MS — kept for env compatibility */
+const CACHE_TTL_MS = UPSTREAM_MS;
 const FINNHUB_KEY = String(process.env.FINNHUB_API_KEY || '').trim();
 
 let cache = { at: 0, payload: null };
@@ -275,7 +278,8 @@ async function fetchAllQuotes() {
     live,
     source: live ? parts.join(' · ') : 'Reference fallback',
     updatedAt: new Date().toISOString(),
-    refreshSeconds: Math.round(CACHE_TTL_MS / 1000),
+    refreshSeconds: CLIENT_POLL_SEC,
+    upstreamSeconds: Math.round(UPSTREAM_MS / 1000),
     forex,
     metals,
     crypto,
@@ -284,21 +288,53 @@ async function fetchAllQuotes() {
   };
 }
 
+function decoratePayload(payload) {
+  if (!payload) return payload;
+  const ageMs = cache.at ? Math.max(0, Date.now() - cache.at) : 0;
+  return Object.assign({}, payload, {
+    refreshSeconds: CLIENT_POLL_SEC,
+    upstreamSeconds: Math.round(UPSTREAM_MS / 1000),
+    cacheAgeMs: ageMs
+  });
+}
+
 async function getQuotes(force) {
-  if (!force && cache.payload && Date.now() - cache.at < CACHE_TTL_MS) {
-    return cache.payload;
+  const age = cache.at ? Date.now() - cache.at : Infinity;
+  const stale = age >= UPSTREAM_MS;
+
+  if (!force && cache.payload && !stale) {
+    return decoratePayload(cache.payload);
   }
-  if (inflight) return inflight;
+
+  if (!force && cache.payload && stale) {
+    if (!inflight) {
+      inflight = fetchAllQuotes()
+        .then((payload) => {
+          cache.at = Date.now();
+          cache.payload = payload;
+          inflight = null;
+          return payload;
+        })
+        .catch((e) => {
+          inflight = null;
+          throw e;
+        });
+    }
+    return decoratePayload(cache.payload);
+  }
+
+  if (inflight) return inflight.then(decoratePayload);
+
   inflight = fetchAllQuotes()
     .then((payload) => {
       cache.at = Date.now();
       cache.payload = payload;
       inflight = null;
-      return payload;
+      return decoratePayload(payload);
     })
     .catch((e) => {
       inflight = null;
-      if (cache.payload) return cache.payload;
+      if (cache.payload) return decoratePayload(cache.payload);
       throw e;
     });
   return inflight;
@@ -307,7 +343,7 @@ async function getQuotes(force) {
 function startAutoRefresh() {
   setInterval(() => {
     getQuotes(true).catch(() => {});
-  }, CACHE_TTL_MS);
+  }, UPSTREAM_MS);
 }
 
-module.exports = { getQuotes, startAutoRefresh, CACHE_TTL_MS };
+module.exports = { getQuotes, startAutoRefresh, CACHE_TTL_MS, UPSTREAM_MS, CLIENT_POLL_SEC };

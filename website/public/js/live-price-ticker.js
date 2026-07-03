@@ -4,7 +4,6 @@
 (function () {
   var prices = {};
   var started = false;
-  var apiMs = 30000;
 
   function key(cat, sym) {
     return cat + ':' + sym;
@@ -106,10 +105,8 @@
   function start() {
     if (started) return;
     started = true;
-    setInterval(function () {
-      if (window.AURAFX_refreshLiveQuotes) window.AURAFX_refreshLiveQuotes();
-    }, apiMs);
     document.addEventListener('aurafx-quotes-updated', syncFromLiveQuotes);
+    setInterval(updateBadge, 1000);
     updateBadge();
   }
 

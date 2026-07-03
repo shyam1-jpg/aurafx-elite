@@ -1,6 +1,6 @@
 /**
  * Reference market prices (USD) — OFFLINE FALLBACK ONLY when /api/quotes unavailable.
- * Live prices come from the AuraFX server (Yahoo + CoinGecko), refreshed every 30 seconds.
+ * Live prices come from the AuraFX server (Yahoo + CoinGecko), refreshed every second on the client.
  */
 window.AURAFX_PRICE_BASES = {
   forex: {

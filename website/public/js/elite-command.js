@@ -271,10 +271,15 @@
     pingServer().then(renderTicker);
     loadSummaries().then(renderAll);
 
+    var lastFeedPush = 0;
     document.addEventListener('aurafx-quotes-updated', function () {
-      pushFeed('Quotes refreshed', window.AURAFX_LIVE_QUOTES.source || '');
-      renderAll();
+      renderTicker();
       if (window.AURAFX_pushLivePrices) window.AURAFX_pushLivePrices();
+      var now = Date.now();
+      if (now - lastFeedPush >= 10000) {
+        lastFeedPush = now;
+        pushFeed('Quotes refreshed', window.AURAFX_LIVE_QUOTES.source || '');
+      }
     });
 
     setInterval(function () {
