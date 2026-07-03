@@ -41,9 +41,6 @@ body.theme-light .dash-sidebar { background: #e8eaf2; border-color: #ccc; }
   max-width: 100%;
   max-height: 56px;
   height: auto;
-  mix-blend-mode: lighten;
-  transform: scale(1.07);
-  transform-origin: center left;
   -webkit-mask-image: url('../assets/aura-logo-frame-mask.svg');
   mask-image: url('../assets/aura-logo-frame-mask.svg');
   -webkit-mask-size: 100% 100%;

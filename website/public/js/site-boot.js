@@ -7,7 +7,7 @@
   window.AURAFX_API_BASE = isFile ? '' : '';
   window.AURAFX_IS_FILE_MODE = isFile;
   window.AURAFX_CLIENT_POLL_MS = 1000;
-  var LOGO_VER = '6';
+  var LOGO_VER = '7';
   var LOGO = '/assets/aura-icon-140.png?v=' + LOGO_VER;
   var LOGO_WIDE = '/assets/aurafx-elite-logo.png?v=' + LOGO_VER;
 
@@ -74,11 +74,11 @@
   function syncStylesheets() {
     document.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
       var href = link.getAttribute('href') || '';
-      if (/css\/site\.css/i.test(href) && !/v=8/.test(href)) {
-        link.setAttribute('href', 'css/site.css?v=8');
+      if (/css\/site\.css/i.test(href) && !/v=10/.test(href)) {
+        link.setAttribute('href', 'css/site.css?v=10');
       }
-      if (/css\/pro-dashboard\.css/i.test(href) && !/v=8/.test(href)) {
-        link.setAttribute('href', 'css/pro-dashboard.css?v=8');
+      if (/css\/pro-dashboard\.css/i.test(href) && !/v=10/.test(href)) {
+        link.setAttribute('href', 'css/pro-dashboard.css?v=10');
       }
     });
   }

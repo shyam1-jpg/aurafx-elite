@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true">
   <defs>
-    <filter id="auraGoldFeather" x="-8%" y="-8%" width="116%" height="116%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="0.85" />
+    <!-- Feather only at the gold frame edge — inner logo stays fully opaque -->
+    <filter id="auraGoldFeather" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.45" />
     </filter>
   </defs>
-  <!-- Matches gold frame in aurafx-elite-logo.png  soft fade at the golden border -->
-  <rect x="3.2" y="3.2" width="93.6" height="93.6" rx="13.8" ry="13.8" fill="#fff" filter="url(#auraGoldFeather)" />
+  <rect x="3.4" y="3.4" width="93.2" height="93.2" rx="13.6" ry="13.6" fill="#fff" filter="url(#auraGoldFeather)" />
 </svg>
