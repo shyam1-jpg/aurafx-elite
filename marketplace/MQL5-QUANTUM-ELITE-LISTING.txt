@@ -1,0 +1,39 @@
+# MQL5 MARKET LISTING — AuraFX Quantum Elite EA (flagship)
+# Copy into seller form. NO guaranteed win rate / profit claims.
+
+PRODUCT NAME:
+AuraFX Quantum Elite EA MT5
+
+SHORT DESCRIPTION:
+Premium XAUUSD-focused expert advisor with 5-layer validation, pro dashboard, spread filter, and strict risk controls. No grid. No martingale. Educational software only.
+
+FULL DESCRIPTION:
+AuraFX Quantum Elite is the flagship expert advisor from Aura Elite FX — built for traders who want institutional-style filtering on gold and major forex pairs.
+
+WHAT MAKES IT DIFFERENT:
+• 5-layer validation before every trade (score, multi-timeframe, checklist, news, spread)
+• Optimised for XAUUSD (Gold) on M15 and H1 — also works on major FX pairs
+• Professional on-chart dashboard — score, checklist, session, structure
+• Fixed risk % lot sizing with suggested SL/TP from market structure
+• Trailing stop and breakeven protection
+• Daily loss lock — pauses new entries after your limit
+• NO grid, NO martingale, NO hedging basket
+
+RISK DISCLAIMER:
+Trading forex and gold involves substantial risk. Past backtest or demo results do not guarantee future performance. Aura Elite FX provides analysis tools — not financial advice.
+
+RECOMMENDED:
+• Symbol: XAUUSD
+• Timeframe: M15 or H1
+• Account: Demo first, then live with 1% risk
+• Broker: ECN / low spread
+
+SUGGESTED PRICE: $1,499 USD (rent $149/mo)
+BUNDLE: Include with AuraFX Elite Signals + Risk Guardian at $1,999
+
+SCREENSHOTS:
+1. XAUUSD H1 with gold dashboard visible
+2. Strategy Tester equity curve (demo)
+3. Inputs panel showing risk settings
+
+ICON: marketplace/icons/aura-icon-200.png

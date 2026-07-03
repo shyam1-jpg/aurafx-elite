@@ -22,8 +22,6 @@
       <ul class="dash-nav" role="tablist">
         <li><button type="button" class="active" data-panel="overview" role="tab" aria-selected="true">Overview</button></li>
         <li><button type="button" data-panel="markets" role="tab">Markets</button></li>
-        <li><a href="scanner.html" class="dash-nav-link">Market scanner</a></li>
-        <li><a href="risk-calculator.html" class="dash-nav-link">Risk calculator</a></li>
         <li><button type="button" data-panel="calendar" role="tab">Calendar &amp; News</button></li>
         <li><button type="button" data-panel="journal" role="tab">Trade journal</button></li>
         <li><button type="button" data-panel="analytics" role="tab">Analytics</button></li>
@@ -62,6 +60,7 @@
               <span class="user-avatar" id="userAvatar">?</span>
               <span id="userName">Guest</span>
             </div>
+            <a href="register.html" class="btn-dash" id="btnGuestAuth">Register / Sign in</a>
             <button type="button" class="btn-dash" id="btnSignOut" hidden>Sign out</button>
           </div>
         </div>
@@ -202,9 +201,10 @@
                 <input type="text" id="jReason" name="reason" placeholder="Reason / setup" aria-label="Reason" />
                 <button type="submit" class="btn-primary">Save trade</button>
               </form>
-              <div style="margin:.75rem 0;display:flex;gap:.5rem;flex-wrap:wrap">
+              <div style="margin:.75rem 0;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
                 <button type="button" class="btn-dash" id="btnExportJournal">Export CSV</button>
                 <button type="button" class="btn-dash" id="btnSyncJournal" hidden>Sync to cloud</button>
+                <span id="cloudSyncNote" class="muted" style="font-size:.85rem"></span>
               </div>
               <div id="journalInsights" class="insights"></div>
               <ul id="journalList" class="journal-list"></ul>
@@ -212,7 +212,7 @@
             <section class="card screenshot-card card-wide" aria-labelledby="screenshotHeading">
               <h2 id="screenshotHeading">Chart screenshot overlay</h2>
               <label for="chartUpload" class="upload-label">Upload chart image</label>
-              <input type="file" id="chartUpload" accept="image/*" />
+              <input type="file" id="chartUpload" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" />
               <canvas id="chartCanvas" width="640" height="360" role="img" aria-label="Chart with illustrative zones"></canvas>
               <pre id="screenshotAnalysis" class="analysis-out">Upload a chart for illustrative zone overlays.</pre>
             </section>
@@ -237,7 +237,7 @@
         <section id="panel-settings" class="dash-panel" role="tabpanel" hidden>
           <div class="card card-wide">
             <h2>Account link</h2>
-            <p class="muted" style="margin-bottom:.75rem">Link your registration to sync journal to cloud (Neon database when configured on server).</p>
+            <p id="cloudSyncSettingsNote" class="muted" style="margin-bottom:.75rem">Link your registration email to sync your journal when cloud storage is enabled on the server.</p>
             <div class="settings-block">
               <label for="linkEmail">Registration email</label>
               <input type="email" id="linkEmail" placeholder="you@email.com" aria-label="Registration email" />

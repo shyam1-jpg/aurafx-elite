@@ -1,0 +1,92 @@
+# MQL5 MARKET LISTING — AuraFX Quantum Queen EA (flagship gold grid)
+
+# Modelled after top MQL5 seller patterns — original Aura Elite FX code.
+
+# NO guaranteed profit / win-rate claims.
+
+
+
+PRODUCT NAME:
+
+AuraFX Quantum Queen EA MT5
+
+
+
+SHORT DESCRIPTION:
+
+Premium XAUUSD expert advisor with 6 regime-based strategies, smart recovery grid (no martingale doubling), spread filter, news block, and plug-and-play broker presets. Educational software only.
+
+
+
+FULL DESCRIPTION:
+
+AuraFX Quantum Queen is the flagship gold trading engine from Aura Elite FX — built for traders who want a professional, patient XAUUSD system inspired by the best-rated products on MQL5 Market.
+
+
+
+WHAT MAKES IT DIFFERENT:
+
+• 6 built-in strategies that activate by market regime (trend, range, volatility, session)
+
+• Smart trend-following recovery grid — capped lot scaling, NOT martingale doubling
+
+• Basket take-profit and emergency basket stop based on ATR
+
+• Spread filter (default 30 pts) — blocks entries in poor conditions
+
+• News filter — pauses before high-impact USD events
+
+• Daily loss lock — capital preservation first
+
+• Broker presets: IC Markets RAW, RoboForex ECN, Generic ECN
+
+• Risk presets: Low and Medium
+
+• On-chart dashboard — active strategy, basket levels, P/L
+
+
+
+RECOMMENDED SETUP (like top MQL5 gold EAs):
+
+• Symbol: XAUUSD only
+
+• Timeframe: Any (M15 or H1 common)
+
+• Account: Hedging, ECN/RAW low spread
+
+• Deposit: Demo first; $500+ live with proper risk
+
+• VPS: Recommended for 24/5 operation
+
+• 2-decimal gold pricing broker
+
+
+
+RISK DISCLAIMER:
+
+Trading forex and gold involves substantial risk of loss. Past backtest or demo results do not guarantee future performance. Grid systems can experience drawdown. Aura Elite FX provides software tools — not financial advice.
+
+
+
+SUGGESTED PRICE: $1,799 USD (rent $179/mo)
+
+COMPETITOR REF: Quantum Queen MT5 ~$1,999 on MQL5 Market (4.98 rating, 799 reviews)
+
+
+
+SCREENSHOTS:
+
+1. XAUUSD with Quantum Queen dashboard + basket panel
+
+2. Strategy Tester equity curve (demo, 6+ months)
+
+3. Inputs showing Low/Medium risk + broker preset
+
+4. Preset files screenshot
+
+
+
+ICON: marketplace/icons/aura-icon-200.png
+
+PRESETS: AuraFX_QuantumQueen_IC_Low.set, AuraFX_QuantumQueen_IC_Medium.set, AuraFX_QuantumQueen_Robo.set
+

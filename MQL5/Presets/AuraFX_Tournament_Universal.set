@@ -1,0 +1,25 @@
+; ULTRA AGGRESSIVE — maximum demo trades
+InpTradeMode=3
+InpFullyAuto=true
+InpCloseOnOpposite=true
+InpTradeBreakouts=true
+InpMagic=20260815
+InpMaxOpenTrades=3
+InpIgnoreNewsBlock=true
+InpIgnoreScoreCheck=true
+InpAllowForex=true
+InpAllowGold=true
+InpAllowSilver=true
+InpAllowIndices=true
+InpRiskPct=1.0
+InpMinRR=1.0
+InpMaxSpreadPts=120
+InpMaxSpreadIndex=800
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpTrailStartAtr=0.3
+InpUseBreakeven=true
+InpBE_AtrMult=1
+InpMaxDailyLossPct=8.0
+InpNewsBlockMin=5
+InpShowDashboard=true

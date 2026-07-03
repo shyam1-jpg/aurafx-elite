@@ -235,6 +235,27 @@ app.get('/api/risk-summary', (_, res) => {
 
 app.get('/api/pro-summary', (_, res) => res.json(proSummary()));
 
+let signalEngine = null;
+let quotesService = null;
+try { signalEngine = require('./signal-engine'); } catch (_) {}
+try { quotesService = require('./live-quotes-service'); } catch (_) {}
+
+app.get('/api/precision-gold/score', async (_, res) => {
+  if (!signalEngine || !signalEngine.precisionGoldScore) {
+    return res.status(503).json({ error: 'Precision Gold score unavailable' });
+  }
+  const riskContext = {
+    news_imminent: !!(cache.nextEvent && (cache.nextEvent.minutesUntil || 99) < 90),
+    next_event: cache.nextEvent
+  };
+  try {
+    const quotes = quotesService ? await quotesService.getQuotes() : null;
+    res.json(signalEngine.precisionGoldScore(quotes, riskContext));
+  } catch {
+    res.json(signalEngine.precisionGoldScore(null, riskContext));
+  }
+});
+
 app.post('/api/explain', (req, res) => {
   const has = !!(req.body && req.body.hasOpenTrade);
   const ev = cache.nextEvent;

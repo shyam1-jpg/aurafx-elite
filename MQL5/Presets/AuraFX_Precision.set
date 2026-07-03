@@ -1,0 +1,22 @@
+; AuraFX Precision EA — flagship safe demo preset (XAUUSD H1)
+InpMagic=20260830
+InpRiskPct=0.3
+InpMinRR=2.0
+InpMinScore=75
+InpRequireChecklist=true
+InpMaxSpreadPts=40
+InpNewsBlockMin=45
+InpMaxDailyLossPct=2.0
+InpSmartExit=true
+InpQuickTakeProfit=true
+InpQuickTpAtr=0.9
+InpCutLossEarly=true
+InpCutLossAtr=0.75
+InpExitOnOpposite=true
+InpMaxBarsStuck=10
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpTrailStartAtr=0.4
+InpUseBreakeven=true
+InpBE_AtrMult=1
+InpShowDashboard=true

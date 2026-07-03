@@ -59,8 +59,8 @@ int OnInit()
    PlotIndexSetInteger(1, PLOT_ARROW, 234);
    PlotIndexSetInteger(0, PLOT_LINE_COLOR, InpBuyArrowColor);
    PlotIndexSetInteger(1, PLOT_LINE_COLOR, InpSellArrowColor);
-   PlotIndexSetDouble(2, PLOT_LINE_WIDTH, 2);
-   PlotIndexSetDouble(3, PLOT_LINE_WIDTH, 2);
+   PlotIndexSetInteger(2, PLOT_LINE_WIDTH, 2);
+   PlotIndexSetInteger(3, PLOT_LINE_WIDTH, 2);
 
    g_hFast = iMA(_Symbol, PERIOD_CURRENT, InpFastMA_Period, 0, MODE_EMA, PRICE_CLOSE);
    g_hSlow = iMA(_Symbol, PERIOD_CURRENT, InpSlowMA_Period, 0, MODE_EMA, PRICE_CLOSE);

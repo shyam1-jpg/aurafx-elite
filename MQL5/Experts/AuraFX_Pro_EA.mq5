@@ -30,6 +30,12 @@ input bool   InpAllowCover      = true;
 input bool   InpOneTradePerBar  = true;
 input bool   InpShowProPanel    = true;
 
+input group "=== Trailing & breakeven ==="
+input bool   InpUseTrailing     = true;
+input int    InpTrailingPoints  = 120;
+input bool   InpUseBreakeven    = true;
+input int    InpBreakevenPoints = 80;
+
 CTrade trade;
 AuraFX_ProState g_pro;
 datetime g_lastBar = 0;
@@ -87,6 +93,8 @@ void OnTick()
 
    if(InpShowProPanel)
       AuraFX_DrawProDashboard(ChartID(), PRO_PREFIX, 16, 180, g_pro, _Symbol, sig);
+
+   ManageExits();
 
    if(g_pro.crash_alert)
       AuraFX_SendRiskAlert("PRO EA CRASH ALERT", "Consider protecting open positions.", true);
@@ -152,6 +160,42 @@ void CloseAll()
       if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
       if(PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
       trade.PositionClose(tk);
+     }
+  }
+
+void ManageExits()
+  {
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+     {
+      ulong ticket = PositionGetTicket(i);
+      if(!PositionSelectByTicket(ticket)) continue;
+      if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
+
+      bool isBuy = PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY;
+      double openPrice = PositionGetDouble(POSITION_PRICE_OPEN);
+      double currentSL = PositionGetDouble(POSITION_SL);
+      double currentTP = PositionGetDouble(POSITION_TP);
+      double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
+      double ask = SymbolInfoDouble(_Symbol, SYMBOL_ASK);
+      double profitPts = isBuy ? (bid - openPrice) / _Point : (openPrice - ask) / _Point;
+
+      if(InpUseBreakeven && profitPts >= InpBreakevenPoints)
+        {
+         double beSL = isBuy ? openPrice + 5 * _Point : openPrice - 5 * _Point;
+         if(isBuy && currentSL < beSL)
+            trade.PositionModify(ticket, beSL, currentTP);
+         if(!isBuy && (currentSL == 0.0 || currentSL > beSL))
+            trade.PositionModify(ticket, beSL, currentTP);
+        }
+      if(InpUseTrailing && profitPts >= InpTrailingPoints)
+        {
+         double trailSL = isBuy ? bid - InpTrailingPoints * _Point : ask + InpTrailingPoints * _Point;
+         if(isBuy && trailSL > currentSL + _Point)
+            trade.PositionModify(ticket, trailSL, currentTP);
+         if(!isBuy && (currentSL == 0.0 || trailSL < currentSL - _Point))
+            trade.PositionModify(ticket, trailSL, currentTP);
+        }
      }
   }
 

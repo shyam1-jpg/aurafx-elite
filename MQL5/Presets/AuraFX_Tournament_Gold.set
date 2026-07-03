@@ -1,0 +1,11 @@
+; AGGRESSIVE — Gold Reaper
+InpLots=0.02
+InpAutoLots=true
+InpRiskPct=1.5
+InpSlPoints=300
+InpTpPoints=600
+InpMagic=20260701
+InpUseTrailing=true
+InpTrailPts=150
+InpBlockNews=false
+InpShowPanel=true

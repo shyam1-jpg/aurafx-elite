@@ -1,0 +1,22 @@
+; AuraFX Elite Classic — EURUSD H1 tuned
+InpEMA_Fast=50||50||1||500||N
+InpEMA_Slow=200||200||1||500||N
+InpRSI_Period=14||14||1||50||N
+InpRSI_BullLevel=55.0||55.0||50.0||60.0||N
+InpRSI_BearLevel=45.0||45.0||40.0||50.0||N
+InpMACD_Fast=12||12||1||20||N
+InpMACD_Slow=26||26||1||50||N
+InpMACD_Signal=9||9||1||20||N
+InpATR_Period=14||14||1||50||N
+InpATR_SL_Multi=1.2||1.2||0.5||2.0||N
+InpATR_TP_Multi=3.0||3.0||1.0||5.0||N
+InpRiskPercent=1.0||1.0||0.1||3.0||N
+InpMaxSpreadPts=25.0||25.0||5.0||50.0||N
+InpMaxOpenTrades=1||1||1||5||N
+InpUseTrailingStop=true||false||0||true||N
+InpTrailATRMulti=0.8||0.8||0.1||2.0||N
+InpUseSessionFilter=true||false||0||true||N
+InpSessionStartHour=7||7||1||12||N
+InpSessionEndHour=20||20||1||23||N
+InpMagicNumber=202402||202402||1||999999||N
+InpEA_Comment=AuraFX Elite Tuned EUR

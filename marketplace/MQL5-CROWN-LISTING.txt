@@ -1,0 +1,94 @@
+# MQL5 MARKET LISTING — AuraFX Crown EA (Ultimate flagship)
+
+# Fuses Quantum Queen MT5 (#118805) + Nexorion Initium Novum (#176296)
+
+# Original Aura Elite FX code — NOT a copy of proprietary sellers.
+
+
+
+PRODUCT NAME:
+
+AuraFX Crown EA MT5 — Quantum Queen + Nexorion Fusion
+
+
+
+SHORT DESCRIPTION:
+
+Ultimate XAUUSD expert advisor combining Quantum Queen's 8-strategy smart grid with Nexorion's BSL/SSL liquidity mapping, equilibrium zones, and on-chart zone visualization. Three modes: Hybrid, Nexorion, Quantum. Educational only.
+
+
+
+FULL DESCRIPTION:
+
+AuraFX Crown is the flagship gold engine that merges the two highest-rated approaches on MQL5 Market into one plug-and-play system.
+
+
+
+FROM QUANTUM QUEEN MT5 (4.98★, 74k+ demos):
+
+• 8 regime-based strategies (momentum, structure, range, volatility, session, liquidity)
+
+• Smart trend-following recovery grid — capped lots, NO martingale doubling
+
+• Spread filter (30 pts), news block, daily loss lock
+
+• Broker presets: IC RAW, RoboForex ECN, Generic ECN
+
+• Patient, quality-over-quantity entries
+
+
+
+FROM NEXORION INITIUM NOVUM (5.0★):
+
+• BSL/SSL liquidity pool detection
+
+• Equilibrium (EQ) level — Premium / Discount zone filtering
+
+• Market phase resonance (Accumulation, Markup, Distribution, Markdown)
+
+• Dynamic zone mapping drawn on chart (green discount, red premium)
+
+• Deterministic stop-loss per trade in Nexorion mode
+
+• Linear risk — no toxic averaging in precision mode
+
+
+
+THREE TRADING MODES:
+
+1. HYBRID (recommended) — Liquidity-validated entries + optional smart grid
+
+2. NEXORION — Single-trade precision, zone map, deterministic SL
+
+3. QUANTUM — Full Queen-style multi-strategy grid
+
+
+
+RECOMMENDED:
+
+• Symbol: XAUUSD | Timeframe: H1 (Nexorion style) or M15
+
+• Account: Hedging for grid mode | ECN/RAW broker
+
+• VPS for 24/5 | Demo first
+
+
+
+SUGGESTED PRICE: $1,999 USD (rent $199/mo)
+
+POSITIONING: Competes with Quantum Queen ($1,999) + Nexorion ($699) in one bundle
+
+
+
+PRESETS:
+
+• AuraFX_Crown_Hybrid.set — best of both
+
+• AuraFX_Crown_Nexorion.set — precision liquidity only
+
+• AuraFX_Crown_Quantum.set — grid mode only
+
+
+
+ICON: marketplace/icons/aura-icon-200.png
+

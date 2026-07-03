@@ -41,13 +41,23 @@
     }
   }
 
+  function applyFallbackBases() {
+    var bases = window.AURAFX_PRICE_BASES || {};
+    applyPayload({
+      live: false,
+      source: 'Reference data — live feed temporarily unavailable',
+      updatedAt: new Date().toISOString(),
+      refreshSeconds: 30,
+      forex: bases.forex || {},
+      metals: bases.metals || {},
+      crypto: bases.crypto || {},
+      changes: {}
+    });
+  }
+
   window.AURAFX_refreshLiveQuotes = async function () {
     var ok = await fetchFromServer();
-    if (!ok) {
-      window.AURAFX_LIVE_QUOTES.source = 'Offline — visit aurafxelite.com for live data';
-      window.AURAFX_LIVE_QUOTES.live = false;
-      document.dispatchEvent(new CustomEvent('aurafx-quotes-updated'));
-    }
+    if (!ok) applyFallbackBases();
     return window.AURAFX_LIVE_QUOTES;
   };
 

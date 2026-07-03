@@ -20,8 +20,10 @@ enum ENUM_AURA_SIGNAL
 //--- Asset class auto-detect
 enum ENUM_AURA_ASSET
   {
-   AURA_ASSET_FOREX = 0,
-   AURA_ASSET_GOLD  = 1
+   AURA_ASSET_FOREX  = 0,
+   AURA_ASSET_GOLD   = 1,
+   AURA_ASSET_INDEX  = 2,
+   AURA_ASSET_SILVER = 3
   };
 
 //--- Panel theme colors (elegant gold-on-obsidian)
@@ -44,7 +46,23 @@ ENUM_AURA_ASSET AuraFX_DetectAsset(const string symbol)
    StringToUpper(s);
    if(StringFind(s, "XAU") >= 0 || StringFind(s, "GOLD") >= 0)
       return AURA_ASSET_GOLD;
+   if(StringFind(s, "XAG") >= 0 || StringFind(s, "SILVER") >= 0)
+      return AURA_ASSET_SILVER;
+   if(StringFind(s, "US30") >= 0 || StringFind(s, "US500") >= 0 || StringFind(s, "SPX") >= 0 ||
+      StringFind(s, "SP500") >= 0 || StringFind(s, "NAS") >= 0 || StringFind(s, "US100") >= 0 ||
+      StringFind(s, "USTEC") >= 0 || StringFind(s, "GER") >= 0 || StringFind(s, "DAX") >= 0 ||
+      StringFind(s, "UK100") >= 0 || StringFind(s, "FTSE") >= 0 || StringFind(s, "JP225") >= 0 ||
+      StringFind(s, "NI225") >= 0 || StringFind(s, "US2000") >= 0)
+      return AURA_ASSET_INDEX;
    return AURA_ASSET_FOREX;
+  }
+
+string AuraFX_AssetLabel(const ENUM_AURA_ASSET asset)
+  {
+   if(asset == AURA_ASSET_GOLD)   return "GOLD";
+   if(asset == AURA_ASSET_SILVER) return "SILVER";
+   if(asset == AURA_ASSET_INDEX)  return "INDEX";
+   return "FOREX";
   }
 
 //+------------------------------------------------------------------+
@@ -55,6 +73,24 @@ void AuraFX_GetPeriods(const ENUM_AURA_ASSET asset,
                        int &macdFast, int &macdSlow, int &macdSignal)
   {
    if(asset == AURA_ASSET_GOLD)
+     {
+      emaFast    = 8;
+      emaSlow    = 21;
+      rsiPeriod  = 14;
+      macdFast   = 12;
+      macdSlow   = 26;
+      macdSignal = 9;
+     }
+   else if(asset == AURA_ASSET_INDEX)
+     {
+      emaFast    = 10;
+      emaSlow    = 24;
+      rsiPeriod  = 14;
+      macdFast   = 12;
+      macdSlow   = 26;
+      macdSignal = 9;
+     }
+   else if(asset == AURA_ASSET_SILVER)
      {
       emaFast    = 8;
       emaSlow    = 21;
@@ -87,7 +123,115 @@ double AuraFX_Buffer(const int handle, const int buffer, const int shift)
   }
 
 //+------------------------------------------------------------------+
-//| Core confluence signal engine                                    |
+//| Indicator handle cache — avoids create/release every tick        |
+//| (fixes Elite_Signals "indicator is too slow" on live charts)     |
+//+------------------------------------------------------------------+
+struct AuraFX_IndCacheRow
+  {
+   string            symbol;
+   ENUM_TIMEFRAMES   tf;
+   int               emaFast, emaSlow, rsiP, macdF, macdS, macdSig;
+   int               hEmaFast, hEmaSlow, hRsi, hMacd, hAtr;
+  };
+
+struct AuraFX_MACacheRow
+  {
+   string            symbol;
+   ENUM_TIMEFRAMES   tf;
+   int               period;
+   int               handle;
+  };
+
+AuraFX_IndCacheRow g_auraIndCache[];
+AuraFX_MACacheRow  g_auraMaCache[];
+
+int AuraFX_CacheFindBundle(const string symbol, const ENUM_TIMEFRAMES tf,
+                           const int emaFast, const int emaSlow, const int rsiP,
+                           const int macdF, const int macdS, const int macdSig)
+  {
+   for(int i = 0; i < ArraySize(g_auraIndCache); i++)
+     {
+      if(g_auraIndCache[i].symbol == symbol && g_auraIndCache[i].tf == tf &&
+         g_auraIndCache[i].emaFast == emaFast && g_auraIndCache[i].emaSlow == emaSlow &&
+         g_auraIndCache[i].rsiP == rsiP && g_auraIndCache[i].macdF == macdF &&
+         g_auraIndCache[i].macdS == macdS && g_auraIndCache[i].macdSig == macdSig)
+         return i;
+     }
+   return -1;
+  }
+
+bool AuraFX_CacheEnsureBundle(const string symbol, const ENUM_TIMEFRAMES tf,
+                              const int emaFast, const int emaSlow, const int rsiP,
+                              const int macdF, const int macdS, const int macdSig,
+                              int &hEmaFast, int &hEmaSlow, int &hRsi, int &hMacd, int &hAtr)
+  {
+   int idx = AuraFX_CacheFindBundle(symbol, tf, emaFast, emaSlow, rsiP, macdF, macdS, macdSig);
+   if(idx < 0)
+     {
+      idx = ArraySize(g_auraIndCache);
+      ArrayResize(g_auraIndCache, idx + 1);
+      g_auraIndCache[idx].symbol   = symbol;
+      g_auraIndCache[idx].tf       = tf;
+      g_auraIndCache[idx].emaFast  = emaFast;
+      g_auraIndCache[idx].emaSlow  = emaSlow;
+      g_auraIndCache[idx].rsiP     = rsiP;
+      g_auraIndCache[idx].macdF    = macdF;
+      g_auraIndCache[idx].macdS    = macdS;
+      g_auraIndCache[idx].macdSig  = macdSig;
+      g_auraIndCache[idx].hEmaFast = iMA(symbol, tf, emaFast, 0, MODE_EMA, PRICE_CLOSE);
+      g_auraIndCache[idx].hEmaSlow = iMA(symbol, tf, emaSlow, 0, MODE_EMA, PRICE_CLOSE);
+      g_auraIndCache[idx].hRsi     = iRSI(symbol, tf, rsiP, PRICE_CLOSE);
+      g_auraIndCache[idx].hMacd    = iMACD(symbol, tf, macdF, macdS, macdSig, PRICE_CLOSE);
+      g_auraIndCache[idx].hAtr     = iATR(symbol, tf, 14);
+     }
+   hEmaFast = g_auraIndCache[idx].hEmaFast;
+   hEmaSlow = g_auraIndCache[idx].hEmaSlow;
+   hRsi     = g_auraIndCache[idx].hRsi;
+   hMacd    = g_auraIndCache[idx].hMacd;
+   hAtr     = g_auraIndCache[idx].hAtr;
+   return (hEmaFast != INVALID_HANDLE && hEmaSlow != INVALID_HANDLE &&
+           hRsi != INVALID_HANDLE && hMacd != INVALID_HANDLE && hAtr != INVALID_HANDLE);
+  }
+
+int AuraFX_CacheMA(const string symbol, const ENUM_TIMEFRAMES tf, const int period)
+  {
+   for(int i = 0; i < ArraySize(g_auraMaCache); i++)
+     {
+      if(g_auraMaCache[i].symbol == symbol && g_auraMaCache[i].tf == tf &&
+         g_auraMaCache[i].period == period)
+         return g_auraMaCache[i].handle;
+     }
+   int h = iMA(symbol, tf, period, 0, MODE_EMA, PRICE_CLOSE);
+   if(h == INVALID_HANDLE) return INVALID_HANDLE;
+   int idx = ArraySize(g_auraMaCache);
+   ArrayResize(g_auraMaCache, idx + 1);
+   g_auraMaCache[idx].symbol = symbol;
+   g_auraMaCache[idx].tf     = tf;
+   g_auraMaCache[idx].period = period;
+   g_auraMaCache[idx].handle = h;
+   return h;
+  }
+
+void AuraFX_IndCacheReleaseAll()
+  {
+   for(int i = 0; i < ArraySize(g_auraIndCache); i++)
+     {
+      if(g_auraIndCache[i].hEmaFast != INVALID_HANDLE) IndicatorRelease(g_auraIndCache[i].hEmaFast);
+      if(g_auraIndCache[i].hEmaSlow != INVALID_HANDLE) IndicatorRelease(g_auraIndCache[i].hEmaSlow);
+      if(g_auraIndCache[i].hRsi != INVALID_HANDLE)     IndicatorRelease(g_auraIndCache[i].hRsi);
+      if(g_auraIndCache[i].hMacd != INVALID_HANDLE)    IndicatorRelease(g_auraIndCache[i].hMacd);
+      if(g_auraIndCache[i].hAtr != INVALID_HANDLE)     IndicatorRelease(g_auraIndCache[i].hAtr);
+     }
+   for(int i = 0; i < ArraySize(g_auraMaCache); i++)
+     {
+      if(g_auraMaCache[i].handle != INVALID_HANDLE) IndicatorRelease(g_auraMaCache[i].handle);
+     }
+   ArrayResize(g_auraIndCache, 0);
+   ArrayResize(g_auraMaCache, 0);
+  }
+
+//+------------------------------------------------------------------+
+//| Core confluence signal engine (cached handles)                   |
 //+------------------------------------------------------------------+
 ENUM_AURA_SIGNAL AuraFX_ComputeSignal(const string symbol,
                                       const ENUM_TIMEFRAMES tf,
@@ -100,14 +244,10 @@ ENUM_AURA_SIGNAL AuraFX_ComputeSignal(const string symbol,
    int emaFast, emaSlow, rsiPeriod, macdFast, macdSlow, macdSignal;
    AuraFX_GetPeriods(asset, emaFast, emaSlow, rsiPeriod, macdFast, macdSlow, macdSignal);
 
-   int hEmaFast = iMA(symbol, tf, emaFast, 0, MODE_EMA, PRICE_CLOSE);
-   int hEmaSlow = iMA(symbol, tf, emaSlow, 0, MODE_EMA, PRICE_CLOSE);
-   int hRsi     = iRSI(symbol, tf, rsiPeriod, PRICE_CLOSE);
-   int hMacd    = iMACD(symbol, tf, macdFast, macdSlow, macdSignal, PRICE_CLOSE);
-   int hAtr     = iATR(symbol, tf, 14);
-
-   if(hEmaFast == INVALID_HANDLE || hEmaSlow == INVALID_HANDLE ||
-      hRsi == INVALID_HANDLE || hMacd == INVALID_HANDLE || hAtr == INVALID_HANDLE)
+   int hEmaFast, hEmaSlow, hRsi, hMacd, hAtr;
+   if(!AuraFX_CacheEnsureBundle(symbol, tf, emaFast, emaSlow, rsiPeriod,
+                                macdFast, macdSlow, macdSignal,
+                                hEmaFast, hEmaSlow, hRsi, hMacd, hAtr))
       return AURA_SIGNAL_NONE;
 
    double emaF0 = AuraFX_Buffer(hEmaFast, 0, shift);
@@ -120,12 +260,6 @@ ENUM_AURA_SIGNAL AuraFX_ComputeSignal(const string symbol,
    double macdM1= AuraFX_Buffer(hMacd, 0, shift + 1);
    double macdS1= AuraFX_Buffer(hMacd, 1, shift + 1);
    double atr0  = AuraFX_Buffer(hAtr, 0, shift);
-
-   IndicatorRelease(hEmaFast);
-   IndicatorRelease(hEmaSlow);
-   IndicatorRelease(hRsi);
-   IndicatorRelease(hMacd);
-   IndicatorRelease(hAtr);
 
    if(emaF0 == EMPTY_VALUE || emaS0 == EMPTY_VALUE || rsi0 == EMPTY_VALUE)
       return AURA_SIGNAL_NONE;
@@ -227,7 +361,7 @@ void AuraFX_DrawPanel(const long chartId,
 
    string lines[7];
    lines[0] = "AuraFX ELITE";
-   lines[1] = symbol + "  |  " + (asset == AURA_ASSET_GOLD ? "GOLD" : "FOREX");
+   lines[1] = symbol + "  |  " + AuraFX_AssetLabel(asset);
    string sigText = "SCANNING...";
    color sigColor = AURA_COLOR_MUTED;
    if(signal == AURA_SIGNAL_BUY)   { sigText = "BUY";   sigColor = AURA_COLOR_BUY; }

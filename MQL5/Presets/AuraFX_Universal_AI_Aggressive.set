@@ -1,0 +1,20 @@
+; AuraFX Universal AI EA — aggressive demo (any symbol)
+InpTradeMode=0
+InpFullyAuto=true
+InpCloseOnOpposite=true
+InpTradeBreakouts=true
+InpMagic=20260815
+InpAllowForex=true
+InpAllowGold=true
+InpAllowSilver=true
+InpAllowIndices=true
+InpRiskPct=1.0
+InpMinRR=1.5
+InpMaxSpreadPts=50
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseBreakeven=true
+InpBE_AtrMult=1
+InpMaxDailyLossPct=3.0
+InpNewsBlockMin=30
+InpShowDashboard=true

@@ -1,0 +1,12 @@
+InpLots=0.05
+InpAutoLots=true
+InpRiskPct=1.0
+InpSlAtrMult=2
+InpTpAtrMult=3
+InpFastEma=3
+InpSlowEma=8
+InpMagic=20260820
+InpMaxPositions=2
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpShowPanel=true

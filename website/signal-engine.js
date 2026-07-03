@@ -215,9 +215,65 @@ function scanAll(quotes, riskContext, options) {
   };
 }
 
+/**
+ * Phase 1 — Precision Gold cloud hook (aligns with AuraFX_Precision_Gold_EA v1).
+ * Score bands mirror EA: trade only when confidence >= 75, strong >= 85.
+ * Not a guaranteed win rate — confidence for dashboard + future EA bridge.
+ */
+function precisionGoldScore(quotes, riskContext) {
+  const sig = buildSignal('XAUUSD', 'H1', quotes, riskContext);
+  const h = new Date().getUTCHours();
+  const londonNy = (h >= 7 && h < 21);
+  const newsBlock = !!(riskContext && riskContext.news_imminent);
+
+  let adjusted = sig.confidence_score;
+  if (!londonNy) adjusted -= 15;
+  if (newsBlock) adjusted -= 20;
+  adjusted = Math.max(0, Math.min(100, Math.round(adjusted)));
+
+  let band = 'NO_TRADE';
+  if (adjusted >= 85) band = 'STRONG';
+  else if (adjusted >= 75) band = 'VALID';
+  else if (adjusted >= 65) band = 'WEAK';
+  else if (adjusted >= 50) band = 'WATCH';
+
+  const eaWouldTrade =
+    band === 'STRONG' || band === 'VALID'
+      ? sig.final_action === 'BUY' || sig.final_action === 'SELL'
+      : false;
+
+  return {
+    product: 'AuraFX_Precision_Gold_EA',
+    version: '1.01',
+    symbol: 'XAUUSD',
+    timeframe: 'H1',
+    confidence_score: adjusted,
+    band,
+    signal: sig.final_action,
+    ea_entry_allowed: eaWouldTrade && londonNy && !newsBlock,
+    session_ok: londonNy,
+    news_blocked: newsBlock,
+    checklist_hint: {
+      min_score: 80,
+      min_rr: 2.0,
+      london_ny_only: true
+    },
+    levels: {
+      entry_zone: sig.entry_zone,
+      stop_loss: sig.stop_loss,
+      take_profit_1: sig.take_profit_1
+    },
+    reason: sig.reason,
+    risk_warning: sig.risk_warning,
+    disclaimer: 'Cloud confidence only — MT5 EA makes final execution. No guaranteed profit.',
+    updated_at: new Date().toISOString()
+  };
+}
+
 module.exports = {
   SCANNER_PAIRS,
   TIMEFRAMES,
   buildSignal,
-  scanAll
+  scanAll,
+  precisionGoldScore
 };

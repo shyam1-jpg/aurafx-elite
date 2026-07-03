@@ -1,0 +1,29 @@
+# Aura Elite FX — MQL5 Market product catalog
+# Suggested listing prices (USD) — similar tier to top MQL5 sellers
+# Educational software only. No guaranteed profit wording.
+
+| Product | File | Type | Suggested price | Rent/mo |
+|---------|------|------|-----------------|---------|
+| AuraFX Elite Signals | AuraFX_Elite_Signals.mq5 | Indicator | $79 | $15 |
+| AuraFX Pro Assistant | AuraFX_Pro_Assistant.mq5 | Indicator | $149 | $25 |
+| AuraFX Trade Assistant | AuraFX_Trade_Assistant.mq5 | Indicator | $99 | $18 |
+| AuraFX Risk Guardian | AuraFX_Risk_Guardian.mq5 | Indicator | $129 | $22 |
+| AuraFX Pro Lite EA | AuraFX_Pro_Lite_EA.mq5 | EA | $199 | $29 |
+| AuraFX Scalper Pro EA | AuraFX_Scalper_Pro_EA.mq5 | EA | $399 | $49 |
+| AuraFX Pulse Engine EA | AuraFX_Pulse_Engine_EA.mq5 | EA | $499 | $59 |
+| AuraFX Breakout EA | AuraFX_Breakout_EA.mq5 | EA | $599 | $69 |
+| AuraFX Gold Reaper EA | AuraFX_Gold_Reaper_EA.mq5 | EA | $849 | $89 |
+| AuraFX Quantum Queen EA | AuraFX_Quantum_Queen_EA.mq5 | EA | $1,799 | $179 |
+| AuraFX Crown EA | AuraFX_Crown_EA.mq5 | EA | $1,999 | $199 |
+| AuraFX ONE World Elite | AuraFX_ONE_World_Elite_EA.mq5 | EA | $2,999 | $249 |
+| AuraFX Elite EA | AuraFX_Elite_EA.mq5 | EA | $999 | $99 |
+| AuraFX Pro EA | AuraFX_Pro_EA.mq5 | EA | $1,199 | $119 |
+| Full bundle (all MT5) | — | Bundle | $1,499 | — |
+
+Bundle names for marketing (like Quantum Queen / Gold Reaper competitors):
+- Gold line: Gold Reaper EA + Risk Guardian + XAUUSD presets
+- Scalper line: Scalper Pro + Pulse Engine + Trade Assistant
+- Elite line: Elite EA + Pro Assistant + Elite Signals
+
+Upload icon: marketplace/icons/aura-icon-200.png
+Screenshots: MT5 chart with gold panel visible on XAUUSD H1

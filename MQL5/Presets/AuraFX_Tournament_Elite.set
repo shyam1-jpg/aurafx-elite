@@ -1,0 +1,25 @@
+; AGGRESSIVE — Elite EA
+InpLots=0.02
+InpRiskPercent=1.0
+InpAutoLots=true
+InpSlPoints=180
+InpTpPoints=360
+InpMagic=202605
+InpUseTrailing=true
+InpTrailingPoints=100
+InpUseBreakeven=true
+InpBreakevenTriggerPts=100
+InpBreakevenLockPts=10
+InpMaxDailyLossPct=5.0
+InpTargetWinRate=76.0
+InpRsiBuyMax=68.0
+InpRsiSellMin=32.0
+InpAtrMultMin=0.22
+InpAllowCover=true
+InpOneTradePerBar=true
+InpShowPanel=true
+InpEnableNewsGuard=true
+InpWarnMinutesBefore=60
+InpBlockNewTradesOnNews=false
+InpSoundRiskAlerts=true
+InpShowRiskDashboard=true

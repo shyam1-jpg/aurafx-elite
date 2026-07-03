@@ -1,0 +1,19 @@
+; NEXORION mode — liquidity zones only, no grid, deterministic SL
+InpMode=0
+InpRiskPreset=0
+InpBrokerPreset=0
+InpMagic=20260915
+InpRiskPct=0.5
+InpFixedLot=0.01
+InpAutoLot=true
+InpMinRR=2.0
+InpUseGrid=false
+InpRequireLiquidity=true
+InpDrawZones=true
+InpLiquidityLookback=60
+InpMaxSpreadPts=30
+InpNewsBlockMin=45
+InpDailyLossPct=2.5
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpShowPanel=true

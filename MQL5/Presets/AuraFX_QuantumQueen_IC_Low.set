@@ -1,0 +1,17 @@
+; IC Markets / VT RAW — Low risk (like Quantum Queen low-risk set)
+InpRiskPreset=0
+InpBrokerPreset=0
+InpMagic=20260901
+InpRiskPct=0.5
+InpFixedLot=0.01
+InpAutoLot=true
+InpMaxGridLevels=3
+InpGridAtrMult=0.95
+InpLotStepMult=0.10
+InpMaxLotMult=1.30
+InpBasketTpAtr=0.50
+InpBasketSlAtr=2.5
+InpMaxSpreadPts=30
+InpNewsBlockMin=45
+InpDailyLossPct=2.5
+InpShowPanel=true

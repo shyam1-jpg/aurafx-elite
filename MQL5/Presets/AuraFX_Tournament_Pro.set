@@ -1,0 +1,21 @@
+; AGGRESSIVE — Pro EA
+InpRiskPct=1.0
+InpMinRR=1.2
+InpDailyLossLimit=5.0
+InpWeeklyLossLimit=8.0
+InpMaxDrawdownLock=12.0
+InpNewsBlockMin=15
+InpMinScore=55
+InpMinMTFAgree=2
+InpRequireChecklist=false
+InpMagic=202606
+InpRsiBuyMax=68.0
+InpRsiSellMin=32.0
+InpAtrMultMin=0.22
+InpAllowCover=true
+InpOneTradePerBar=true
+InpShowProPanel=true
+InpUseTrailing=true
+InpTrailingPoints=100
+InpUseBreakeven=true
+InpBreakevenPoints=60

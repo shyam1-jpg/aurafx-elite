@@ -1,0 +1,17 @@
+; IC Markets / VT RAW — Medium risk (default Quantum Queen style)
+InpRiskPreset=1
+InpBrokerPreset=0
+InpMagic=20260901
+InpRiskPct=0.8
+InpFixedLot=0.01
+InpAutoLot=true
+InpMaxGridLevels=4
+InpGridAtrMult=0.85
+InpLotStepMult=0.15
+InpMaxLotMult=1.45
+InpBasketTpAtr=0.55
+InpBasketSlAtr=2.8
+InpMaxSpreadPts=30
+InpNewsBlockMin=40
+InpDailyLossPct=3.0
+InpShowPanel=true

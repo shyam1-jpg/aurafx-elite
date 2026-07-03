@@ -1,0 +1,86 @@
+================================================================================
+  WHY YOU SEE THE APP BUT NO TRADING (and no green smiley face)
+================================================================================
+
+THE SMILEY FACE IS THE KEY
+--------------------------
+Top-right corner of each chart:
+
+  ☺  Green smiley  = EA CAN place trades  → you will see orders
+  ✗  Red X         = EA BLOCKED            → ZERO trades (your problem now)
+  (no face)        = You attached an INDICATOR not an EA → no trades ever
+
+You said smiley is NOT there → that is exactly why nothing trades.
+
+
+FIX IN 60 SECONDS (do in order)
+-------------------------------
+
+STEP 1 — Green Algo button (whole MT5)
+  Top toolbar: button says "Algo Trading" or shows a robot icon
+  CLICK IT until it turns GREEN
+
+STEP 2 — Options
+  Tools → Options → Expert Advisors tab:
+  [x] Allow algorithmic trading
+  [x] Allow DLL imports (if shown)
+  Click OK
+
+STEP 3 — Remove wrong apps from chart
+  These are INDICATORS — they NEVER trade (only show signals):
+    - AuraFX_Elite_Signals
+    - AuraFX_Pro_Assistant
+    - AuraFX_Chartist_Pro
+    - AuraFX_Risk_Guardian
+  Right-click chart → Indicators List → delete them (optional, they slow PC)
+
+STEP 4 — Attach a TRADING robot (Expert Advisor)
+  Navigator → Expert Advisors (NOT Indicators)
+  Drag: AuraFX_M1_Hyper_Scalper_EA
+  Onto: XAUUSD  M1  chart  (1-minute = fastest scalping)
+
+STEP 5 — When the dialog opens
+  Common tab:
+    [x] Allow Algo Trading
+    [x] Allow live trading (demo)
+  Click OK
+
+STEP 6 — Check smiley
+  You MUST see ☺ on the chart corner within 5 seconds.
+  Chart comment should say: "ALGO ON ☺ — scalping active"
+
+STEP 7 — Run diagnostic script (once)
+  Navigator → Scripts → AuraFX_Check_Algo
+  Drag onto chart → must say READY
+
+
+FASTEST SCALPING SETUP (3 charts only — start simple)
+------------------------------------------------------
+| Chart      | TF | EA to drag                    |
+|------------|----|---------------------------------|
+| XAUUSD     | M1 | AuraFX_M1_Hyper_Scalper_EA    |
+| EURUSD     | M1 | AuraFX_M1_Hyper_Scalper_EA    |
+| US30       | M1 | AuraFX_M1_Hyper_Scalper_EA    |
+
+Do NOT use H1 for scalping — too slow, few trades.
+
+
+DOUBLE-CLICK TO INSTALL
+-------------------------
+  FIX-AND-SCALP-MT5.bat
+
+
+WHAT YOU SHOULD SEE WHEN WORKING
+---------------------------------
+- Smiley face on chart
+- Terminal → Trade tab: new rows every few minutes on M1
+- Chart text: "Trades this session: 1, 2, 3..."
+
+
+STILL NO TRADES?
+----------------
+Send screenshot showing:
+  1. Full MT5 window (toolbar + chart corner)
+  2. Terminal → Experts tab (last messages)
+
+================================================================================

@@ -1,0 +1,17 @@
+; RoboForex ECN preset
+InpRiskPreset=1
+InpBrokerPreset=1
+InpMagic=20260901
+InpRiskPct=0.7
+InpFixedLot=0.01
+InpAutoLot=true
+InpMaxGridLevels=4
+InpGridAtrMult=0.90
+InpLotStepMult=0.12
+InpMaxLotMult=1.40
+InpBasketTpAtr=0.52
+InpBasketSlAtr=2.6
+InpMaxSpreadPts=35
+InpNewsBlockMin=40
+InpDailyLossPct=3.0
+InpShowPanel=true

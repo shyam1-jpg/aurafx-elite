@@ -1,0 +1,9 @@
+; AGGRESSIVE — Scalper Pro
+InpLots=0.02
+InpFast=3
+InpSlow=8
+InpSl=60
+InpTp=120
+InpMagic=20260702
+InpTrail=true
+InpTrailPts=40

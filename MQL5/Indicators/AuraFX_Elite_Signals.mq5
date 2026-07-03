@@ -88,6 +88,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
+   AuraFX_IndCacheReleaseAll();
    AuraFX_DeletePanel(ChartID(), PANEL_PREFIX);
   }
 

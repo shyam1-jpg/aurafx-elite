@@ -1,0 +1,10 @@
+AuraFX Precision Gold Phase 1 Backtest
+Dates: 2023.01.01 to 2025.12.31 | XAUUSD H1 | Deposit 100,000
+Net Profit: -38.69
+Profit Factor: 0.65
+Recovery Factor: -0.83
+Total Trades: 118
+Win Rate: 36.44%
+Max Drawdown: 46.37 (0.05%)
+Expected Payoff: -0.33
+Report: C:\Users\shyam prasad\Desktop\AuraFX-Elite\backtest-reports\AuraFX_Precision_Gold_Phase1.htm

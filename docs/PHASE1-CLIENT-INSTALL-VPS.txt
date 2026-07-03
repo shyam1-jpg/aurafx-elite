@@ -1,0 +1,57 @@
+================================================================================
+  AURAFX PHASE 1 — CLIENT INSTALL & VPS (ONE PAGE)
+  Product: AuraFX_Precision_Gold_EA v1.01
+  Part of Aura Elite FX system (same foundation as existing website + APIs)
+================================================================================
+
+WHAT THIS IS
+  Gold-only MT5 Expert Advisor for XAUUSD H1.
+  Uses existing AuraFX engine (score, structure, news, smart exits).
+  Cloud hook: GET /api/precision-gold/score on your AuraFX website.
+
+BEFORE LIVE MONEY
+  Run 90-day DEMO forward test. Log results weekly (see docs/PHASE1-DEMO-LOG.csv).
+
+INSTALL (5 MINUTES)
+  1. Double-click INSTALL-PHASE1-PRECISION-GOLD.bat on Desktop
+  2. Open MT5 → XAUUSD chart → set timeframe H1
+  3. Navigator → Expert Advisors → AuraFX_Precision_Gold_EA → drag to chart
+  4. Inputs → Load → AuraFX_Precision_Gold_Client.set
+  5. Enable Algo Trading (green button, smiley on chart)
+  6. REMOVE all other EAs from every other chart
+
+RISK PROTECTION (BUILT IN)
+  - Fixed 0.01 lots (demo safe) — or enable auto lot in inputs
+  - Daily loss stop 1.5% (includes open trades)
+  - Weekly loss stop 4%
+  - Max drawdown stop 8%
+  - Stop after 3 losses in a row
+  - Daily profit target +0.4% then pause (optional)
+  - London/NY session filter
+  - Spread + news filters
+  - EMERGENCY CLOSE ALL button on chart
+
+VPS (24/7 DEMO OR LIVE LATER)
+  Option A: MetaTrader 5 VPS (from MT5 menu — easiest)
+  Option B: Windows VPS near your broker
+  Steps:
+    1. Install MT5 on VPS, login demo account
+    2. Copy EA via INSTALL bat or copy build\phase1\ files to MQL5\Experts
+    3. Attach to XAUUSD H1 with client preset
+    4. Keep Algo Trading ON
+    5. Check daily: panel shows Risk Shield active
+
+CLOUD SCORE (OPTIONAL)
+  Start website: AuraFX-Elite\website → npm start (or START-LIVE-WEBSITE.bat)
+  Open: http://127.0.0.1:3847/api/precision-gold/score
+  Shows confidence score aligned with EA — not a profit guarantee.
+
+FILES FOR CLIENTS
+  build\phase1\AuraFX_Precision_Gold_EA.mq5   (source)
+  build\phase1\AuraFX_Precision_Gold_EA.ex5   (compiled)
+  build\phase1\AuraFX_Precision_Gold_Client.set
+
+SUPPORT RULE
+  One chart. One EA. Demo first. Publish only real backtest + forward numbers.
+
+================================================================================

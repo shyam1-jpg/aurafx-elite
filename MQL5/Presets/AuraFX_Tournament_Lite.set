@@ -1,0 +1,14 @@
+; AGGRESSIVE — Pro Lite (faster EMA)
+InpLots=0.02
+InpSlippage=30
+InpMagicNumber=20260622
+InpStopLossPts=120
+InpTakeProfitPts=240
+InpUseTrailing=true
+InpTrailingStopPts=80
+InpFastMA=5
+InpSlowMA=13
+InpRSI_Period=14
+InpRSI_Overbought=75.0
+InpRSI_Oversold=25.0
+InpShowDashboard=true

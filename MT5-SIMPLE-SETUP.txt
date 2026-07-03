@@ -1,0 +1,70 @@
+================================================================================
+  AuraFX Elite — SIMPLE MT5 SETUP (read this first)
+================================================================================
+
+WHY IT LOOKS LIKE NOTHING IS HAPPENING
+--------------------------------------
+1. INDICATORS do NOT trade — they only show signals/colors on the chart.
+   (Chartist Pro, Elite Signals, Pro Assistant, Risk Guardian = visual only)
+
+2. Only EXPERT ADVISORS (EAs) place trades — you need Algo Trading ON (green).
+
+3. You had TOO MANY EAs on different charts at once — they fight each other.
+   Each EA only manages ITS OWN trades (magic number).
+
+4. Manual trades (you clicked Buy/Sell) are NOT trailed by the EA.
+   Your log showed a manual XAUUSD buy with NO stop-loss — EA cannot trail that.
+
+5. AuraFX Pro EA had NO trailing before — now fixed (re-install to update).
+
+
+RECOMMENDED SETUP — ONE CHART TO START
+--------------------------------------
+Chart:  XAUUSD  H1  (gold, 1 hour)
+EA:     AuraFX_Universal_AI_EA
+         - Mode: Aggressive
+         - InpUseTrailing = true
+         - InpTrailStartAtr = 0.5
+Indicator: AuraFX_Chartist_Pro (colors + patterns + SL/TP lines)
+
+Steps:
+  1. Close extra charts or remove other EAs from them
+  2. Open XAUUSD H1
+  3. Drag AuraFX_Chartist_Pro onto chart → OK
+  4. Drag AuraFX_Universal_AI_EA onto SAME chart → OK → Allow Algo Trading
+  5. Top toolbar: Algo Trading button must be GREEN
+  6. Chart top-right: smiley face must be smiling (not X)
+
+
+WHICH EA FOR WHAT
+-----------------
+| EA                    | Best for              | Trailing |
+|-----------------------|-----------------------|----------|
+| Universal AI EA       | All markets, auto     | YES      |
+| Gold Reaper EA        | Gold only             | YES      |
+| Elite EA              | Balanced auto         | YES      |
+| Pro EA                | Strict, fewer trades  | YES (new)|
+| Quantum Elite         | High filter           | YES      |
+| Scalper Pro           | M5/M15 fast           | YES      |
+| Breakout EA           | Structure breaks      | NO       |
+| Pulse Engine          | MACD pulse            | NO       |
+
+Pick ONE EA per chart. Do not stack 5 EAs on 10 charts on day one.
+
+
+TRAILING STOP — WHEN IT WORKS
+-----------------------------
+- Trade must be opened BY THE EA (comment says "AuraFX Universal AI" etc.)
+- InpUseTrailing must be true in EA settings
+- Price must be in profit first:
+    Universal AI: profit >= 0.5 x ATR (panel shows "Trail: ACTIVE")
+    Pro EA: profit >= 120 points (default)
+- You will see SL line move on the chart when trail is active
+
+
+RUN UPDATED FILES
+-----------------
+Double-click:  INSTALL-MT5-AURAFX.bat
+Then in MT5: remove old EA from chart, drag fresh one on again.
+
+================================================================================
