@@ -1,0 +1,30 @@
+PARSLIA KITCHEN OS — GITHUB PAGES (after push)
+==============================================
+
+Repo: https://github.com/shyam1-jpg/parslia-kitchen-os
+
+1. PUSH CODE
+   - Run PUSH-PARSLIA-TO-GITHUB.bat in this folder (Windows), OR
+   - git push https://github.com/shyam1-jpg/parslia-kitchen-os.git HEAD:main
+
+2. ENABLE PAGES
+   GitHub → parslia-kitchen-os → Settings → Pages
+   - Source: Deploy from a branch
+   - Branch: main
+   - Folder: / (root)
+   - Save
+
+3. CUSTOM DOMAIN (optional)
+   - Pages → Custom domain: parslia.app
+   - DNS at your registrar:
+     CNAME  @  or  www  →  shyam1-jpg.github.io
+     (or the Pages URL shown in GitHub)
+
+4. LOGO FILES (optional but recommended)
+   Copy into assets/:
+     USE_THIS_parslia_header_logo_clean.png
+     USE_THIS_parslia_app_icon_1024.png
+
+Site URL after Pages propagates (usually 1–3 minutes):
+  https://shyam1-jpg.github.io/parslia-kitchen-os/
+  or https://parslia.app if domain is set
