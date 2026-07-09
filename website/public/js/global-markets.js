@@ -478,11 +478,11 @@
     var ov = d.marketOverview || {};
     var gainers = (ov.gainers || []).map(function (g) {
       return '<li><strong>' + esc(g.n) + '</strong> <span class="up">' + esc(g.v) + '</span></li>';
-    }).join('') || '<li class="muted">Loading…</li>';
+    }).join('') || '<li class="muted">No gainers yet</li>';
     var losers = (ov.losers || []).map(function (g) {
       return '<li><strong>' + esc(g.n) + '</strong> <span class="down">' + esc(g.v) + '</span></li>';
-    }).join('') || '<li class="muted">Loading…</li>';
-    var vix = d.vix ? ('VIX ' + esc(d.vix.value) + ' (' + esc(d.vix.change) + ')') : (ov.vix ? 'VIX ' + esc(ov.vix) : '—');
+    }).join('') || '<li class="muted">No losers yet</li>';
+    var vix = d.vix ? ('VIX ' + esc(d.vix.value) + ' (' + esc(d.vix.change) + ')') : (ov.vix ? 'VIX ' + esc(ov.vix) : 'Unavailable');
     return '<section class="card inst-wide"><h2>Market overview <span class="inst-live-tag">LIVE</span></h2>' +
       '<div class="grid-3">' +
       '<div><h3 style="font-size:.8rem;color:var(--gold)">Top gainers (24h)</h3><ul class="feed-list">' + gainers + '</ul></div>' +

@@ -19,6 +19,8 @@
   let bullChart = null;
   let riskGauge = null;
   let lastRefreshMs = 0;
+  let refreshInFlight = false;
+  let hasLoadedOnce = false;
   let client = null;
   let cloudBackend = 'unavailable';
 
@@ -152,7 +154,8 @@
   function quoteAgeSec() {
     const q = window.AURAFX_LIVE_QUOTES;
     if (!q || !q.updatedAt) return null;
-    return Math.round((Date.now() - new Date(q.updatedAt).getTime()) / 1000);
+    const age = Math.round((Date.now() - new Date(q.updatedAt).getTime()) / 1000);
+    return age < 0 ? 0 : age;
   }
 
   function buildFallbackQuotes() {
@@ -630,8 +633,13 @@
     ]);
   }
 
-  async function refresh() {
-    setStatus('demo', ['○ Connecting…', 'Fetching market data…']);
+  async function refresh(opts) {
+    const forceStatus = !!(opts && opts.forceStatus);
+    if (refreshInFlight) return;
+    refreshInFlight = true;
+    if (!hasLoadedOnce || forceStatus) {
+      setStatus('demo', ['○ Connecting…', 'Fetching market data…']);
+    }
     try {
       const [pro, risk, news, evRes] = await Promise.all([
         safeJson(API + '/api/pro-summary', null),
@@ -646,6 +654,7 @@
       }
 
       lastRefreshMs = Date.now();
+      hasLoadedOnce = true;
       applyData(pro, risk || {});
       renderFeeds(risk || {}, news || { items: [] });
       renderEvents((evRes && evRes.events) || []);
@@ -679,6 +688,8 @@
       }
     } catch {
       applyFallbackData();
+    } finally {
+      refreshInFlight = false;
     }
   }
 
@@ -710,7 +721,7 @@
     });
   });
 
-  $('btnRefresh')?.addEventListener('click', refresh);
+  $('btnRefresh')?.addEventListener('click', () => refresh({ forceStatus: true }));
   $('btnTheme')?.addEventListener('click', () => {
     document.body.classList.toggle('theme-light');
     localStorage.setItem(THEME_KEY, document.body.classList.contains('theme-light') ? 'light' : 'dark');
@@ -884,7 +895,7 @@
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'r' || e.key === 'R') {
-      if (!e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT') refresh();
+      if (!e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT') refresh({ forceStatus: true });
     }
   });
 

@@ -272,11 +272,24 @@ async function buildLiveMarkets(calendarNews, warnings) {
   const vix = yahooData.VIX;
   const gainers = [];
   const losers = [];
-  Object.entries(quotes.changes || {}).forEach(([sym, pct]) => {
-    if (pct == null) return;
+  const changeMap = Object.assign({}, quotes.changes || {});
+  // When FX feed has no 24h changes, derive movers from built rows (Yahoo / CoinGecko %).
+  [
+    ...(forex.majors || []),
+    ...(forex.minors || []),
+    ...(metals || []),
+    ...(crypto || []).slice(0, 20),
+    ...(indices || []),
+    ...(energy || [])
+  ].forEach((r) => {
+    if (!r || !r.symbol || r.changePct == null || !isFinite(r.changePct)) return;
+    if (changeMap[r.symbol] == null) changeMap[r.symbol] = r.changePct;
+  });
+  Object.entries(changeMap).forEach(([sym, pct]) => {
+    if (pct == null || !isFinite(pct)) return;
     const item = { n: sym, v: fmtPct(pct) };
     if (pct > 0) gainers.push(item);
-    else losers.push(item);
+    else if (pct < 0) losers.push(item);
   });
   gainers.sort((a, b) => parseFloat(b.v) - parseFloat(a.v));
   losers.sort((a, b) => parseFloat(a.v) - parseFloat(b.v));
