@@ -42,6 +42,12 @@
       <p style="margin-top:1rem"><a href="dashboard.html" class="btn btn-gold">Open dashboard</a> <a href="register.html?plan=free" class="btn btn-outline" style="margin-left:.5rem">Register free</a></p>
     </div>
 
+    <div id="ai-demo-card" class="lux-glass lux-shimmer" style="padding:1.35rem;margin-bottom:1.5rem;display:none;border:1px solid rgba(59,130,246,.35)">
+      <h3 style="color:#3B82F6;margin-bottom:.5rem">Aura FX Elite AI — Signal demo</h3>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:.75rem">Educational BUY / SELL / WAIT cards with live spot prices and admin approval workflow. <strong>Free demo</strong> — not financial advice, no auto-trading.</p>
+      <p style="margin-top:1rem"><a id="ai-demo-link" href="#" class="btn btn-outline" target="_blank" rel="noopener noreferrer">Open AI signal demo →</a></p>
+    </div>
+
     <h2>MetaTrader 5 — Expert Advisors</h2>
     <p style="color:var(--muted);font-size:.88rem;margin-bottom:1rem">Premium-style lineup similar to top MQL5 sellers — test on <strong>demo</strong> before any MQL5 listing.</p>
     <div class="lux-glass lux-shimmer" style="padding:1.35rem;margin-bottom:1.25rem;border:1px solid rgba(212,175,55,.45)">
@@ -148,5 +154,16 @@
 
   <script src="js/cookie-consent.js"></script>
   <script src="js/luxury-fx.js"></script>
+  <script>
+    fetch('/api/config').then(function (r) { return r.json(); }).then(function (c) {
+      if (!c.aiDemoUrl) return;
+      var card = document.getElementById('ai-demo-card');
+      var link = document.getElementById('ai-demo-link');
+      if (card && link) {
+        link.href = c.aiDemoUrl;
+        card.style.display = 'block';
+      }
+    }).catch(function () {});
+  </script>
 </body>
 </html>

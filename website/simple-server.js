@@ -87,6 +87,9 @@ const PLANS = {
 
 /** demo = public demo only | preview = live feeds for owner key only | public = live for everyone (later) */
 const INSTITUTIONAL_MODE = String(process.env.INSTITUTIONAL_MODE || 'demo').toLowerCase();
+/** Next.js AI signal demo (aura-fx-elite-ai) — set after Render/Vercel deploy */
+const AI_DEMO_URL = String(process.env.AI_DEMO_URL || '').trim() ||
+  (IS_PRODUCTION ? '' : 'http://localhost:3000');
 let instLiveMod = null;
 try {
   instLiveMod = require('./institutional-live');
@@ -444,7 +447,8 @@ function apiConfig() {
       tradingName: business.tradingName,
       supportEmail: business.supportEmail,
       website: business.website
-    }
+    },
+    aiDemoUrl: AI_DEMO_URL
   };
 }
 

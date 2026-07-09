@@ -30,3 +30,20 @@ services:
         value: "1"
       - key: AURAFX_OWNER_KEY
         generateValue: true
+      - key: AI_DEMO_URL
+        value: https://aura-fx-elite-ai.onrender.com
+  - type: web
+    name: aura-fx-elite-ai
+    runtime: node
+    plan: free
+    rootDir: aura-fx-elite-ai
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/signals
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20"
+      - key: ADMIN_DEMO_KEY
+        generateValue: true
