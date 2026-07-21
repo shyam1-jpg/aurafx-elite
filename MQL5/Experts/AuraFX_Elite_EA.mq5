@@ -4,20 +4,28 @@
 //+------------------------------------------------------------------+
 #property copyright   "AuraFX Labs"
 #property link        "https://www.mql5.com"
-#property version     "1.20"
-#property description "AuraFX Elite EA — auto orders, SL/TP, trailing stop, risk % sizing."
+#property version     "1.31"
+#property description "AuraFX Elite EA — signal-candle SL/TP, auto orders, trailing, risk %."
 
 #include <Trade\Trade.mqh>
 #include <AuraFX_Core.mqh>
 #include <AuraFX_NewsRisk.mqh>
 
 input group "=== Risk & Lot Sizing ==="
+input bool   InpEnableOrderExecution = false; // SAFE DEFAULT: signals only, never place/close orders
 input double InpLots           = 0.01;
 input double InpRiskPercent   = 1.0;
 input bool   InpAutoLots       = true;    // Size lots from account % risk
-input int    InpSlPoints       = 200;     // Stop loss (points) — limits loss
-input int    InpTpPoints       = 400;     // Take profit (points) — auto close in profit
+input int    InpSlPoints       = 200;     // Fixed SL (points) if signal-candle off
+input int    InpTpPoints       = 400;     // Fixed TP (points) if signal-candle off
 input int    InpMagic          = 202605;
+
+input group "=== Entry Points Pro style SL/TP ==="
+input bool   InpUseSignalCandleSL = true;  // SL beyond signal candle high/low
+input int    InpSlCandleBufferPts = 10;    // Extra points beyond signal candle
+input double InpTpRiskReward      = 2.0;   // TP = risk distance x this ratio
+input int    InpMinSlPoints       = 30;    // Minimum SL distance (points)
+input int    InpMaxSlPoints       = 800;   // Maximum SL distance (points)
 
 input group "=== Auto exit (profit & protection) ==="
 input bool   InpUseTrailing          = true;   // Trail stop when in profit
@@ -74,6 +82,9 @@ int OnInit()
    g_dayStart = iTime(_Symbol, PERIOD_D1, 0);
    g_dayStartBalance = AccountInfoDouble(ACCOUNT_BALANCE);
 
+   if(!InpEnableOrderExecution)
+      Print("AuraFX Elite: ANALYSIS-ONLY mode. Order execution is disabled.");
+
    return INIT_SUCCEEDED;
   }
 
@@ -97,9 +108,10 @@ void OnTick()
    if(InpEnableNewsGuard)
       RunNewsRiskChecks();
 
-   ManageOpenPositions();
+   if(InpEnableOrderExecution)
+      ManageOpenPositions();
 
-   if(DailyLossLimitHit())
+   if(InpEnableOrderExecution && DailyLossLimitHit())
      {
       Comment("AuraFX: daily loss limit reached — no new trades today. ", AURA_DISCLAIMER);
       return;
@@ -111,6 +123,13 @@ void OnTick()
 
    if(InpShowPanel)
       AuraFX_DrawPanel(ChartID(), PANEL_PREFIX, 16, 28, sig, g_stats, _Symbol, asset);
+
+   if(!InpEnableOrderExecution)
+     {
+      Comment("AuraFX ANALYSIS ONLY | Signal: ", AuraFX_SignalToString(sig),
+              " | Order execution disabled. ", AURA_DISCLAIMER);
+      return;
+     }
 
    if(sig == AURA_SIGNAL_COVER && InpAllowCover)
      {
@@ -134,7 +153,7 @@ void OnTick()
       if(CountPositions(POSITION_TYPE_SELL) > 0)
          CloseAllPositions();
       if(CountPositions(POSITION_TYPE_BUY) == 0)
-         OpenTrade(ORDER_TYPE_BUY);
+         OpenTrade(ORDER_TYPE_BUY, 1);
       g_lastTradeBar = barTime;
      }
    else if(sig == AURA_SIGNAL_SELL)
@@ -142,7 +161,7 @@ void OnTick()
       if(CountPositions(POSITION_TYPE_BUY) > 0)
          CloseAllPositions();
       if(CountPositions(POSITION_TYPE_SELL) == 0)
-         OpenTrade(ORDER_TYPE_SELL);
+         OpenTrade(ORDER_TYPE_SELL, 1);
       g_lastTradeBar = barTime;
      }
   }
@@ -202,7 +221,7 @@ void OnChartEvent(const int id, const long &lparam, const double &dparam, const 
   }
 
 //+------------------------------------------------------------------+
-double CalcLots()
+double CalcLots(const double slDistancePrice)
   {
    if(!InpAutoLots) return InpLots;
    double balance = AccountInfoDouble(ACCOUNT_BALANCE);
@@ -210,7 +229,8 @@ double CalcLots()
    double tickSz  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
    if(tickVal <= 0 || tickSz <= 0) return InpLots;
    double riskMoney = balance * InpRiskPercent / 100.0;
-   double slPrice = InpSlPoints * _Point;
+   double slPrice = (slDistancePrice > 0) ? slDistancePrice : InpSlPoints * _Point;
+   if(slPrice <= 0) return InpLots;
    double lots = riskMoney / (slPrice / tickSz * tickVal);
    double minLot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
    double maxLot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
@@ -220,22 +240,116 @@ double CalcLots()
   }
 
 //+------------------------------------------------------------------+
-void OpenTrade(const ENUM_ORDER_TYPE type)
+bool CalcSignalCandleSLTP(const ENUM_ORDER_TYPE type,
+                          const double price,
+                          const int signalShift,
+                          double &sl,
+                          double &tp)
+  {
+   sl = 0;
+   tp = 0;
+   double candleHigh = iHigh(_Symbol, PERIOD_CURRENT, signalShift);
+   double candleLow  = iLow(_Symbol, PERIOD_CURRENT, signalShift);
+   if(candleHigh <= 0 || candleLow <= 0 || candleHigh < candleLow)
+      return false;
+
+   if(type == ORDER_TYPE_BUY)
+      sl = candleLow - InpSlCandleBufferPts * _Point;
+   else
+      sl = candleHigh + InpSlCandleBufferPts * _Point;
+
+   double slDist = MathAbs(price - sl);
+   double minDist = InpMinSlPoints * _Point;
+   double maxDist = InpMaxSlPoints * _Point;
+   if(slDist < minDist)
+     {
+      if(type == ORDER_TYPE_BUY) sl = price - minDist;
+      else                      sl = price + minDist;
+      slDist = minDist;
+     }
+   else if(slDist > maxDist)
+     {
+      if(type == ORDER_TYPE_BUY) sl = price - maxDist;
+      else                      sl = price + maxDist;
+      slDist = maxDist;
+     }
+
+   if(InpTpRiskReward > 0)
+     {
+      if(type == ORDER_TYPE_BUY) tp = price + slDist * InpTpRiskReward;
+      else                       tp = price - slDist * InpTpRiskReward;
+     }
+
+   int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   sl = NormalizeDouble(sl, digits);
+   tp = NormalizeDouble(tp, digits);
+   return true;
+  }
+
+//+------------------------------------------------------------------+
+bool CalcFixedSLTP(const ENUM_ORDER_TYPE type, const double price, double &sl, double &tp)
+  {
+   sl = 0;
+   tp = 0;
+   if(InpSlPoints > 0)
+     {
+      if(type == ORDER_TYPE_BUY) sl = price - InpSlPoints * _Point;
+      else                       sl = price + InpSlPoints * _Point;
+     }
+   if(InpTpPoints > 0)
+     {
+      if(type == ORDER_TYPE_BUY) tp = price + InpTpPoints * _Point;
+      else                       tp = price - InpTpPoints * _Point;
+     }
+   int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   if(sl > 0) sl = NormalizeDouble(sl, digits);
+   if(tp > 0) tp = NormalizeDouble(tp, digits);
+   return true;
+  }
+
+//+------------------------------------------------------------------+
+bool EnforceBrokerStops(const ENUM_ORDER_TYPE type,
+                        const double price,
+                        double &sl,
+                        double &tp)
+  {
+   int stopsLevel = (int)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL);
+   if(stopsLevel <= 0) return true;
+   double minDist = stopsLevel * _Point;
+   if(sl > 0 && MathAbs(price - sl) < minDist)
+     {
+      if(type == ORDER_TYPE_BUY) sl = price - minDist;
+      else                       sl = price + minDist;
+     }
+   if(tp > 0 && MathAbs(price - tp) < minDist)
+     {
+      if(type == ORDER_TYPE_BUY) tp = price + minDist;
+      else                       tp = price - minDist;
+     }
+   int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+   if(sl > 0) sl = NormalizeDouble(sl, digits);
+   if(tp > 0) tp = NormalizeDouble(tp, digits);
+   return true;
+  }
+
+//+------------------------------------------------------------------+
+void OpenTrade(const ENUM_ORDER_TYPE type, const int signalShift)
   {
    double price = (type == ORDER_TYPE_BUY) ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
                                            : SymbolInfoDouble(_Symbol, SYMBOL_BID);
    double sl = 0, tp = 0;
-   if(InpSlPoints > 0)
+   if(InpUseSignalCandleSL)
      {
-      if(type == ORDER_TYPE_BUY)  sl = price - InpSlPoints * _Point;
-      else                        sl = price + InpSlPoints * _Point;
+      if(!CalcSignalCandleSLTP(type, price, signalShift, sl, tp))
+         CalcFixedSLTP(type, price, sl, tp);
      }
-   if(InpTpPoints > 0)
-     {
-      if(type == ORDER_TYPE_BUY)  tp = price + InpTpPoints * _Point;
-      else                        tp = price - InpTpPoints * _Point;
-     }
-   trade.PositionOpen(_Symbol, type, CalcLots(), price, sl, tp, "AuraFX Elite");
+   else
+      CalcFixedSLTP(type, price, sl, tp);
+
+   EnforceBrokerStops(type, price, sl, tp);
+   double slDist = (sl > 0) ? MathAbs(price - sl) : InpSlPoints * _Point;
+   if(!trade.PositionOpen(_Symbol, type, CalcLots(slDist), price, sl, tp, "AuraFX Elite"))
+      Print("AuraFX PositionOpen failed: ", trade.ResultRetcode(), " ", trade.ResultRetcodeDescription());
   }
 
 //+------------------------------------------------------------------+
@@ -278,14 +392,16 @@ void ManageOpenPositions()
            {
             double beSL = openPrice + InpBreakevenLockPts * _Point;
             if(currentSL < beSL - _Point)
-               trade.PositionModify(ticket, beSL, currentTP);
+               if(!trade.PositionModify(ticket, beSL, currentTP))
+                  Print("AuraFX breakeven modify failed: ", trade.ResultRetcodeDescription());
            }
 
          if(InpUseTrailing && profitPts >= InpTrailingPoints)
            {
             double trailSL = bid - InpTrailingPoints * _Point;
             if(trailSL > currentSL + _Point)
-               trade.PositionModify(ticket, trailSL, currentTP);
+               if(!trade.PositionModify(ticket, trailSL, currentTP))
+                  Print("AuraFX trailing modify failed: ", trade.ResultRetcodeDescription());
            }
         }
       else if(ptype == POSITION_TYPE_SELL)
@@ -297,14 +413,16 @@ void ManageOpenPositions()
            {
             double beSL = openPrice - InpBreakevenLockPts * _Point;
             if(currentSL == 0.0 || currentSL > beSL + _Point)
-               trade.PositionModify(ticket, beSL, currentTP);
+               if(!trade.PositionModify(ticket, beSL, currentTP))
+                  Print("AuraFX breakeven modify failed: ", trade.ResultRetcodeDescription());
            }
 
          if(InpUseTrailing && profitPts >= InpTrailingPoints)
            {
             double trailSL = ask + InpTrailingPoints * _Point;
             if(currentSL == 0.0 || trailSL < currentSL - _Point)
-               trade.PositionModify(ticket, trailSL, currentTP);
+               if(!trade.PositionModify(ticket, trailSL, currentTP))
+                  Print("AuraFX trailing modify failed: ", trade.ResultRetcodeDescription());
            }
         }
      }
@@ -334,7 +452,8 @@ void CloseAllPositions()
       if(!PositionSelectByTicket(ticket)) continue;
       if(PositionGetString(POSITION_SYMBOL) != _Symbol) continue;
       if(PositionGetInteger(POSITION_MAGIC) != InpMagic) continue;
-      trade.PositionClose(ticket);
+      if(!trade.PositionClose(ticket))
+         Print("AuraFX PositionClose failed: ", trade.ResultRetcodeDescription());
      }
   }
 

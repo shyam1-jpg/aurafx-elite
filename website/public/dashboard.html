@@ -9,7 +9,7 @@
   <link rel="icon" href="assets/aura-icon-140.png?v=7" type="image/png" />
   <script src="js/site-boot.js?v=8"></script>
 
-  <link rel="stylesheet" href="css/pro-dashboard.css?v=10" />
+  <link rel="stylesheet" href="css/pro-dashboard.css?v=12" />
   <link rel="stylesheet" href="css/institutional.css" />
   <link rel="stylesheet" href="css/luxury.css" />
   <link rel="stylesheet" href="css/hub.css" />
@@ -90,6 +90,77 @@
 
         <!-- OVERVIEW -->
         <section id="panel-overview" class="dash-panel active" role="tabpanel">
+          <section class="market-command" aria-labelledby="marketCommandTitle">
+            <div class="market-command-head">
+              <div class="instrument-lockup">
+                <span class="instrument-mark">XAU</span>
+                <div>
+                  <div class="eyebrow">Aura intelligence workspace</div>
+                  <h1 id="marketCommandTitle"><span id="auraChartSymbol">XAUUSD</span> <span class="instrument-timeframe" id="auraChartTimeframe">H1</span></h1>
+                </div>
+                <span class="market-state" id="auraMarketState"><i></i> Market context</span>
+              </div>
+              <div class="market-command-metrics">
+                <div><span>Last</span><strong id="auraChartLast">—</strong></div>
+                <div><span>Change</span><strong id="auraChartChange">—</strong></div>
+                <div><span>Spread</span><strong>Feed pending</strong></div>
+              </div>
+            </div>
+
+            <div class="market-toolbar">
+              <div class="symbol-switcher" role="group" aria-label="Chart instrument">
+                <button type="button" class="active" data-aura-symbol="XAUUSD">Gold</button>
+                <button type="button" data-aura-symbol="EURUSD">EUR/USD</button>
+                <button type="button" data-aura-symbol="GBPUSD">GBP/USD</button>
+                <button type="button" data-aura-symbol="USDJPY">USD/JPY</button>
+              </div>
+              <div class="chart-tool-divider"></div>
+              <div class="timeframe-switcher" role="group" aria-label="Chart timeframe">
+                <button type="button" data-aura-timeframe="M15">15m</button>
+                <button type="button" class="active" data-aura-timeframe="H1">1H</button>
+                <button type="button" data-aura-timeframe="H4">4H</button>
+                <button type="button" data-aura-timeframe="D1">1D</button>
+              </div>
+              <div class="chart-legend" aria-label="Chart indicators">
+                <span><i class="legend-line ema-fast"></i> EMA 9</span>
+                <span><i class="legend-line ema-slow"></i> EMA 26</span>
+                <span><i class="legend-dot volume"></i> Volume</span>
+              </div>
+            </div>
+
+            <div class="market-stage">
+              <div class="advanced-chart-shell">
+                <canvas id="auraCandlestickChart" role="img" aria-label="Advanced live-anchored candlestick market context"></canvas>
+                <div class="chart-watermark"><span>A</span> AURAFX</div>
+                <div class="chart-floating-status"><span class="live-pulse"></span><strong id="auraChartFeedMode">REFERENCE</strong><small>live-anchored visual context</small></div>
+                <div class="chart-tooltip" id="auraChartTooltip" hidden></div>
+              </div>
+              <aside class="intelligence-rail">
+                <div class="rail-heading"><span>AURA AI</span><em>Analysis only</em></div>
+                <div class="setup-orbit" id="auraSetupOrbit">
+                  <div><strong id="auraSetupScore">—</strong><span>setup<br>quality</span></div>
+                </div>
+                <div class="rail-decision">
+                  <span>Current decision</span>
+                  <strong id="auraDecision">NO TRADE</strong>
+                  <p id="auraDecisionReason">Waiting for closed-candle confirmation and reliable market data.</p>
+                </div>
+                <div class="rail-levels">
+                  <div><span>Regime</span><strong id="auraRegime">Unclear</strong></div>
+                  <div><span>Risk mode</span><strong class="safe">Paper only</strong></div>
+                  <div><span>Data quality</span><strong id="auraDataQuality">Checking</strong></div>
+                </div>
+                <div class="rail-checks">
+                  <span class="pending" id="auraTrendCheck">Trend alignment</span>
+                  <span class="pending" id="auraMomentumCheck">Momentum confirmation</span>
+                  <span class="pending" id="auraRiskCheck">Risk filters</span>
+                </div>
+                <button type="button" class="aura-ai-button" id="auraAnalyzeButton">Run AI analysis</button>
+                <small class="aura-ai-updated" id="auraAiUpdated">Server-side AI · no auto-execution</small>
+              </aside>
+            </div>
+            <p class="market-data-note">Candles are a live-price-anchored visual context until a broker OHLC feed is connected. They are not broker execution data and must not be used alone to place a trade.</p>
+          </section>
           <div class="grid">
             <div class="card card-wide lux-glass lux-shimmer">
               <h2>Market pulse</h2>
@@ -270,6 +341,7 @@
   <script src="js/live-price-ticker.js"></script>
   <script src="js/elite-calendar.js"></script>
   <script src="js/elite-command.js"></script>
+  <script src="js/advanced-market-chart.js?v=1"></script>
   <script src="js/pro-dashboard.js?v=11"></script>
   <script src="js/institutional-data.js"></script>
   <script src="js/institutional.js"></script>

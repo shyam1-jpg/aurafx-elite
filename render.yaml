@@ -32,6 +32,8 @@ services:
         generateValue: true
       - key: AI_DEMO_URL
         value: https://aura-fx-elite-ai.onrender.com
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
   - type: web
     name: aura-fx-elite-ai
     runtime: node
