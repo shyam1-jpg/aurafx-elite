@@ -132,6 +132,13 @@ try {
   console.warn('[AuraFX] live-markets-service not loaded:', e.message);
 }
 
+let aiIntelligence = null;
+try {
+  aiIntelligence = require('./ai-intelligence-service');
+} catch (e) {
+  console.warn('[AuraFX] ai-intelligence-service not loaded:', e.message);
+}
+
 function applyCalendarToCache(calPayload) {
   if (!calPayload) return;
   cache.calendar = calPayload.calendar || calPayload.items || [];
@@ -705,7 +712,7 @@ function apiWiring() {
   ];
   const apis = [
     '/api/health', '/api/status', '/api/quotes', '/api/pro-summary', '/api/risk-summary',
-    '/api/calendar', '/api/news', '/api/institutional', '/api/institutional-live', '/api/markets', '/api/wiring'
+    '/api/calendar', '/api/news', '/api/ai/status', '/api/ai/analyze', '/api/institutional', '/api/institutional-live', '/api/markets', '/api/wiring'
   ];
   return {
     ok: true,
@@ -979,7 +986,8 @@ const server = http.createServer((req, res) => {
       mode: 'production',
       site: business.website,
       updatedAt: cache.updatedAt,
-      quotes: quotesService ? 'available' : 'unavailable'
+      quotes: quotesService ? 'available' : 'unavailable',
+      ai: aiIntelligence && aiIntelligence.status().configured ? 'configured' : 'not_configured'
     });
   }
   if (url === '/api/wiring') {
@@ -998,6 +1006,28 @@ const server = http.createServer((req, res) => {
     });
   }
   if (url === '/api/pro-summary') return json(res, 200, apiProSummary());
+  if (url === '/api/ai/status' && req.method === 'GET') {
+    return json(res, 200, aiIntelligence ? aiIntelligence.status() : { configured: false, mode: 'analysis_only', executionEnabled: false });
+  }
+  if (url === '/api/ai/analyze' && req.method === 'POST') {
+    if (!aiIntelligence || !quotesService) return json(res, 503, { decision: 'NO_TRADE', error: 'AI or quote service unavailable' });
+    return readBody(req).then(async (body) => {
+      const symbol = String(body.symbol || '').toUpperCase();
+      const timeframe = String(body.timeframe || '').toUpperCase();
+      const quotes = await quotesService.getQuotes();
+      const groups = [quotes.forex || {}, quotes.metals || {}, quotes.crypto || {}];
+      let price = null;
+      for (const group of groups) if (Number(group[symbol]) > 0) price = Number(group[symbol]);
+      const result = await aiIntelligence.analyze({
+        symbol, timeframe, price,
+        quoteTime: (quotes.times && (quotes.times[symbol] || quotes.times._fx)) || quotes.updatedAt,
+        quoteLive: quotes.live === true,
+        changePct: quotes.changes && quotes.changes[symbol],
+        market: apiProSummary(), calendar: cache.calendar, news: cache.news
+      });
+      return json(res, 200, result);
+    }).catch((e) => json(res, 400, aiIntelligence.failClosed(e.message)));
+  }
   if (url === '/api/risk-summary') {
     return json(res, 200, {
       mood: cache.calendarMood || cache.mood,

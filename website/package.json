@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node simple-server.js",
     "start:express": "node server.js",
-    "dev": "node simple-server.js"
+    "dev": "node simple-server.js",
+    "test:ai": "node test-ai-intelligence.js"
   },
   "engines": { "node": ">=18" },
   "dependencies": {
