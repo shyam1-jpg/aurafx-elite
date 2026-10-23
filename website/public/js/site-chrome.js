@@ -5,6 +5,9 @@
   var FOOTER_LINKS = {
     Platform: [
       { href: 'dashboard.html', label: 'Pro dashboard' },
+      { href: 'trading-plans.html', label: 'Daily plans' },
+      { href: 'ai-engine.html', label: 'AI engine' },
+      { href: 'pricing.html', label: 'Pricing' },
       { href: 'track-record.html', label: 'Measured track record' },
       { href: 'markets.html', label: 'Live markets' },
       { href: 'economic-calendar.html', label: 'Economic calendar' },
@@ -30,6 +33,8 @@
       { href: 'resources.html', label: 'All resources' }
     ],
     Legal: [
+      { href: 'legal.html', label: 'Legal hub' },
+      { href: 'disclaimer.html', label: 'Disclaimer' },
       { href: 'terms.html', label: 'Terms' },
       { href: 'privacy.html', label: 'Privacy' },
       { href: 'risk-warning.html', label: 'Risk warning' },

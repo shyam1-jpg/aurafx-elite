@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#05050A" />
+  <meta name="description" content="How the AuraFX signal engine scores a market: regime rules, publication checks, calibration, and what the language model is allowed to change." />
+  <title>AI engine — AuraFX Elite</title>
+  <link rel="icon" href="assets/aura-icon-140.png?v=7" type="image/png" />
+  <link rel="apple-touch-icon" href="assets/aura-icon-192.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="css/platform.css?v=1" />
+  <script src="js/font-loader.js"></script>
+  <script src="js/site-boot.js?v=8"></script>
+</head>
+<body class="pf">
+  <a href="#main" class="skip-link">Skip to main content</a>
+  <nav class="pf-nav" aria-label="Primary">
+    <a href="index.html" class="logo" aria-label="AuraFX Elite home"><img src="assets/aurafx-elite-logo.png?v=7" alt="" class="logo-img" width="160" height="58" decoding="sync" /></a>
+    <button class="pf-nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="pfNavLinks">Menu</button>
+    <div class="pf-nav-links" id="pfNavLinks">
+      <a href="trading-plans.html">Plans</a>
+      <a href="ai-engine.html">Engine</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="track-record.html">Track record</a>
+      <a href="how-it-works.html">How it works</a>
+      <a href="dashboard.html" class="pf-btn pf-btn-sm">Dashboard</a>
+    </div>
+  </nav>
+  <main id="main" class="pf-page">
+    <p class="pf-kicker">AI engine</p>
+    <h1>The engine calculates. AI explains.</h1>
+    <p>Direction, levels and the regime come from rules on hourly and daily candles. A language model, when a key is configured, may rewrite the wording. It does not pick the side or move the stop.</p>
+    <div class="pf-engine" style="margin:1.4rem 0">
+      <div class="pf-engine-step"><strong>1. Read the candles</strong><span>Twelve Data when a key is set, then Yahoo Finance, then Kraken where a pair exists. These are not your broker’s quotes, and spread is not included.</span></div>
+      <div class="pf-engine-step"><strong>2. Name the regime</strong><span>Trending when ADX is at least 25. Ranging otherwise, unless the current bar or ATR is more than 2.2 times its recent norm, which is volatile. News is a separate pause, not a fourth regime.</span></div>
+      <div class="pf-engine-step"><strong>3. Apply the rules for that regime</strong><span>Trending markets publish a buy or sell only when trend, momentum, structure and the 4-hour plus daily trend all agree. Ranging mean-reversion is limited to the instruments in the range list, gold by default. Every other ranging market keeps the trend rules. Volatile markets publish nothing.</span></div>
+      <div class="pf-engine-step"><strong>4. Refuse a weak setup</strong><span>Volatility has to be tradable, high-impact news has to sit outside the pause window, raw confidence has to clear the publication line, and risk/reward has to be at least 1.8. Otherwise the card is Wait.</span></div>
+      <div class="pf-engine-step"><strong>5. Label the number honestly</strong><span>Confidence starts as setup quality. After eight closed take-profit or stop results, the displayed number can switch to a measured rate from that history. The card says which one it is. The rate is not a forecast, and it does not change what gets published.</span></div>
+    </div>
+    <h2>What “AI” changes</h2>
+    <p>With no model key, the rule engine writes the note and answers the assistant from the current board. With a key, the model may rephrase that note. Both paths are blocked from promising profit or a fixed accuracy figure.</p>
+    <h2>What this page does not do</h2>
+    <p>The engine does not send orders. Auto trading is off. Broker execution is not connected. MT4 and MT5 tools, where offered, are optional chart software. You still click buy or sell at your broker.</p>
+    <p><a class="pf-btn" href="trading-plans.html">See today’s plans</a></p>
+    <p class="pf-fine" style="margin-top:1rem"><a href="how-it-works.html">How the product fits around your broker</a> · <a href="methodology.html">Longer methodology note</a></p>
+  </main>
+  <p class="pf-disclaimer">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>
+  <footer class="pf-foot">
+    <div class="pf-foot-grid">
+      <div><h2>AuraFX Elite</h2><p>Rules first. Explanation second.</p></div>
+      <div>
+        <h3>Product</h3>
+        <a href="index.html">Home</a>
+        <a href="trading-plans.html">Daily plans</a>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="track-record.html">Track record</a>
+      </div>
+      <div>
+        <h3>Legal</h3>
+        <a href="legal.html">Legal hub</a>
+        <a href="risk-warning.html">Risk warning</a>
+        <a href="disclaimer.html">Disclaimer</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <a href="mailto:support@aurafxelite.com">support@aurafxelite.com</a>
+        <div class="pf-social"><a href="mailto:support@aurafxelite.com" aria-label="Email support"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6.5A2.5 2.5 0 0 1 4.5 4h15A2.5 2.5 0 0 1 22 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 17.5v-11Z"/></svg></a></div>
+      </div>
+    </div>
+    <p class="pf-foot-note">No result is guaranteed. A measured sample includes its size. Auto trading is not available.</p>
+  </footer>
+  <script src="js/cookie-consent.js"></script>
+  <script src="js/pwa.js"></script>
+</body>
+</html>
