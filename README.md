@@ -17,7 +17,13 @@ Or double-click **`START-LIVE-WEBSITE.bat`**
 
 ### AI signal board (dashboard)
 
-The live dashboard (**AI Signals**) scores forex, gold, silver and commodities from real candles. A **Buy** or **Sell** is published only when trend (EMA), momentum (RSI + MACD), structure, and 4-hour/daily agreement all line up, volatility is normal, and risk/reward is at least 1.8. Otherwise the card stays **Wait**. Confidence is a setup-quality score, not a predicted win rate. The page shows only the server's measured win rate from logged signals.
+The live dashboard (**AI Signals**) scores forex, gold, silver and commodities from real candles. A **Buy** or **Sell** is published only when trend (EMA), momentum (RSI + MACD), structure, and 4-hour/daily agreement all line up, volatility is normal, news is outside the pause window, and risk/reward is at least 1.8. Otherwise the card stays **Wait**. Confidence is a setup-quality score, not a predicted win rate. The page shows only the server's measured win rate from logged signals.
+
+The public track record is **http://127.0.0.1:3847/track-record.html**. It lists every published signal with entry, stop, target, outcome, R, and timestamps, plus an equity curve, win rate, average R, profit factor, and max drawdown. Filter by instrument or month. Those figures are the measured sample. They are not a forecast.
+
+Each published card has a position-size calculator: account size, risk percent, and account currency produce a lot size from that signal's stop distance. JPY pairs convert through the USDJPY rate. Gold uses 100 oz and silver uses 5,000 oz. It does not send an order.
+
+Alerts are opt-in on the track record page. A published signal, a take-profit, or a stop sends a Telegram message when `TELEGRAM_BOT_TOKEN` is set, and an email when SMTP is set. The token and SMTP password stay in the server environment. Opt-ins are stored in `website/data/signal-alerts.json`, and in Neon when `DATABASE_URL` is set, so a redeploy does not drop them.
 
 The signal engine calculates direction and levels. An optional language model rewrites the plain-English note and cannot change the trade.
 
@@ -28,7 +34,15 @@ The signal engine calculates direction and levels. An optional language model re
 | `OPENAI_API_KEY` | No | Server-side only. Never put this in the browser or in git |
 | `AI_RATIONALE_PROVIDER` | No | Set to `openai` to rewrite rationales. Leave blank to keep the engine text |
 | `OPENAI_MODEL` | No | Defaults to `gpt-4o-mini` |
-| `FINNHUB_API_KEY` | No | Live economic calendar. High-impact events inside 45 minutes force Wait on the affected market |
+| `FINNHUB_API_KEY` | No | Live economic calendar. High-impact events inside the pause window force Wait on the affected currency, and on USD events for gold and other metals |
+| `SIGNAL_NEWS_BEFORE_MIN` | No | Minutes before a high-impact release to pause new signals. Default 30 |
+| `SIGNAL_NEWS_AFTER_MIN` | No | Minutes after a high-impact release to keep that pause. Default 30 |
+| `TELEGRAM_BOT_TOKEN` | No | Server-side Telegram bot token. Users opt in with their numeric chat id on the track record page |
+| `SMTP_HOST` | No | SMTP host for signal alert email. Leave blank to keep email alerts off |
+| `SMTP_PORT` | No | SMTP port. 587 uses STARTTLS. 465 uses TLS. Default 587 |
+| `SMTP_USER` | No | SMTP username when the server requires AUTH LOGIN |
+| `SMTP_PASS` | No | SMTP password. Server-side only |
+| `SMTP_FROM` | No | From address for signal alerts. Required with `SMTP_HOST` |
 
 Copy `website/.env.example` to `website/.env` for local keys. On Render, add the same names under Environment. Do not commit `.env`.
 

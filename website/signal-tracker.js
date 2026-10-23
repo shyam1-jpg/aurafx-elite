@@ -39,6 +39,83 @@ function coreStats(list) {
   };
 }
 
+function equityCurve(records) {
+  const closed = (Array.isArray(records) ? records : [])
+    .filter((row) => row.status === 'tp' || row.status === 'sl')
+    .slice()
+    .sort((a, b) => new Date(a.closed_at || a.opened_at || 0) - new Date(b.closed_at || b.opened_at || 0));
+  let equity = 0;
+  let peak = 0;
+  let maxDrawdown = 0;
+  const points = [{ t: null, equity_r: 0, drawdown_r: 0 }];
+  closed.forEach((row) => {
+    equity = Math.round((equity + Number(row.result_r || 0)) * 100) / 100;
+    if (equity > peak) peak = equity;
+    const drawdown = Math.round((peak - equity) * 100) / 100;
+    if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+    points.push({
+      t: row.closed_at || null,
+      instrument: row.instrument,
+      result_r: Number(row.result_r || 0),
+      equity_r: equity,
+      drawdown_r: drawdown
+    });
+  });
+  return { points, max_drawdown_r: maxDrawdown, ending_r: equity };
+}
+
+function publicSignal(row) {
+  return {
+    id: row.id,
+    instrument: row.instrument,
+    name: row.name || row.instrument,
+    action: row.action,
+    entry: row.entry,
+    stop_loss: row.stop_loss,
+    take_profit_1: row.take_profit_1,
+    take_profit_2: row.take_profit_2,
+    opened_at: row.opened_at,
+    closed_at: row.closed_at,
+    status: row.status,
+    result_r: row.result_r,
+    close_price: row.close_price,
+    risk_reward: row.risk_reward
+  };
+}
+
+function filterRecords(records, query) {
+  const opts = query || {};
+  const instrument = String(opts.instrument || '').toUpperCase();
+  const month = String(opts.month || '');
+  return (Array.isArray(records) ? records : []).filter((row) => {
+    if (instrument && instrument !== 'ALL' && row.instrument !== instrument) return false;
+    if (month && !String(row.opened_at || '').startsWith(month)) return false;
+    return true;
+  });
+}
+
+function buildTrackRecord(records, query) {
+  const filtered = filterRecords(records, query);
+  const measured = summariseRecords(filtered);
+  const curve = equityCurve(filtered);
+  const instruments = [...new Set((records || []).map((row) => row.instrument).filter(Boolean))].sort();
+  const months = [...new Set((records || []).map((row) => String(row.opened_at || '').slice(0, 7)).filter((value) => /^\d{4}-\d{2}$/.test(value)))].sort();
+  return {
+    ok: true,
+    instrument: query && query.instrument ? String(query.instrument).toUpperCase() : 'ALL',
+    month: query && query.month ? String(query.month) : '',
+    instruments,
+    months,
+    signals: filtered.map(publicSignal).sort((a, b) => new Date(b.opened_at || 0) - new Date(a.opened_at || 0)),
+    measured: Object.assign({}, measured, {
+      max_drawdown_r: curve.max_drawdown_r,
+      sample_note: measured.resolved < 8 ? 'This sample is small and is not a forecast.' : null
+    }),
+    equity: curve.points,
+    basis: 'Win rate, average R, profit factor and max drawdown use closed take-profit and stop results only. Expired and open signals stay in the table and out of those figures. This is a measured sample, not a forecast.'
+  };
+}
+
 function summariseRecords(records) {
   const list = Array.isArray(records) ? records : [];
   const by = {};
@@ -174,12 +251,17 @@ function createTracker(options) {
   async function sync(setups, candleMap, now) {
     await ready();
     const clock = now instanceof Date ? now : new Date(now || Date.now());
+    const publishedNow = [];
+    const closedNow = [];
     for (const setup of setups) {
       const candles = (candleMap && candleMap[setup.instrument]) || [];
       const open = signals.find((s) => s.instrument === setup.instrument && s.status === 'open');
       if (open) {
         const next = resolveOpen(open, candles, clock);
-        if (next.status !== 'open') Object.assign(open, next);
+        if (next.status !== 'open') {
+          Object.assign(open, next);
+          if (next.status === 'tp' || next.status === 'sl') closedNow.push(Object.assign({}, open));
+        }
       }
       if (!setup.published) continue;
       const stillOpen = signals.find((s) => s.instrument === setup.instrument && s.status === 'open');
@@ -187,7 +269,7 @@ function createTracker(options) {
       const prior = signals.filter((s) => s.instrument === setup.instrument);
       const last = prior[prior.length - 1];
       if (last && last.closed_at && clock.getTime() - new Date(last.closed_at).getTime() < COOLDOWN_MS) continue;
-      signals.push({
+      const row = {
         id: crypto.randomBytes(8).toString('hex'),
         instrument: setup.instrument,
         name: setup.name,
@@ -204,10 +286,16 @@ function createTracker(options) {
         closed_at: null,
         close_price: null,
         timeframe: 'H1'
-      });
+      };
+      signals.push(row);
+      publishedNow.push(Object.assign({}, row));
     }
     await save();
-    return snapshot();
+    return Object.assign(snapshot(), { events: { published: publishedNow, closed: closedNow } });
+  }
+
+  function trackRecord(query) {
+    return buildTrackRecord(signals, query || {});
   }
 
   function snapshot() {
@@ -219,12 +307,14 @@ function createTracker(options) {
     };
   }
 
-  return { ready, sync, snapshot, summariseRecords };
+  return { ready, sync, snapshot, summariseRecords, trackRecord };
 }
 
 module.exports = {
   createTracker,
   summariseRecords,
+  equityCurve,
+  buildTrackRecord,
   DEFAULT_FILE,
   COOLDOWN_MS,
   EXPIRY_BARS

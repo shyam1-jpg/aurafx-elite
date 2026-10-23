@@ -5,6 +5,7 @@
   var FOOTER_LINKS = {
     Platform: [
       { href: 'dashboard.html', label: 'Pro dashboard' },
+      { href: 'track-record.html', label: 'Measured track record' },
       { href: 'markets.html', label: 'Live markets' },
       { href: 'economic-calendar.html', label: 'Economic calendar' },
       { href: 'symbols.html', label: 'Symbols & instruments' },
