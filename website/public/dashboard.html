@@ -10,6 +10,7 @@
   <script src="js/site-boot.js?v=8"></script>
 
   <link rel="stylesheet" href="css/pro-dashboard.css?v=12" />
+  <link rel="stylesheet" href="css/signal-board.css?v=2" />
   <link rel="stylesheet" href="css/institutional.css" />
   <link rel="stylesheet" href="css/luxury.css" />
   <link rel="stylesheet" href="css/hub.css" />
@@ -24,6 +25,7 @@
       </div>
       <ul class="dash-nav" role="tablist">
         <li><button type="button" class="active" data-panel="overview" role="tab" aria-selected="true">Overview</button></li>
+        <li><button type="button" data-panel="signals" role="tab" aria-selected="false">AI Signals</button></li>
         <li><button type="button" data-panel="markets" role="tab">Markets</button></li>
         <li><button type="button" data-panel="calendar" role="tab">Calendar &amp; News</button></li>
         <li><button type="button" data-panel="journal" role="tab">Trade journal</button></li>
@@ -162,6 +164,13 @@
             <p class="market-data-note">Candles are a live-price-anchored visual context until a broker OHLC feed is connected. They are not broker execution data and must not be used alone to place a trade.</p>
           </section>
           <div class="grid">
+            <section class="card card-wide" id="signalPreview" aria-labelledby="signalPreviewTitle">
+              <h2 id="signalPreviewTitle">AI signal board</h2>
+              <p class="muted">Live confluence scan for forex, gold, silver and commodities. Buy or Sell is published only when trend, momentum, structure and higher timeframes agree.</p>
+              <div id="signalPreviewBody" class="signal-preview-row"><p class="muted">Loading signals…</p></div>
+              <p class="signal-disclaimer">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>
+              <button type="button" class="btn-dash" id="btnOpenSignals">Open full signal board</button>
+            </section>
             <div class="card card-wide lux-glass lux-shimmer">
               <h2>Market pulse</h2>
               <div class="pulse-ring-wrap">
@@ -219,6 +228,45 @@
               <ul id="eventLog" class="event-log" aria-live="polite"><li class="ev-info"><span class="ev-time">—</span><span class="ev-level">info</span><span class="ev-msg">Loading events…</span></li></ul>
             </section>
           </div>
+        </section>
+
+        <!-- AI SIGNALS -->
+        <section id="panel-signals" class="dash-panel" role="tabpanel" hidden>
+          <div class="signal-toolbar">
+            <div>
+              <h2 style="color:var(--gold);font-size:.95rem;letter-spacing:.04em;">AI signal board</h2>
+              <p id="signalBoardMeta" class="muted">Loading the live scan…</p>
+            </div>
+            <div class="range-toggle" id="signalFilter" role="group" aria-label="Filter signals">
+              <button type="button" data-signal-filter="all" class="active">All</button>
+              <button type="button" data-signal-filter="BUY">Buy</button>
+              <button type="button" data-signal-filter="SELL">Sell</button>
+              <button type="button" data-signal-filter="WAIT">Wait</button>
+            </div>
+          </div>
+          <p class="muted" style="margin:.35rem 0 .75rem;max-width:860px">Confidence is a setup-quality score, not a predicted win rate. Levels are analysis only and are not sent to a broker. Spread is not in this feed — compare the stop with your own broker before acting.</p>
+          <div class="kpi-row" id="signalStats" aria-label="Measured signal stats"></div>
+          <div id="signalBoardBody" class="signal-grid" aria-live="polite"></div>
+          <section class="card card-wide" style="margin-top:1rem" aria-labelledby="signalHistHeading">
+            <h2 id="signalHistHeading">Signal tracker</h2>
+            <p class="muted">Every published Buy or Sell is logged here and marked TP hit, SL hit, or open when later candles trade through those levels. Wait is not counted as a trade. The win rate below is the measured result of those closed signals.</p>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>Opened</th><th>Instrument</th><th>Signal</th><th>Entry</th><th>Stop</th><th>Target</th><th>Status</th><th>R</th></tr></thead>
+                <tbody id="signalHistory"></tbody>
+              </table>
+            </div>
+          </section>
+          <section class="card card-wide" style="margin-top:1rem" aria-labelledby="signalInstHeading">
+            <h2 id="signalInstHeading">Measured results by instrument</h2>
+            <div class="signal-table-wrap">
+              <table class="signal-table">
+                <thead><tr><th>Instrument</th><th>Win rate</th><th>Avg R</th><th>Open</th><th>Wins</th><th>Losses</th></tr></thead>
+                <tbody id="signalByInstrument"></tbody>
+              </table>
+            </div>
+            <p id="signalEngineNote" class="signal-disclaimer">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>
+          </section>
         </section>
 
         <!-- MARKETS -->
@@ -343,6 +391,7 @@
   <script src="js/elite-command.js"></script>
   <script src="js/advanced-market-chart.js?v=1"></script>
   <script src="js/pro-dashboard.js?v=11"></script>
+  <script src="js/signal-board.js?v=2"></script>
   <script src="js/institutional-data.js"></script>
   <script src="js/institutional.js"></script>
   <script src="js/markets-universe.js"></script>

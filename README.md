@@ -15,6 +15,35 @@ Or double-click **`START-LIVE-WEBSITE.bat`**
 - Deploy online: **`website/DEPLOY.md`**
 - **Paid hosting + domain:** **`website/PAID-HOSTING-SETUP.md`** or **`BUY-HOSTING-NOW.txt`**
 
+### AI signal board (dashboard)
+
+The live dashboard (**AI Signals**) scores forex, gold, silver and commodities from real candles. A **Buy** or **Sell** is published only when trend (EMA), momentum (RSI + MACD), structure, and 4-hour/daily agreement all line up, volatility is normal, and risk/reward is at least 1.8. Otherwise the card stays **Wait**. Confidence is a setup-quality score, not a predicted win rate. The page shows only the server's measured win rate from logged signals.
+
+The signal engine calculates direction and levels. An optional language model rewrites the plain-English note and cannot change the trade.
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| *(none)* | No | Yahoo Finance candles are the default and need no key |
+| `TWELVE_DATA_API_KEY` | No | Optional Twelve Data candles. If a request fails, that symbol falls back to Yahoo |
+| `OPENAI_API_KEY` | No | Server-side only. Never put this in the browser or in git |
+| `AI_RATIONALE_PROVIDER` | No | Set to `openai` to rewrite rationales. Leave blank to keep the engine text |
+| `OPENAI_MODEL` | No | Defaults to `gpt-4o-mini` |
+| `FINNHUB_API_KEY` | No | Live economic calendar. High-impact events inside 45 minutes force Wait on the affected market |
+
+Copy `website/.env.example` to `website/.env` for local keys. On Render, add the same names under Environment. Do not commit `.env`.
+
+Measure the rules on downloaded history:
+
+```powershell
+cd website
+npm run test:signals
+npm run backtest:signals
+```
+
+`backtest:signals` walks forward through downloaded candles and prints measured win rate, average R and sample size per instrument. Keep that printout as a measurement with its sample size. Do not turn it into a fixed accuracy claim on the site.
+
+> Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.
+
 ---
 
 # AuraFX Elite + Pro — Forex & Gold Trading Assistant for MetaTrader 5

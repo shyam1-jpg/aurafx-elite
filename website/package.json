@@ -7,7 +7,9 @@
     "start": "node simple-server.js",
     "start:express": "node server.js",
     "dev": "node simple-server.js",
-    "test:ai": "node test-ai-intelligence.js"
+    "test:ai": "node test-ai-intelligence.js",
+    "test:signals": "node test-signal-engine.js",
+    "backtest:signals": "node scripts/backtest-signals.js"
   },
   "engines": { "node": ">=18" },
   "dependencies": {

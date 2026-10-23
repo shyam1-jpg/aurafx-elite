@@ -1,0 +1,93 @@
+/* Additive signal board. Uses the dashboard's existing gold, card and type styles. */
+.signal-preview-row,
+.signal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: .75rem;
+}
+.signal-grid { margin-top: .75rem; }
+.signal-card,
+.signal-chip {
+  border: 1px solid rgba(212, 175, 55, .16);
+  border-left-width: 3px;
+  border-radius: 12px;
+  padding: .85rem .9rem;
+  background: rgba(8, 12, 20, .28);
+}
+.signal-card.buy, .signal-chip.buy { border-left-color: var(--bull); }
+.signal-card.sell, .signal-chip.sell { border-left-color: var(--bear); }
+.signal-card.wait, .signal-chip.wait { border-left-color: rgba(212, 175, 55, .55); }
+.signal-card-top, .signal-chip-top {
+  display: flex;
+  justify-content: space-between;
+  gap: .75rem;
+  align-items: baseline;
+}
+.signal-symbol { font-weight: 700; letter-spacing: .02em; }
+.signal-action { font-size: 1.05rem; font-weight: 800; letter-spacing: .06em; }
+.signal-card.buy .signal-action, .signal-chip.buy .signal-action { color: var(--bull); }
+.signal-card.sell .signal-action, .signal-chip.sell .signal-action { color: var(--bear); }
+.signal-card.wait .signal-action, .signal-chip.wait .signal-action { color: var(--gold); }
+.signal-confidence { font-size: .78rem; color: var(--muted); text-align: right; }
+.signal-confidence strong { display: block; color: var(--text); font-size: 1rem; }
+.signal-rationale { margin: .55rem 0; font-size: .84rem; line-height: 1.45; }
+.signal-levels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .28rem .75rem;
+  font-size: .8rem;
+  margin-top: .35rem;
+}
+.signal-levels span { color: var(--muted); display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.signal-factors { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .65rem; }
+.signal-factor {
+  font-size: .68rem;
+  padding: .12rem .45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  color: var(--muted);
+}
+.signal-factor.bullish, .signal-factor.clear { color: var(--bull); border-color: rgba(46, 204, 113, .35); }
+.signal-factor.bearish { color: var(--bear); border-color: rgba(231, 76, 60, .35); }
+.signal-factor.blocked { color: #e67e22; border-color: rgba(230, 126, 34, .4); }
+.signal-group-title {
+  grid-column: 1 / -1;
+  margin: .35rem 0 0;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.signal-disclaimer {
+  margin-top: .75rem;
+  font-size: .75rem;
+  line-height: 1.45;
+  color: var(--gold);
+}
+.signal-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: .35rem 0 .25rem;
+}
+.signal-table-wrap { overflow-x: auto; }
+.signal-table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.signal-table th {
+  text-align: left;
+  color: var(--gold);
+  font-size: .68rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: .4rem .35rem;
+}
+.signal-table td { padding: .45rem .35rem; border-top: 1px solid rgba(255, 255, 255, .06); vertical-align: top; }
+.signal-table .pos { color: var(--bull); }
+.signal-table .neg { color: var(--bear); }
+body.theme-light .signal-card,
+body.theme-light .signal-chip { background: rgba(255, 255, 255, .72); }
+body.theme-light .signal-table td { border-top-color: rgba(0, 0, 0, .06); }
+@media (max-width: 640px) {
+  .signal-levels { grid-template-columns: 1fr 1fr; }
+}

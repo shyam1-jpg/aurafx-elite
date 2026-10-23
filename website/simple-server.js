@@ -139,6 +139,13 @@ try {
   console.warn('[AuraFX] ai-intelligence-service not loaded:', e.message);
 }
 
+let signalService = null;
+try {
+  signalService = require('./signal-service');
+} catch (e) {
+  console.warn('[AuraFX] signal-service not loaded:', e.message);
+}
+
 function applyCalendarToCache(calPayload) {
   if (!calPayload) return;
   cache.calendar = calPayload.calendar || calPayload.items || [];
@@ -702,6 +709,21 @@ function fileOk(rel) {
   }
 }
 
+function signalNewsContext() {
+  const ev = cache.nextEvent;
+  const source = cache.calendarSource || '';
+  if (!ev || !source) return { newsImminent: false, newsCurrency: '', newsTitle: '', newsSource: source };
+  const mins = Number(ev.minutesUntil);
+  const imminent = String(ev.risk || '').toUpperCase() === 'HIGH' &&
+    Number.isFinite(mins) && mins >= 0 && mins <= 45;
+  return {
+    newsImminent: imminent,
+    newsCurrency: String(ev.currency || ''),
+    newsTitle: String(ev.title || ''),
+    newsSource: source
+  };
+}
+
 function apiWiring() {
   const base = 'http://127.0.0.1:' + PORT;
   const pages = [
@@ -711,7 +733,7 @@ function apiWiring() {
     'system-status.html', 'owner-email.html', 'owner-leads.html', 'owner-preview.html'
   ];
   const apis = [
-    '/api/health', '/api/status', '/api/quotes', '/api/pro-summary', '/api/risk-summary',
+    '/api/health', '/api/status', '/api/quotes', '/api/signals', '/api/signals/tracker', '/api/pro-summary', '/api/risk-summary',
     '/api/calendar', '/api/news', '/api/ai/status', '/api/ai/analyze', '/api/institutional', '/api/institutional-live', '/api/markets', '/api/wiring'
   ];
   return {
@@ -987,6 +1009,7 @@ const server = http.createServer((req, res) => {
       site: business.website,
       updatedAt: cache.updatedAt,
       quotes: quotesService ? 'available' : 'unavailable',
+      signals: signalService ? 'available' : 'unavailable',
       ai: aiIntelligence && aiIntelligence.status().configured ? 'configured' : 'not_configured'
     });
   }
@@ -1074,6 +1097,26 @@ const server = http.createServer((req, res) => {
         .catch(() => respond(economicCalendar.getPayload()));
     }
     return respond({ calendar: cache.calendar, nextEvent: cache.nextEvent, updatedAt: cache.updatedAt });
+  }
+  if ((url === '/api/signals' || url === '/api/signals/tracker') && req.method === 'GET') {
+    if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
+    const force = rawUrl.includes('force=1');
+    return signalService.getBoard({ force, news: signalNewsContext() })
+      .then((board) => {
+        if (url === '/api/signals/tracker') {
+          return json(res, 200, {
+            ok: true,
+            updated_at: board.updated_at,
+            tracker: board.tracker,
+            disclaimer: board.disclaimer
+          });
+        }
+        return json(res, 200, board);
+      })
+      .catch((e) => {
+        console.warn('[AuraFX] /api/signals:', e.message);
+        return json(res, 500, { error: 'Signal scan failed' });
+      });
   }
   if (url === '/api/news') return json(res, 200, { items: cache.news, breaking: cache.news });
   if (url === '/api/quotes' && req.method === 'GET') {
