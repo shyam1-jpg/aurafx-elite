@@ -80,17 +80,39 @@ function publicSignal(row) {
     result_r: row.result_r,
     close_price: row.close_price,
     risk_reward: row.risk_reward,
-    regime: row.regime || null
+    regime: row.regime || null,
+    session: row.session || null
   };
+}
+
+function sessionLabel(row) {
+  const name = String(row && row.session || '').trim();
+  return name || 'unknown';
+}
+
+function statsBy(records, keyFn) {
+  const by = {};
+  (records || []).forEach((row) => {
+    const key = keyFn(row);
+    if (!by[key]) by[key] = [];
+    by[key].push(row);
+  });
+  const out = {};
+  Object.keys(by).sort().forEach((key) => {
+    out[key] = coreStats(by[key]);
+  });
+  return out;
 }
 
 function filterRecords(records, query) {
   const opts = query || {};
   const instrument = String(opts.instrument || '').toUpperCase();
   const month = String(opts.month || '');
+  const session = String(opts.session || '');
   return (Array.isArray(records) ? records : []).filter((row) => {
     if (instrument && instrument !== 'ALL' && row.instrument !== instrument) return false;
     if (month && !String(row.opened_at || '').startsWith(month)) return false;
+    if (session && session !== 'ALL' && sessionLabel(row) !== session) return false;
     return true;
   });
 }
@@ -105,11 +127,13 @@ function buildTrackRecord(records, query) {
     ok: true,
     instrument: query && query.instrument ? String(query.instrument).toUpperCase() : 'ALL',
     month: query && query.month ? String(query.month) : '',
+    session: query && query.session ? String(query.session) : '',
     instruments,
     months,
     signals: filtered.map(publicSignal).sort((a, b) => new Date(b.opened_at || 0) - new Date(a.opened_at || 0)),
     measured: Object.assign({}, measured, {
       max_drawdown_r: curve.max_drawdown_r,
+      by_session: statsBy(filtered, sessionLabel),
       sample_note: measured.resolved < 8 ? 'This sample is small and is not a forecast.' : null
     }),
     equity: curve.points,
@@ -277,6 +301,7 @@ function createTracker(options) {
         action: setup.action,
         confidence: setup.confidence,
         regime: setup.regime || null,
+        session: setup.session || null,
         entry: setup.entry,
         stop_loss: setup.stop_loss,
         take_profit_1: setup.take_profit_1,

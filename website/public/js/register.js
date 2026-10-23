@@ -367,8 +367,7 @@
       id: d.id, email: payload.email, fullName: payload.fullName,
 
       plan: selectedPlan, paymentStatus: paymentStatus, countryCode: payload.countryCode,
-      emailVerified: !!d.emailVerified,
-      dashboardToken: d.dashboardToken || ''
+      emailVerified: !!d.emailVerified
 
     }));
 

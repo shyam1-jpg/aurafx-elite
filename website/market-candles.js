@@ -216,7 +216,10 @@ function parseYahooChart(body) {
     const l = quote.low && quote.low[i];
     const c = quote.close && quote.close[i];
     if (![o, h, l, c].every((n) => typeof n === 'number' && Number.isFinite(n))) continue;
-    candles.push({ t: new Date(result.timestamp[i] * 1000).toISOString(), o, h, l, c });
+    const bar = { t: new Date(result.timestamp[i] * 1000).toISOString(), o, h, l, c };
+    const volume = quote.volume && quote.volume[i];
+    if (typeof volume === 'number' && Number.isFinite(volume) && volume >= 0) bar.v = volume;
+    candles.push(bar);
   }
   return candles;
 }
@@ -250,7 +253,10 @@ function parseTwelveSeries(body) {
     if (![o, h, l, c].every((n) => Number.isFinite(n))) continue;
     const stamp = row.datetime ? new Date(String(row.datetime).replace(' ', 'T') + 'Z') : null;
     if (!stamp || Number.isNaN(stamp.getTime())) continue;
-    candles.push({ t: stamp.toISOString(), o, h, l, c });
+    const bar = { t: stamp.toISOString(), o, h, l, c };
+    const volume = Number(row.volume);
+    if (Number.isFinite(volume) && volume >= 0) bar.v = volume;
+    candles.push(bar);
   }
   candles.sort((a, b) => new Date(a.t) - new Date(b.t));
   return candles;
@@ -270,7 +276,10 @@ function parseKrakenOhlc(body) {
     const l = Number(row[3]);
     const c = Number(row[4]);
     if (![t, o, h, l, c].every((n) => Number.isFinite(n))) continue;
-    candles.push({ t: new Date(t * 1000).toISOString(), o, h, l, c });
+    const bar = { t: new Date(t * 1000).toISOString(), o, h, l, c };
+    const volume = Number(row[6]);
+    if (Number.isFinite(volume) && volume >= 0) bar.v = volume;
+    candles.push(bar);
   }
   candles.sort((a, b) => new Date(a.t) - new Date(b.t));
   return candles;

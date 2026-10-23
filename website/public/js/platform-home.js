@@ -37,10 +37,7 @@
   }
 
   function cardHtml(signal) {
-    var levels = '';
-    if (signal.action === 'BUY' || signal.action === 'SELL') {
-      levels = '<p class="pf-levels">Entry ' + esc(signal.entry) + ' · Stop ' + esc(signal.stop_loss) + ' · Target ' + esc(signal.take_profit_1) + '</p>';
-    }
+    var levels = '<p class="pf-fine">Entry, stop and targets stay in the members area.</p>';
     var why = (signal.blockers && signal.blockers[0]) || signal.regime_note || '';
     return '<article class="pf-card pf-signal">' +
       '<div class="pf-signal-top"><strong>' + esc(signal.name || signal.instrument) + '</strong>' +

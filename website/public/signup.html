@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a0c12" />
+  <title>Member signup — AuraFX Elite</title>
+  <link rel="icon" href="assets/aura-icon-140.png?v=7" type="image/png" />
+  <link rel="stylesheet" href="css/site.css?v=11" />
+  <link rel="stylesheet" href="css/hub.css" />
+  <link rel="stylesheet" href="css/members.css?v=1" />
+  <script src="js/font-loader.js"></script>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary">
+    <a href="index.html" class="logo" aria-label="AuraFX Elite home"><img src="assets/aurafx-elite-logo.png?v=7" alt="" class="logo-img" width="160" height="58" decoding="sync" /></a>
+    <div class="nav-links">
+      <a href="pricing.html">Pricing</a>
+      <a href="login.html">Log in</a>
+      <a href="members.html">Members</a>
+      <a href="dashboard.html" class="btn btn-gold">Dashboard</a>
+    </div>
+  </nav>
+  <main class="mem-shell">
+    <form class="mem-card auth-card mem-form" id="signupForm">
+      <h1>Create a member account</h1>
+      <p>This is the members login. It is separate from the client registration form. New accounts are Free. Contact support@aurafxelite.com about Pro or Elite. Payment is not taken here.</p>
+      <label>Name <input name="name" required minlength="2" /></label>
+      <label>Email <input name="email" type="email" autocomplete="username" required /></label>
+      <label>Password <input name="password" type="password" autocomplete="new-password" required minlength="8" /></label>
+      <label><input name="acceptRisk" type="checkbox" required /> I understand trading involves risk and no result is guaranteed.</label>
+      <button class="btn btn-gold" type="submit">Create account</button>
+      <p id="signupMsg" class="mem-note" role="status"></p>
+      <p class="mem-note"><a href="login.html">Already registered? Log in</a> · <a href="risk-warning.html">Risk warning</a></p>
+    </form>
+    <p class="mem-note">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>
+  </main>
+  <footer class="footer"></footer>
+  <script src="js/site-chrome.js"></script>
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+      var data = new FormData(event.target);
+      var msg = document.getElementById('signupMsg');
+      msg.textContent = 'Creating the account…';
+      fetch('/api/members/register', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.get('name'),
+          email: data.get('email'),
+          password: data.get('password'),
+          acceptRisk: data.get('acceptRisk') === 'on'
+        })
+      }).then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
+        .then(function (result) {
+          if (!result.ok) { msg.textContent = result.body.error || 'Signup failed.'; return; }
+          location.href = 'members.html';
+        }).catch(function () { msg.textContent = 'Signup failed.'; });
+    });
+  </script>
+</body>
+</html>

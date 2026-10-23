@@ -38,10 +38,7 @@
       return;
     }
     list.innerHTML = plans.map(function (plan) {
-      var levels = plan.key_levels
-        ? '<p class="pf-levels">Entry ' + esc(plan.key_levels.entry) + ' · Stop ' + esc(plan.key_levels.stop_loss) + ' · Target ' + esc(plan.key_levels.take_profit_1) +
-          (plan.key_levels.risk_reward != null ? ' · ' + esc(plan.key_levels.risk_reward) + 'R' : '') + '</p>'
-        : '<p class="pf-fine">No key levels. This market is not a published buy or sell.</p>';
+      var levels = '<p class="pf-fine">' + esc(plan.levels_note || 'Entry, stop and targets stay in the members area.') + '</p>';
       var scenario = plan.scenario || {};
       return '<article class="pf-card">' +
         '<div class="pf-plan-top"><strong>' + esc(plan.name) + '</strong><span class="pf-bias ' + biasClass(plan.bias) + '">' + esc(word(plan.bias)) + '</span></div>' +
