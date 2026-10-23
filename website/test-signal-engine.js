@@ -4,10 +4,12 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const zlib = require('zlib');
 const math = require('./signal-math');
 const trackerMod = require('./signal-tracker');
 const candles = require('./market-candles');
 const rationale = require('./signal-rationale');
+const signalService = require('./signal-service');
 const { backtestInstrument } = require('./signal-backtest');
 
 const EUR = { id: 'EURUSD', name: 'EUR/USD', asset: 'forex' };
@@ -249,6 +251,141 @@ assert.strictEqual(rationale.acceptableRationale('Wait on EUR/USD until the hour
 
   fs.rmSync(file, { force: true });
   fs.rmSync(file + '.sl', { force: true });
+
+  const gzipPayload = Buffer.from(JSON.stringify({ ok: true, n: 3 }));
+  const gzipped = zlib.gzipSync(gzipPayload);
+  assert.strictEqual(JSON.parse(candles.decodeHttpBody(gzipped, 'gzip').toString('utf8')).n, 3);
+  assert.strictEqual(JSON.parse(candles.decodeHttpBody(gzipped, '').toString('utf8')).n, 3);
+
+  function yahooBars(count) {
+    const timestamp = [];
+    const open = [];
+    const high = [];
+    const low = [];
+    const close = [];
+    for (let i = 0; i < count; i++) {
+      timestamp.push(1700000000 + i * 3600);
+      open.push(1.1);
+      high.push(1.12);
+      low.push(1.08);
+      close.push(1.11);
+    }
+    return { chart: { result: [{ timestamp, indicators: { quote: [{ open, high, low, close }] } }] } };
+  }
+
+  function krakenBars(count, start, step) {
+    const rows = [];
+    let price = start;
+    for (let i = 0; i < count; i++) {
+      const open = price;
+      const close = price + start * 0.0001;
+      rows.push([1700000000 + i * step, String(open), String(open + 0.001), String(Math.max(0.0001, open - 0.001)), String(close), '0', '1', 1]);
+      price = close;
+    }
+    return { error: [], result: { PAIR: rows, last: rows[rows.length - 1][0] } };
+  }
+
+  const previousTwelve = process.env.TWELVE_DATA_API_KEY;
+  delete process.env.TWELVE_DATA_API_KEY;
+  const nzd = candles.INSTRUMENTS.find((row) => row.id === 'NZDUSD');
+  const eur = candles.INSTRUMENTS.find((row) => row.id === 'EURUSD');
+  const gbpjpy = candles.INSTRUMENTS.find((row) => row.id === 'GBPJPY');
+  const gzChart = zlib.gzipSync(Buffer.from(JSON.stringify(yahooBars(90))));
+  candles.clearCache();
+  const decodedFeed = await candles.loadInstrument(nzd, {
+    force: true,
+    fetchImpl: async () => ({ status: 200, body: gzChart, encoding: 'gzip' })
+  });
+  assert.strictEqual(decodedFeed.source, 'Yahoo Finance');
+  assert.ok(decodedFeed.h1.length >= 80, 'gzip chart body should decode to candles');
+
+  candles.clearCache();
+  const krakenFeed = await candles.loadInstrument(eur, {
+    force: true,
+    fetchImpl: async (url) => {
+      const target = String(url);
+      if (target.includes('api.kraken.com')) {
+        const step = target.includes('interval=1440') ? 86400 : 3600;
+        return { status: 200, body: krakenBars(90, 1.1, step) };
+      }
+      return { status: 200, body: '<!DOCTYPE html><html>consent</html>' };
+    }
+  });
+  assert.strictEqual(krakenFeed.source, 'Kraken');
+  assert.strictEqual(krakenFeed.feed, 'EURUSD');
+  assert.ok(krakenFeed.h1.length >= 80, 'Kraken fallback should fill hourly history');
+  assert.ok(krakenFeed.errors.some((message) => /HTML/i.test(message)));
+
+  candles.clearCache();
+  const cross = candles.crossMultiply(
+    [{ t: '2026-01-01T00:00:00.000Z', o: 1.2, h: 1.3, l: 1.1, c: 1.25 }],
+    [{ t: '2026-01-01T00:00:00.000Z', o: 150, h: 151, l: 149, c: 150.5 }]
+  );
+  assert.strictEqual(cross.length, 1);
+  assert.ok(Math.abs(cross[0].c - 1.25 * 150.5) < 1e-9);
+  const crossFeed = await candles.loadInstrument(gbpjpy, {
+    force: true,
+    fetchImpl: async (url) => {
+      const target = String(url);
+      if (!target.includes('api.kraken.com')) return { status: 200, body: '<html>blocked</html>' };
+      const step = target.includes('interval=1440') ? 86400 : 3600;
+      const start = target.includes('pair=USDJPY') ? 150 : 1.25;
+      return { status: 200, body: krakenBars(90, start, step) };
+    }
+  });
+  assert.strictEqual(crossFeed.source, 'Kraken cross');
+  assert.ok(crossFeed.h1.length >= 80);
+  assert.ok(/cross/i.test(crossFeed.feed_note));
+
+  process.env.TWELVE_DATA_API_KEY = 'unit-test-key';
+  candles.clearCache();
+  const twelveFallback = await candles.loadInstrument(eur, {
+    force: true,
+    fetchImpl: async (url) => {
+      const target = String(url);
+      if (target.includes('twelvedata.com')) return { status: 200, body: { status: 'error', message: 'apikey=unit-test-key was rejected' } };
+      if (target.includes('api.kraken.com')) {
+        const step = target.includes('interval=1440') ? 86400 : 3600;
+        return { status: 200, body: krakenBars(90, 1.1, step) };
+      }
+      return { status: 200, body: '<html>blocked</html>' };
+    }
+  });
+  assert.strictEqual(twelveFallback.source, 'Kraken');
+  assert.ok(!twelveFallback.errors.join(' ').includes('unit-test-key'));
+  if (previousTwelve === undefined) delete process.env.TWELVE_DATA_API_KEY;
+  else process.env.TWELVE_DATA_API_KEY = previousTwelve;
+
+  candles.clearCache();
+  let yahooPhase = 'ok';
+  const staleFeedImpl = async (url) => {
+    if (yahooPhase === 'ok' && String(url).includes('/v8/finance/chart/')) return { status: 200, body: yahooBars(90) };
+    return { status: 200, body: '<html>blocked</html>' };
+  };
+  const freshNzd = await candles.loadInstrument(nzd, { force: true, fetchImpl: staleFeedImpl });
+  assert.strictEqual(freshNzd.stale, false);
+  yahooPhase = 'down';
+  const staleNzd = await candles.loadInstrument(nzd, { force: true, fetchImpl: staleFeedImpl });
+  assert.strictEqual(staleNzd.stale, true);
+  assert.ok(staleNzd.h1.length >= 80, 'last good candles stay available for six hours');
+  candles.clearCache();
+
+  const down = signalService.describeFeed([{ h1: [], errors: ['Yahoo query1 200 returned HTML instead of data'] }]);
+  assert.strictEqual(down.status, 'down');
+  assert.ok(/Price history is down/.test(down.detail));
+  const degraded = signalService.describeFeed([
+    { h1: new Array(80), source: 'Kraken' },
+    { h1: [], errors: ['Yahoo returned no candles'] }
+  ]);
+  assert.strictEqual(degraded.status, 'degraded');
+  const stale = signalService.describeFeed([
+    { h1: new Array(80), stale: true, source: 'Yahoo Finance' },
+    { h1: new Array(80), stale: true, source: 'Yahoo Finance' }
+  ]);
+  assert.strictEqual(stale.status, 'stale');
+  const live = signalService.describeFeed([{ h1: new Array(80), source: 'Yahoo Finance' }]);
+  assert.strictEqual(live.status, 'live');
+
   console.log('Signal engine tests passed. Sample BUY confidence ' + buy.confidence + ', backtest trades ' + bt.trade_count + ', measured win rate ' + bt.measured.win_rate + ' on ' + bt.measured.resolved + ' resolved.');
 })().catch((error) => {
   console.error(error);

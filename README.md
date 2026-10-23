@@ -23,8 +23,8 @@ The signal engine calculates direction and levels. An optional language model re
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
-| *(none)* | No | Yahoo Finance candles are the default and need no key |
-| `TWELVE_DATA_API_KEY` | No | Optional Twelve Data candles. If a request fails, that symbol falls back to Yahoo |
+| *(none)* | No | Yahoo Finance candles are the default. The server sends a browser user-agent, decompresses gzip, and falls back to Kraken public OHLC for supported forex and PAXG gold |
+| `TWELVE_DATA_API_KEY` | No | Optional Twelve Data candles, tried first. A failed request still falls through to Yahoo, then Kraken where a pair exists |
 | `OPENAI_API_KEY` | No | Server-side only. Never put this in the browser or in git |
 | `AI_RATIONALE_PROVIDER` | No | Set to `openai` to rewrite rationales. Leave blank to keep the engine text |
 | `OPENAI_MODEL` | No | Defaults to `gpt-4o-mini` |
