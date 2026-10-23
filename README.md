@@ -17,7 +17,7 @@ Or double-click **`START-LIVE-WEBSITE.bat`**
 
 ### AI signal board (dashboard)
 
-The live dashboard (**AI Signals**) scores forex, gold, silver and commodities from real candles. A **Buy** or **Sell** is published only when trend (EMA), momentum (RSI + MACD), structure, and 4-hour/daily agreement all line up, volatility is normal, news is outside the pause window, and risk/reward is at least 1.8. Otherwise the card stays **Wait**. Confidence is a setup-quality score, not a predicted win rate. The page shows only the server's measured win rate from logged signals.
+The live dashboard (**AI Signals**) scores forex, gold, silver and commodities from real candles. Each card shows the market regime, and that regime switches the rules. **Trending** (ADX at least 25) publishes a **Buy** or **Sell** only when trend (EMA), momentum (RSI + MACD), structure, and 4-hour/daily agreement all line up. **Ranging** publishes only a mean-reversion setup within one ATR of support or resistance. **Volatile** (a recent bar wider than 2.2 times ATR) publishes nothing. Volatility still has to be tradable, news has to be outside the pause window, and risk/reward has to be at least 1.8. Otherwise the card stays **Wait**. Confidence starts as a setup-quality score, not a predicted win rate. Once the tracker has 8 closed signals, the number on a Buy or Sell card can switch to a measured rate from that history and the card says so. That rate is not a forecast. The page also shows the tracker's measured win rate, with the sample size.
 
 The public track record is **http://127.0.0.1:3847/track-record.html**. It lists every published signal with entry, stop, target, outcome, R, and timestamps, plus an equity curve, win rate, average R, profit factor, and max drawdown. Filter by instrument or month. Those figures are the measured sample. They are not a forecast.
 
@@ -25,14 +25,14 @@ Each published card has a position-size calculator: account size, risk percent, 
 
 Alerts are opt-in on the track record page. A published signal, a take-profit, or a stop sends a Telegram message when `TELEGRAM_BOT_TOKEN` is set, and an email when SMTP is set. The token and SMTP password stay in the server environment. Opt-ins are stored in `website/data/signal-alerts.json`, and in Neon when `DATABASE_URL` is set, so a redeploy does not drop them.
 
-The signal engine calculates direction and levels. An optional language model rewrites the plain-English note and cannot change the trade.
+The signal engine calculates direction, levels, and the plain-English note. The same note says which regime is in force. An optional language model rewrites that wording and can answer questions from the on-dashboard assistant. It cannot change the trade. With no key, the assistant still answers from the current board and the default risk limits (1% per trade, 3% daily, 7% weekly, 3 open trades, auto trading off).
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | *(none)* | No | Yahoo Finance candles are the default. The server sends a browser user-agent, decompresses gzip, and falls back to Kraken public OHLC for supported forex and PAXG gold |
 | `TWELVE_DATA_API_KEY` | No | Optional Twelve Data candles, tried first. A failed request still falls through to Yahoo, then Kraken where a pair exists |
 | `OPENAI_API_KEY` | No | Server-side only. Never put this in the browser or in git |
-| `AI_RATIONALE_PROVIDER` | No | Set to `openai` to rewrite rationales. Leave blank to keep the engine text |
+| `AI_RATIONALE_PROVIDER` | No | Set to `openai` to rewrite rationales and to let the dashboard assistant use the model. Leave blank and both stay on the rule engine |
 | `OPENAI_MODEL` | No | Defaults to `gpt-4o-mini` |
 | `FINNHUB_API_KEY` | No | Live economic calendar. High-impact events inside the pause window force Wait on the affected currency, and on USD events for gold and other metals |
 | `SIGNAL_NEWS_BEFORE_MIN` | No | Minutes before a high-impact release to pause new signals. Default 30 |

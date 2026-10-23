@@ -10,7 +10,7 @@
   <script src="js/site-boot.js?v=8"></script>
 
   <link rel="stylesheet" href="css/pro-dashboard.css?v=12" />
-  <link rel="stylesheet" href="css/signal-board.css?v=4" />
+  <link rel="stylesheet" href="css/signal-board.css?v=5" />
   <link rel="stylesheet" href="css/institutional.css" />
   <link rel="stylesheet" href="css/luxury.css" />
   <link rel="stylesheet" href="css/hub.css" />
@@ -167,7 +167,7 @@
           <div class="grid">
             <section class="card card-wide" id="signalPreview" aria-labelledby="signalPreviewTitle">
               <h2 id="signalPreviewTitle">AI signal board</h2>
-              <p class="muted">Live confluence scan for forex, gold, silver and commodities. Buy or Sell is published only when trend, momentum, structure and higher timeframes agree.</p>
+              <p class="muted">Live confluence scan for forex, gold, silver and commodities. Each card shows the regime, and that regime switches the rules.</p>
               <p id="signalPreviewFeed" class="signal-feed-status" data-signal-feed hidden></p>
               <div id="signalPreviewBody" class="signal-preview-row"><p class="muted">Loading signals…</p></div>
               <p class="signal-disclaimer">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>
@@ -246,7 +246,18 @@
               <button type="button" data-signal-filter="WAIT">Wait</button>
             </div>
           </div>
-          <p class="muted" style="margin:.35rem 0 .75rem;max-width:860px">Confidence is a setup-quality score, not a predicted win rate. Levels are analysis only and are not sent to a broker. Spread is not in this feed — compare the stop with your own broker before acting.</p>
+          <p class="muted" style="margin:.35rem 0 .75rem;max-width:860px">Confidence starts as a setup-quality score, not a predicted win rate. After 8 closed signals it can show a measured rate from that history, labelled on the card, and that rate is not a forecast. Levels are analysis only and are not sent to a broker. Spread is not in this feed — compare the stop with your own broker before acting.</p>
+          <section class="card card-wide signal-ask" aria-labelledby="signalAskHeading">
+            <h2 id="signalAskHeading">Ask about these signals</h2>
+            <p class="muted">Ask about the current board, the regime, or your risk. With an OpenAI key the model answers from this scan. Without one, the signal engine answers from the same scan. Nothing is sent to a broker.</p>
+            <form id="signalAskForm" class="signal-ask-form">
+              <label for="signalAskInput" class="sr-only">Question</label>
+              <input id="signalAskInput" name="question" maxlength="500" placeholder="Why is gold waiting, and what risk limits apply?" aria-label="Question about the current signals">
+              <button type="submit" class="btn-dash">Ask</button>
+            </form>
+            <p id="signalAskAnswer" class="signal-ask-answer" aria-live="polite"></p>
+            <p id="signalAskNote" class="muted"></p>
+          </section>
           <p id="signalPanelFeed" class="signal-feed-status" data-signal-feed hidden></p>
           <div class="kpi-row" id="signalStats" aria-label="Measured signal stats"></div>
           <div id="signalBoardBody" class="signal-grid" aria-live="polite"></div>
@@ -395,7 +406,7 @@
   <script src="js/advanced-market-chart.js?v=1"></script>
   <script src="js/pro-dashboard.js?v=11"></script>
   <script src="js/position-size.js?v=1"></script>
-  <script src="js/signal-board.js?v=4"></script>
+  <script src="js/signal-board.js?v=5"></script>
   <script src="js/institutional-data.js"></script>
   <script src="js/institutional.js"></script>
   <script src="js/markets-universe.js"></script>

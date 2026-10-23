@@ -30,6 +30,37 @@
 .signal-card.wait .signal-action, .signal-chip.wait .signal-action { color: var(--gold); }
 .signal-confidence { font-size: .78rem; color: var(--muted); text-align: right; }
 .signal-confidence strong { display: block; color: var(--text); font-size: 1rem; }
+.signal-confidence-basis { margin: .35rem 0 0; font-size: .75rem; line-height: 1.4; color: var(--muted); }
+.signal-regime {
+  display: inline-block;
+  margin-left: .35rem;
+  padding: .05rem .4rem;
+  border-radius: 999px;
+  font-size: .62rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  border: 1px solid rgba(212, 175, 55, .35);
+  color: var(--gold);
+}
+.signal-regime.trending { color: var(--bull); border-color: rgba(46, 204, 113, .4); }
+.signal-regime.ranging { color: var(--gold); border-color: rgba(212, 175, 55, .45); }
+.signal-regime.volatile { color: #e67e22; border-color: rgba(230, 126, 34, .5); }
+.signal-factor.trending { color: var(--bull); border-color: rgba(46, 204, 113, .35); }
+.signal-factor.ranging { color: var(--gold); border-color: rgba(212, 175, 55, .4); }
+.signal-factor.volatile { color: #e67e22; border-color: rgba(230, 126, 34, .45); }
+.signal-ask { margin: .75rem 0; }
+.signal-ask-form { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .55rem; }
+.signal-ask-form input {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: .45rem .6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, .25);
+  background: rgba(8, 12, 20, .35);
+  color: var(--text);
+}
+.signal-ask-answer { margin: .65rem 0 0; font-size: .86rem; line-height: 1.45; }
 .signal-rationale { margin: .55rem 0; font-size: .84rem; line-height: 1.45; }
 .signal-levels {
   display: grid;

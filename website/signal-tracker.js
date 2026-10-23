@@ -79,7 +79,8 @@ function publicSignal(row) {
     status: row.status,
     result_r: row.result_r,
     close_price: row.close_price,
-    risk_reward: row.risk_reward
+    risk_reward: row.risk_reward,
+    regime: row.regime || null
   };
 }
 
@@ -275,6 +276,7 @@ function createTracker(options) {
         name: setup.name,
         action: setup.action,
         confidence: setup.confidence,
+        regime: setup.regime || null,
         entry: setup.entry,
         stop_loss: setup.stop_loss,
         take_profit_1: setup.take_profit_1,
@@ -307,7 +309,11 @@ function createTracker(options) {
     };
   }
 
-  return { ready, sync, snapshot, summariseRecords, trackRecord };
+  function records() {
+    return signals.map((row) => Object.assign({}, row));
+  }
+
+  return { ready, sync, snapshot, summariseRecords, trackRecord, records };
 }
 
 module.exports = {

@@ -9,7 +9,7 @@ Professional trading assistant. **Does not guarantee profits.**
 | 3 | AI trade scoring 0–100 | ✅ | ✅ `/api/pro-summary` | Rule-based confluence |
 | 4 | Order flow (FVG, OB, BOS, CHOCH, liquidity) | ✅ `AuraFX_Structure.mqh` | — | Algorithmic SMC |
 | 5 | Economic calendar protection | ✅ `AuraFX_NewsRisk.mqh` | ✅ risk-dashboard | 30 min block default |
-| 6 | Market regime detection | ✅ | — | Trend / Range / Volatile / News |
+| 6 | Market regime detection | ✅ | ✅ AI Signals | Trending / ranging / volatile on each card. News stays a separate pause |
 | 7 | Correlation monitor | ✅ | — | Gold vs USD proxy, EUR |
 | 8 | AI trade journal | — | ✅ `pro-dashboard` | localStorage + insights |
 | 9 | S/R AI (D/W/M + supply/demand) | ✅ | Screenshot overlay | Swing + structure zones |

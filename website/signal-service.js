@@ -1,10 +1,11 @@
 'use strict';
 
-const { assessSetup, DISCLAIMER } = require('./signal-math');
+const { assessSetup, calibrateConfidence, DISCLAIMER } = require('./signal-math');
 const { INSTRUMENTS, loadAll } = require('./market-candles');
 const { applyRationales } = require('./signal-rationale');
 const { createTracker } = require('./signal-tracker');
 const { createAlerts } = require('./signal-alerts');
+const assistant = require('./signal-assistant');
 
 const tracker = createTracker();
 const alerts = createAlerts();
@@ -93,8 +94,10 @@ async function computeBoard(options) {
     setup.feed_stale = !!row.stale;
     return setup;
   });
-  const llm = await applyRationales(setups, { fetchImpl: opts.fetchImpl, cache: rationaleCache });
   const tracked = await tracker.sync(setups, candleMap, now);
+  const history = tracker.records();
+  setups.forEach((setup) => calibrateConfidence(setup, history));
+  const llm = await applyRationales(setups, { fetchImpl: opts.fetchImpl, cache: rationaleCache });
   const alertEvents = []
     .concat((tracked.events && tracked.events.published) || [])
     .map((signal) => ({ type: 'published', signal }))
@@ -116,7 +119,7 @@ async function computeBoard(options) {
         ? 'The language model rewrites wording only. Direction and levels stay with the rule engine.'
         : 'Rationales are written by the rule engine. Set AI_RATIONALE_PROVIDER=openai and OPENAI_API_KEY to let a language model rewrite them.'
     },
-    publication_rule: 'Buy or Sell is published only when trend, momentum, structure and higher timeframes agree, volatility is normal, news is clear, and risk/reward is at least 1.8.',
+    publication_rule: 'A trending regime publishes Buy or Sell only when trend, momentum, structure and higher timeframes agree. A ranging regime publishes only a mean-reversion setup at the range edge. A volatile regime publishes nothing. Volatility must be tradable, news must be outside the pause window, and risk/reward must be at least 1.8. Displayed confidence stays a setup-quality score until 8 closed signals exist, then it can show a measured rate from that history. That rate is not a forecast.',
     feed: describeFeed(loaded),
     price_note: 'Candles try Twelve Data when TWELVE_DATA_API_KEY is set, then Yahoo Finance, then Kraken public OHLC for supported forex and PAXG gold. GBP/JPY can be built from GBP/USD and USD/JPY when the direct feed fails. Silver, oil, gas and copper stay on Yahoo or Twelve Data. These are not your broker\'s executable quotes, and spread is not included.',
     signals: setups,
@@ -141,6 +144,13 @@ async function getTrackRecord(query) {
   return record;
 }
 
+async function ask(question, options) {
+  const opts = options || {};
+  const board = opts.board || await getBoard(opts);
+  const result = await assistant.answer(question, board, { fetchImpl: opts.fetchImpl });
+  return Object.assign({ disclaimer: DISCLAIMER }, result);
+}
+
 function getBoard(options) {
   const opts = options || {};
   const ttl = Number(process.env.SIGNAL_CACHE_MS) || 60000;
@@ -154,6 +164,7 @@ function getBoard(options) {
 
 module.exports = {
   getBoard,
+  ask,
   getTrackRecord,
   subscribeAlerts: (body) => alerts.subscribe(body),
   unsubscribeAlerts: (token) => alerts.unsubscribe(token),

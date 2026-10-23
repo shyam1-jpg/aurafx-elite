@@ -50,6 +50,13 @@
     ).join('');
   }
 
+  function regimeChip(signal) {
+    const name = String(signal.regime || '');
+    if (!/^(trending|ranging|volatile)$/.test(name)) return '';
+    const label = name.charAt(0).toUpperCase() + name.slice(1);
+    return '<span class="signal-regime ' + name + '">' + esc(label) + '</span>';
+  }
+
   function cardHtml(signal, compact) {
     const action = signal.action || 'WAIT';
     const cls = action.toLowerCase();
@@ -71,8 +78,9 @@
     return '<article class="' + (compact ? 'signal-chip ' : 'signal-card ') + cls + '">' +
       '<div class="' + (compact ? 'signal-chip-top' : 'signal-card-top') + '">' +
       '<div><div class="signal-symbol">' + esc(signal.name || signal.instrument) + ' <span class="muted">' + esc(price(signal, signal.price)) + '</span></div>' +
-      '<div class="signal-action">' + esc(action) + '</div></div>' +
+      '<div class="signal-action">' + esc(action) + ' ' + regimeChip(signal) + '</div></div>' +
       '<div class="signal-confidence">Confidence<strong>' + esc(conf) + '</strong></div></div>' +
+      (!compact && signal.confidence_basis ? '<p class="signal-confidence-basis">' + esc(signal.confidence_basis) + '</p>' : '') +
       (compact ? '' : '<p class="signal-rationale">' + esc(signal.rationale || '') + '</p>' + levels + factorHtml(signal.factors)) +
       blockerHtml(signal, compact) +
       (compact ? '' : '<p class="muted" style="margin-top:.5rem">' + esc(signal.session || '') + (signal.feed_note ? ' · ' + esc(signal.feed_note) : '') + '</p>') +
@@ -301,6 +309,35 @@
 
   const note = document.getElementById('signalEngineNote');
   if (note && !note.textContent) note.textContent = DISCLAIMER;
+
+  const askForm = document.getElementById('signalAskForm');
+  const askInput = document.getElementById('signalAskInput');
+  const askAnswer = document.getElementById('signalAskAnswer');
+  const askNote = document.getElementById('signalAskNote');
+  askForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const question = askInput ? askInput.value.trim() : '';
+    if (!question) return;
+    const button = askForm.querySelector('button');
+    if (button) button.disabled = true;
+    if (askAnswer) askAnswer.textContent = 'Checking the current board…';
+    if (askNote) askNote.textContent = '';
+    try {
+      const res = await fetch(API + '/api/signals/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+      const payload = await res.json();
+      if (askAnswer) askAnswer.textContent = payload.answer || payload.error || 'No answer was returned.';
+      if (askNote) askNote.textContent = payload.note || '';
+    } catch (error) {
+      if (askAnswer) askAnswer.textContent = 'The assistant could not reach the server. The signal cards above are unchanged.';
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+
   refresh(false);
   timer = setInterval(() => refresh(false), 60000);
   window.addEventListener('beforeunload', () => clearInterval(timer));
