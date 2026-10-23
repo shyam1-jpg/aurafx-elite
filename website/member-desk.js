@@ -6,6 +6,7 @@ const analytics = require('./market-analytics');
 const { createMembersStore, tierAllows, FEATURES } = require('./members-store');
 const { DISCLAIMER } = require('./signal-math');
 const { smtpSettings, telegramSettings } = require('./signal-alerts');
+const chartMath = require('./chart-math');
 
 const KNOWN = INSTRUMENTS.map((item) => item.id);
 const googleStates = new Map();
@@ -318,28 +319,61 @@ function createMemberDesk(options) {
         }
         const params = new URLSearchParams(ctx.rawUrl.includes('?') ? ctx.rawUrl.split('?')[1] : '');
         const id = String(params.get('instrument') || '').toUpperCase();
-        const row = await candlesFor(id);
-        if (!row || !row.h1 || !row.h1.length) {
-          json(res, 200, { ok: false, instrument: id, bars: [], overlays: [], note: 'No hourly candles are available for this instrument.' });
+        const timeframe = String(params.get('timeframe') || 'H1').toUpperCase();
+        if (!KNOWN.includes(id)) {
+          json(res, 400, { ok: false, instrument: id, bars: [], note: 'Unknown instrument.' });
           return true;
         }
-        const board = await liveBoard(ctx.news);
-        const signal = (board.signals || []).find((item) => item.instrument === id) || null;
-        json(res, 200, {
-          ok: true,
+        if (timeframe === 'M15') {
+          const missing = chartMath.candleView(null, 'M15');
+          json(res, 200, Object.assign({ instrument: id, overlays: [], signal: null }, missing));
+          return true;
+        }
+        const row = await candlesFor(id);
+        const view = chartMath.candleView(row || {}, timeframe);
+        const board = view.available ? await liveBoard(ctx.news) : null;
+        const signal = board ? ((board.signals || []).find((item) => item.instrument === id) || null) : null;
+        json(res, 200, Object.assign({
           instrument: id,
-          source: row.source || null,
-          stale: !!row.stale,
-          bars: analytics.chartBars(row.h1, 180),
-          overlays: analytics.chartOverlays(signal),
+          source: row && row.source || null,
+          stale: !!(row && row.stale),
+          overlays: view.available ? analytics.chartOverlays(signal) : [],
           signal: signal ? {
             action: signal.action,
             regime: signal.regime,
             support: signal.support,
-            resistance: signal.resistance
-          } : null,
-          note: 'Candles are the hourly feed. Entry, stop and targets are drawn only when a Buy or Sell is published. Support and resistance are the engine swing levels when they exist.'
-        });
+            resistance: signal.resistance,
+            timeframe: 'H1'
+          } : null
+        }, view));
+        return true;
+      }
+      if (url === '/api/members/chart-layout' && req.method === 'GET') {
+        const user = member(req);
+        if (!user) {
+          json(res, 401, { ok: false, error: 'Sign in to open a chart layout.' });
+          return true;
+        }
+        if (!tierAllows(user.tier, 'charts')) {
+          json(res, 403, locked('charts'));
+          return true;
+        }
+        json(res, 200, { ok: true, desk: store.getChartDesk(user.id) });
+        return true;
+      }
+      if (url === '/api/members/chart-layout' && req.method === 'POST') {
+        const user = member(req);
+        if (!user) {
+          json(res, 401, { ok: false, error: 'Sign in to save a chart layout.' });
+          return true;
+        }
+        if (!tierAllows(user.tier, 'charts')) {
+          json(res, 403, locked('charts'));
+          return true;
+        }
+        const body = await readBody(req);
+        const desk = store.updateChartDesk(user.id, body && body.desk, KNOWN);
+        json(res, 200, { ok: true, desk });
         return true;
       }
       if (url === '/api/members/ask' && req.method === 'POST') {

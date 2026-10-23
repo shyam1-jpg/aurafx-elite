@@ -34,6 +34,7 @@
   }
 
   function view() {
+    if (window.AuraMemberCharts) window.AuraMemberCharts.destroy();
     var root = document.getElementById('memView');
     if (!state.data) {
       root.innerHTML = '<article class="mem-card"><h2>Sign in</h2><p>The members area keeps the public pages as a teaser. <a href="login.html">Log in</a> or <a href="signup.html">create a free account</a>.</p></article>';
@@ -64,11 +65,7 @@
 
   function charts() {
     if (!gate('charts')) return lockedBox(state.data.scanner);
-    var options = ((state.data.live && state.data.live.signals) || []).map(function (signal) {
-      return '<option value="' + esc(signal.instrument) + '"' + (signal.instrument === state.instrument ? ' selected' : '') + '>' + esc(signal.name || signal.instrument) + '</option>';
-    }).join('');
-    return '<article class="mem-card"><h2>Chart</h2><p>Hourly candles from the price feed. Entry, stop and targets appear only on a published Buy or Sell. Support and resistance are the engine swing levels when the scan measured them.</p>' +
-      '<label>Instrument <select id="chartInstrument">' + options + '</select></label><div id="memChart"></div><p id="chartNote" class="mem-note"></p></article>';
+    return '<article class="mem-card"><h2>Charts</h2><p>Each pane keeps its own market and timeframe. M15 is shown only when the feed has it. Entry, stop and targets appear only on a published Buy or Sell. Support and resistance stay when the scan measured them. Layouts and drawings are saved on your member account.</p><div id="chartDesk"></div></article>';
   }
 
   function scanner() {
@@ -257,13 +254,14 @@
         view();
       });
     });
-    var chartSelect = document.getElementById('chartInstrument');
-    if (chartSelect) {
-      chartSelect.addEventListener('change', function () {
-        state.instrument = chartSelect.value;
-        drawChart();
+    var chartDesk = document.getElementById('chartDesk');
+    if (chartDesk && window.AuraMemberCharts) {
+      var rows = ((state.data.live && state.data.live.signals) || state.data.teaser || []);
+      window.AuraMemberCharts.mount(chartDesk, {
+        instruments: rows.map(function (row) {
+          return { id: row.instrument, name: row.name || row.instrument };
+        })
       });
-      drawChart();
     }
     var size = document.getElementById('sizeForm');
     if (size) size.addEventListener('submit', function (event) {
@@ -359,38 +357,6 @@
     }).then(function (res) { return res.json(); }).then(function (body) {
       out.textContent = body.answer || body.error || 'No answer.';
     }).catch(function () { out.textContent = 'The analyst could not be reached.'; });
-  }
-
-  function drawChart() {
-    var box = document.getElementById('memChart');
-    var note = document.getElementById('chartNote');
-    if (!box) return;
-    box.innerHTML = '';
-    fetch('/api/members/candles?instrument=' + encodeURIComponent(state.instrument), { credentials: 'same-origin', cache: 'no-store' })
-      .then(function (res) { return res.json().then(function (body) { return { status: res.status, body: body }; }); })
-      .then(function (result) {
-        if (result.status === 403) { box.innerHTML = lockedBox(result.body); return; }
-        var bars = result.body.bars || [];
-        if (!bars.length || !window.LightweightCharts) {
-          note.textContent = result.body.note || 'No candles to draw.';
-          return;
-        }
-        var chart = window.LightweightCharts.createChart(box, {
-          width: box.clientWidth || 640,
-          height: 360,
-          layout: { background: { color: '#12182a' }, textColor: '#e8eaf2' },
-          grid: { vertLines: { color: 'rgba(212,175,55,0.08)' }, horzLines: { color: 'rgba(212,175,55,0.08)' } },
-          timeScale: { timeVisible: true }
-        });
-        var series = chart.addCandlestickSeries({
-          upColor: '#2ecc71', downColor: '#e74c3c', borderVisible: false, wickUpColor: '#2ecc71', wickDownColor: '#e74c3c'
-        });
-        series.setData(bars);
-        (result.body.overlays || []).forEach(function (line) {
-          series.createPriceLine({ price: line.price, color: line.color, lineWidth: 1, title: line.title, lineStyle: 2 });
-        });
-        note.textContent = result.body.note || '';
-      }).catch(function () { note.textContent = 'The candle request failed. No sample candles are drawn.'; });
   }
 
   function load() {

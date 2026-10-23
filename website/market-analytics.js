@@ -271,16 +271,22 @@ function annotateCalendar(items, now, beforeMin, afterMin) {
 
 function chartBars(candles, limit) {
   const rows = closes(candles).slice(-(limit || 180));
-  return rows.map((bar) => {
+  const out = [];
+  rows.forEach((bar) => {
     const time = Math.floor(new Date(bar.t).getTime() / 1000);
-    return {
+    const item = {
       time,
       open: Number(bar.o != null ? bar.o : bar.c),
       high: Number(bar.h),
       low: Number(bar.l),
       close: Number(bar.c)
     };
-  }).filter((bar) => Number.isFinite(bar.time) && Number.isFinite(bar.close));
+    if (!Number.isFinite(item.time) || !Number.isFinite(item.close)) return;
+    if (Number.isFinite(Number(bar.v)) && Number(bar.v) >= 0) item.volume = Number(bar.v);
+    if (out.length && out[out.length - 1].time === item.time) out[out.length - 1] = item;
+    else out.push(item);
+  });
+  return out;
 }
 
 function chartOverlays(signal) {

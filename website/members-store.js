@@ -354,6 +354,113 @@ function createMembersStore(options) {
     return publicMember(row);
   }
 
+  function cleanPoint(point) {
+    const time = Number(point && point.time);
+    const price = Number(point && point.price);
+    if (!Number.isFinite(time) || !Number.isFinite(price) || !(price > 0)) return null;
+    return { time: Math.round(time), price };
+  }
+
+  function cleanDrawings(drawings) {
+    const types = { trendline: 2, hline: 1, fib: 2, rect: 2 };
+    const out = [];
+    (Array.isArray(drawings) ? drawings : []).slice(0, 30).forEach((drawing) => {
+      const type = String(drawing && drawing.type || '');
+      const need = types[type];
+      if (!need) return;
+      const a = cleanPoint(drawing.a);
+      const b = need === 2 ? cleanPoint(drawing.b) : null;
+      if (!a || (need === 2 && !b)) return;
+      const item = {
+        id: String(drawing.id || crypto.randomBytes(4).toString('hex')).slice(0, 24),
+        type,
+        a
+      };
+      if (b) item.b = b;
+      out.push(item);
+    });
+    return out;
+  }
+
+  function defaultIndicators() {
+    return {
+      ema20: false,
+      ema50: false,
+      ema200: false,
+      bollinger: false,
+      vwap: false,
+      rsi: false,
+      macd: false,
+      atr: false,
+      volume: false
+    };
+  }
+
+  function cleanPane(pane, known, index) {
+    const allow = new Set((known || []).map((item) => String(item).toUpperCase()));
+    const instrument = String(pane && pane.instrument || 'XAUUSD').toUpperCase();
+    const styles = ['candles', 'hollow', 'heikin', 'bars', 'line', 'area'];
+    const frames = ['M15', 'H1', 'H4', 'D1'];
+    const style = String(pane && pane.style || 'candles');
+    const timeframe = String(pane && pane.timeframe || 'H1').toUpperCase();
+    const indicators = defaultIndicators();
+    const incoming = pane && pane.indicators || {};
+    Object.keys(indicators).forEach((key) => {
+      indicators[key] = !!incoming[key];
+    });
+    return {
+      id: String(pane && pane.id || ('p' + (index + 1))).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 16) || ('p' + (index + 1)),
+      instrument: allow.size && !allow.has(instrument) ? 'XAUUSD' : instrument,
+      timeframe: frames.includes(timeframe) ? timeframe : 'H1',
+      style: styles.includes(style) ? style : 'candles',
+      indicators,
+      drawings: cleanDrawings(pane && pane.drawings)
+    };
+  }
+
+  function emptyChartDesk() {
+    return {
+      layout: 1,
+      sync: false,
+      theme: 'dark',
+      panes: [cleanPane({ id: 'p1', instrument: 'XAUUSD' }, ['XAUUSD'], 0)]
+    };
+  }
+
+  function getChartDesk(id) {
+    load();
+    const row = findById(id);
+    if (!row || !row.chart_desk) return emptyChartDesk();
+    return updateChartDesk(id, row.chart_desk, null, true);
+  }
+
+  function updateChartDesk(id, desk, known, readOnly) {
+    load();
+    const row = findById(id);
+    if (!row) {
+      const error = new Error('Sign in to save a chart layout.');
+      error.status = 401;
+      throw error;
+    }
+    const layout = Number(desk && desk.layout);
+    const count = layout === 2 || layout === 4 ? layout : 1;
+    const theme = desk && desk.theme === 'light' ? 'light' : 'dark';
+    const panes = [];
+    const incoming = Array.isArray(desk && desk.panes) ? desk.panes : [];
+    for (let i = 0; i < count; i++) panes.push(cleanPane(incoming[i] || { instrument: 'XAUUSD' }, known, i));
+    const next = {
+      layout: count,
+      sync: !!(desk && desk.sync),
+      theme,
+      panes
+    };
+    if (!readOnly) {
+      row.chart_desk = next;
+      save();
+    }
+    return JSON.parse(JSON.stringify(next));
+  }
+
   function memberFromRequest(req) {
     load();
     const token = parseCookies(req)[COOKIE_NAME];
@@ -380,6 +487,8 @@ function createMembersStore(options) {
     updateWatchlist,
     updateAlerts,
     updateJournal,
+    getChartDesk,
+    updateChartDesk,
     memberFromRequest,
     sessionCookie,
     clearCookie,

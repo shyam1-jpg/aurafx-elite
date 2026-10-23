@@ -5,9 +5,12 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const analytics = require('./market-analytics');
+const chartMath = require('./chart-math');
+const { createDashboardLink, PASSWORD_REQUIRED, SMTP_OFF } = require('./dashboard-link');
 const { createMembersStore, tierAllows, passwordMatches } = require('./members-store');
 const { createMemberDesk } = require('./member-desk');
 const assistant = require('./signal-assistant');
+const marketCandles = require('./market-candles');
 
 function candles(count, start, step) {
   const rows = [];
@@ -87,6 +90,56 @@ assert.strictEqual(tierAllows('free', 'scanner'), false);
 assert.strictEqual(tierAllows('pro', 'scanner'), true);
 assert.strictEqual(tierAllows('pro', 'journal'), false);
 assert.strictEqual(tierAllows('elite', 'alerts'), true);
+
+const m15 = chartMath.candleView({ h1: rising, d1: rising }, 'M15');
+assert.strictEqual(m15.available, false);
+assert.strictEqual(m15.bars.length, 0);
+assert.ok(/not in the price feed/i.test(m15.note));
+assert.ok(/No 15-minute bars are invented/i.test(m15.note));
+
+function hourlyBars(count, volume) {
+  const rows = [];
+  for (let i = 0; i < count; i++) {
+    const bar = {
+      t: new Date(Date.UTC(2026, 0, 1, i)).toISOString(),
+      o: 10 + i,
+      h: 12 + i,
+      l: 9 + i,
+      c: 11 + i
+    };
+    if (volume != null) bar.v = volume;
+    rows.push(bar);
+  }
+  return rows;
+}
+const h4 = chartMath.candleView({ h1: hourlyBars(8, 2) }, 'H4');
+assert.strictEqual(h4.available, true);
+assert.strictEqual(h4.bars.length, 2);
+assert.strictEqual(h4.bars[0].open, 10);
+assert.strictEqual(h4.bars[1].close, 18);
+assert.strictEqual(h4.volume_available, true);
+assert.strictEqual(h4.bars[0].volume, 8);
+assert.ok(h4.indicators.vwap.length > 0);
+assert.ok(h4.indicators.ema20);
+const bare = chartMath.candleView({ h1: hourlyBars(40, null) }, 'H1');
+assert.strictEqual(bare.volume_available, false);
+assert.ok(/volume/i.test(bare.note));
+assert.ok(!Object.prototype.hasOwnProperty.call(bare.bars[0], 'volume'));
+assert.strictEqual(bare.indicators.vwap.length, 0);
+assert.ok(bare.indicators.ema20.length > 0);
+const mixed = hourlyBars(8, 2);
+delete mixed[5].v;
+const partial = chartMath.candleView({ h1: mixed }, 'H4');
+assert.strictEqual(partial.volume_available, false);
+
+const yahooVol = marketCandles.parseYahooChart({
+  chart: { result: [{ timestamp: [1700000000], indicators: { quote: [{ open: [1.1], high: [1.2], low: [1.0], close: [1.15], volume: [42] }] } }] }
+});
+assert.strictEqual(yahooVol[0].v, 42);
+const yahooBare = marketCandles.parseYahooChart({
+  chart: { result: [{ timestamp: [1700000000], indicators: { quote: [{ open: [1.1], high: [1.2], low: [1.0], close: [1.15] }] } }] }
+});
+assert.strictEqual(yahooBare[0].v, undefined);
 
 const file = path.join(os.tmpdir(), 'aura-members-' + process.pid + '.json');
 const store = createMembersStore({ file });
@@ -210,6 +263,128 @@ function harness() {
   assert.strictEqual(saved.res.status, 200);
   assert.strictEqual(saved.res.body.alerts[0].triggered, true);
   assert.strictEqual(saved.res.body.alerts[0].delivery, 'not_configured');
+  const layoutDenied = harness();
+  await freeDesk.handle(
+    { method: 'POST', headers: { cookie }, socket: {} },
+    layoutDenied.res,
+    { url: '/api/members/chart-layout', rawUrl: '/api/members/chart-layout', json: layoutDenied.json, readBody: async () => ({ desk: { layout: 4 } }) }
+  );
+  assert.strictEqual(layoutDenied.res.status, 403);
+
+  const layoutSaved = harness();
+  await desk.handle(
+    { method: 'POST', headers: { cookie: eliteCookie }, socket: {} },
+    layoutSaved.res,
+    {
+      url: '/api/members/chart-layout',
+      rawUrl: '/api/members/chart-layout',
+      json: layoutSaved.json,
+      readBody: async () => ({
+        desk: {
+          layout: 4,
+          sync: true,
+          theme: 'light',
+          panes: [
+            {
+              id: 'p1', instrument: 'EURUSD', timeframe: 'H1', style: 'heikin',
+              indicators: { ema20: true, rsi: true },
+              drawings: [
+                { id: 't1', type: 'trendline', a: { time: 100, price: 1.1 }, b: { time: 200, price: 1.2 } },
+                { id: 'bad', type: 'arrow', a: { time: 1, price: 1 } },
+                { id: 'h1', type: 'hline', a: { time: 100, price: 1.15 } }
+              ]
+            },
+            { id: 'p2', instrument: 'NOTREAL', timeframe: 'M15', style: 'hollow' },
+            { id: 'p3', instrument: 'XAUUSD', timeframe: 'D1', style: 'area' }
+          ]
+        }
+      })
+    }
+  );
+  assert.strictEqual(layoutSaved.res.status, 200);
+  assert.strictEqual(layoutSaved.res.body.desk.layout, 4);
+  assert.strictEqual(layoutSaved.res.body.desk.panes.length, 4);
+  assert.strictEqual(layoutSaved.res.body.desk.theme, 'light');
+  assert.strictEqual(layoutSaved.res.body.desk.sync, true);
+  assert.strictEqual(layoutSaved.res.body.desk.panes[0].style, 'heikin');
+  assert.strictEqual(layoutSaved.res.body.desk.panes[0].indicators.ema20, true);
+  assert.deepStrictEqual(layoutSaved.res.body.desk.panes[0].drawings.map((item) => item.type), ['trendline', 'hline']);
+  assert.strictEqual(layoutSaved.res.body.desk.panes[1].instrument, 'XAUUSD');
+  assert.strictEqual(layoutSaved.res.body.desk.panes[1].timeframe, 'M15');
+  assert.ok(!layoutSaved.res.body.desk.hash);
+  const layoutRead = harness();
+  await desk.handle(
+    { method: 'GET', headers: { cookie: eliteCookie }, socket: {} },
+    layoutRead.res,
+    { url: '/api/members/chart-layout', rawUrl: '/api/members/chart-layout', json: layoutRead.json, readBody: async () => ({}) }
+  );
+  assert.strictEqual(layoutRead.res.status, 200);
+  assert.strictEqual(layoutRead.res.body.desk.panes[0].drawings.length, 2);
+  assert.strictEqual(layoutRead.res.body.desk.panes[3].instrument, 'XAUUSD');
+
+  const linkStore = createMembersStore({ file: path.join(os.tmpdir(), 'aura-link-' + process.pid + '.json') });
+  linkStore.register({ name: 'Link User', email: 'link@example.com', password: 'member-pass', acceptRisk: true });
+  const regs = { 'link@example.com': { id: 'reg-1', email: 'link@example.com', fullName: 'Link User', emailVerified: true } };
+  const sent = [];
+  let smtpOn = false;
+  const linker = createDashboardLink({
+    members: linkStore,
+    findRegistration: async (email) => regs[email] || null,
+    makeToken: (id, email) => 'token-' + id + '-' + email,
+    smtpConfigured: () => smtpOn,
+    sendMail: async (message) => { sent.push(message); },
+    siteUrl: 'https://aurafxelite.com'
+  });
+  const emailOnly = await linker.request({ email: 'link@example.com' }, {});
+  assert.strictEqual(emailOnly.status, 401);
+  assert.strictEqual(emailOnly.body.error, PASSWORD_REQUIRED);
+  assert.ok(!Object.prototype.hasOwnProperty.call(emailOnly.body, 'dashboardToken'));
+  const badPassword = await linker.request({ email: 'link@example.com', password: 'wrong-pass' }, { ip: 'link-ip' });
+  assert.strictEqual(badPassword.status, 401);
+  assert.ok(!badPassword.body.dashboardToken);
+  const goodPassword = await linker.request({ email: 'link@example.com', password: 'member-pass' }, { ip: 'link-ip-2' });
+  assert.strictEqual(goodPassword.status, 200);
+  assert.strictEqual(goodPassword.body.dashboardToken, 'token-reg-1-link@example.com');
+  const magicOff = await linker.request({ email: 'link@example.com', magic: true }, {});
+  assert.strictEqual(magicOff.status, 503);
+  assert.strictEqual(magicOff.body.error, SMTP_OFF);
+  assert.strictEqual(magicOff.body.smtp, false);
+  assert.ok(!magicOff.body.dashboardToken);
+  assert.strictEqual(sent.length, 0);
+  smtpOn = true;
+  const magicUnknown = await linker.request({ email: 'missing@example.com', magic: true }, {});
+  const magicKnown = await linker.request({ email: 'link@example.com', magic: true }, {});
+  assert.strictEqual(magicUnknown.status, 200);
+  assert.strictEqual(magicKnown.status, 200);
+  assert.strictEqual(magicUnknown.body.message, magicKnown.body.message);
+  assert.ok(!magicUnknown.body.dashboardToken && !magicKnown.body.dashboardToken);
+  assert.strictEqual(sent.length, 1);
+  assert.ok(sent[0].text.includes('https://aurafxelite.com/dashboard.html?dash_link='));
+  const token = sent[0].text.split('dash_link=')[1].split('\n')[0].trim();
+  const redeemed = await linker.redeem(token, false);
+  assert.strictEqual(redeemed.status, 200);
+  assert.strictEqual(redeemed.body.dashboardToken, 'token-reg-1-link@example.com');
+  const again = await linker.redeem(token, false);
+  assert.strictEqual(again.status, 401);
+  assert.ok(!again.body.dashboardToken);
+  const cookieMember = linkStore.login('link@example.com', 'member-pass', 'link-ip-3');
+  const fromSession = await linker.request({}, { member: cookieMember });
+  assert.strictEqual(fromSession.status, 200);
+  assert.ok(fromSession.body.dashboardToken);
+
+  const serverSrc = fs.readFileSync(path.join(__dirname, 'simple-server.js'), 'utf8');
+  assert.ok(!/dashboardToken:\s*dashStore/.test(serverSrc), 'registration and email lookup must not mint a dashboard token');
+  assert.ok(serverSrc.includes('dashboardLink.request'));
+  assert.ok(serverSrc.includes('/api/dashboard/session/redeem'));
+  ['member-charts.js', 'members-app.js', 'pro-dashboard.js'].forEach((name) => {
+    const text = fs.readFileSync(path.join(__dirname, 'public', 'js', name), 'utf8');
+    assert.ok(!/parslia/i.test(text), name);
+    assert.ok(!/90%|guaranteed profit/i.test(text), name);
+  });
+  const chartCss = fs.readFileSync(path.join(__dirname, 'public', 'css', 'members.css'), 'utf8');
+  assert.ok(chartCss.includes('.chart-grid.n4'));
+  assert.ok(/grid-template-columns:\s*1fr;/.test(chartCss));
+
   const pages = ['members.html', 'login.html', 'signup.html', 'index.html', 'pricing.html'];
   pages.forEach((name) => {
     const html = fs.readFileSync(path.join(__dirname, 'public', name), 'utf8');

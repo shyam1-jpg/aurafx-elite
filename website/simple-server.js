@@ -154,6 +154,37 @@ try {
   console.warn('[AuraFX] member-desk not loaded:', e.message);
 }
 
+const { createDashboardLink } = require('./dashboard-link');
+const { smtpSettings, deliverSmtp } = require('./signal-alerts');
+const dashboardLink = createDashboardLink({
+  members: {
+    findByEmail(email) {
+      return memberDesk ? memberDesk.store.findByEmail(email) : null;
+    },
+    login(email, password, ip) {
+      if (!memberDesk) {
+        const error = new Error('Member sign-in is unavailable.');
+        error.status = 503;
+        throw error;
+      }
+      return memberDesk.store.login(email, password, ip);
+    }
+  },
+  findRegistration: async (email) => revealRow(await regStore.findByEmail(email)),
+  makeToken: (id, email) => (dashStore ? dashStore.makeDashboardToken(id, email) : ''),
+  smtpConfigured: () => smtpSettings().configured,
+  sendMail: async (message) => {
+    const smtp = smtpSettings();
+    await deliverSmtp({
+      from: smtp.from,
+      to: message.to,
+      subject: message.subject,
+      text: message.text
+    }, smtp);
+  },
+  siteUrl: () => String(process.env.SITE_URL || 'https://aurafxelite.com')
+});
+
 function applyCalendarToCache(calPayload) {
   if (!calPayload) return;
   cache.calendar = calPayload.calendar || calPayload.items || [];
@@ -392,7 +423,6 @@ function handleRegister(req, res) {
         emailVerified: row.emailVerified,
         verificationEmailSent,
         verificationError: verificationError || undefined,
-        dashboardToken: dashStore ? dashStore.makeDashboardToken(row.id, row.email) : undefined,
         fullName: row.fullName,
         email: row.email
       });
@@ -464,7 +494,10 @@ function apiConfig() {
     ownerPreviewAvailable: INSTITUTIONAL_MODE === 'preview' || INSTITUTIONAL_MODE === 'public',
     email: emailStatus,
     storage: regStore.storageInfo(),
-    dashboard: dashStore ? dashStore.storageInfo() : { backend: 'unavailable' },
+    dashboard: Object.assign(
+      dashStore ? dashStore.storageInfo() : { backend: 'unavailable' },
+      { magicLink: smtpSettings().configured }
+    ),
     business: {
       tradingName: business.tradingName,
       supportEmail: business.supportEmail,
@@ -850,23 +883,30 @@ function dashboardAuth(req) {
   return { id, email };
 }
 
+function dashboardLinkContext(req) {
+  return {
+    member: memberDesk ? memberDesk.store.memberFromRequest(req) : null,
+    ip: String(req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || 'dashboard').split(',')[0],
+    cloudSync: !!(dashStore && dashStore.storageInfo().backend === 'neon')
+  };
+}
+
 function handleDashboardSession(req, res) {
+  if (!dashStore) return json(res, 503, { error: 'Dashboard sync unavailable' });
   readBody(req)
     .then(async (body) => {
-      const email = String(body.email || '').trim().toLowerCase();
-      if (!email) return json(res, 400, { error: 'Email required' });
-      const row = revealRow(await regStore.findByEmail(email));
-      if (!row) return json(res, 404, { error: 'Registration not found — register first' });
-      if (!dashStore) return json(res, 503, { error: 'Dashboard sync unavailable' });
-      json(res, 200, {
-        ok: true,
-        id: row.id,
-        fullName: row.fullName,
-        email: row.email,
-        emailVerified: !!row.emailVerified,
-        dashboardToken: dashStore.makeDashboardToken(row.id, row.email),
-        cloudSync: dashStore.storageInfo().backend === 'neon'
-      });
+      const result = await dashboardLink.request(body, dashboardLinkContext(req));
+      json(res, result.status, result.body);
+    })
+    .catch((e) => json(res, 400, { error: e.message }));
+}
+
+function handleDashboardRedeem(req, res) {
+  if (!dashStore) return json(res, 503, { error: 'Dashboard sync unavailable' });
+  readBody(req)
+    .then(async (body) => {
+      const result = await dashboardLink.redeem(body && body.token, dashboardLinkContext(req).cloudSync);
+      json(res, result.status, result.body);
     })
     .catch((e) => json(res, 400, { error: e.message }));
 }
@@ -1017,6 +1057,7 @@ const server = http.createServer((req, res) => {
     return json(res, 200, { ok: true });
   }
   if (url === '/api/dashboard/session' && req.method === 'POST') return handleDashboardSession(req, res);
+  if (url === '/api/dashboard/session/redeem' && req.method === 'POST') return handleDashboardRedeem(req, res);
   if (url === '/api/dashboard/journal' && req.method === 'GET') return handleDashboardJournalGet(req, res);
   if (url === '/api/dashboard/journal' && req.method === 'POST') return handleDashboardJournalPost(req, res);
   if (url === '/api/dashboard/history' && req.method === 'GET') return handleDashboardHistory(req, res, rawUrl);
