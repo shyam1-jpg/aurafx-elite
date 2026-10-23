@@ -53,7 +53,8 @@ const MIME = {
   '.json': 'application/json',
   '.png': 'image/png',
   '.ico': 'image/x-icon',
-  '.svg': 'image/svg+xml'
+  '.svg': 'image/svg+xml',
+  '.webmanifest': 'application/manifest+json'
 };
 
 const STARTED_AT = Date.now();
@@ -741,13 +742,13 @@ function signalNewsContext() {
 function apiWiring() {
   const base = 'http://127.0.0.1:' + PORT;
   const pages = [
-    'index.html', 'dashboard.html', 'track-record.html', 'hard-sell.html', 'aura-lite.html', 'mt5-install.html',
+    'index.html', 'dashboard.html', 'track-record.html', 'trading-plans.html', 'ai-engine.html', 'pricing.html', 'how-it-works.html', 'legal.html', 'disclaimer.html', 'hard-sell.html', 'aura-lite.html', 'mt5-install.html',
     'register.html', 'verify-email.html', 'terms.html', 'privacy.html', 'risk-warning.html',
     'responsible-trading.html', 'regulatory.html', 'refunds.html', 'cookies.html',
     'system-status.html', 'owner-email.html', 'owner-leads.html', 'owner-preview.html'
   ];
   const apis = [
-    '/api/health', '/api/status', '/api/quotes', '/api/signals', '/api/signals/tracker', '/api/signals/track-record', '/api/signals/alerts', '/api/signals/ask', '/api/pro-summary', '/api/risk-summary',
+    '/api/health', '/api/status', '/api/quotes', '/api/signals', '/api/signals/tracker', '/api/signals/track-record', '/api/signals/plans', '/api/signals/free', '/api/signals/alerts', '/api/signals/ask', '/api/pricing', '/api/pro-summary', '/api/risk-summary',
     '/api/calendar', '/api/news', '/api/ai/status', '/api/ai/analyze', '/api/institutional', '/api/institutional-live', '/api/markets', '/api/wiring'
   ];
   return {
@@ -948,7 +949,8 @@ function serveFile(res, filePath) {
     }
     const ext = path.extname(filePath).toLowerCase();
     const headers = securityHeaders({ 'Content-Type': MIME[ext] || 'application/octet-stream' });
-    if (ext === '.html') {
+    const base = path.basename(filePath);
+    if (ext === '.html' || ext === '.webmanifest' || base === 'sw.js') {
       headers['Cache-Control'] = 'no-store, no-cache, must-revalidate';
     } else if (ext === '.js' || ext === '.css' || ext === '.svg' || ext === '.png' || ext === '.webp') {
       headers['Cache-Control'] = 'no-cache, must-revalidate';
@@ -1111,6 +1113,34 @@ const server = http.createServer((req, res) => {
         .catch(() => respond(economicCalendar.getPayload()));
     }
     return respond({ calendar: cache.calendar, nextEvent: cache.nextEvent, updatedAt: cache.updatedAt });
+  }
+  if (url === '/api/pricing' && req.method === 'GET') {
+    try {
+      const pricing = JSON.parse(fs.readFileSync(path.join(PUBLIC, 'pricing.json'), 'utf8'));
+      return json(res, 200, Object.assign({ ok: true }, pricing));
+    } catch (error) {
+      return json(res, 500, { ok: false, error: 'Pricing file is missing' });
+    }
+  }
+  if (url === '/api/signals/plans' && req.method === 'GET') {
+    if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
+    const force = rawUrl.includes('force=1');
+    return signalService.getBoard({ force, news: signalNewsContext() })
+      .then((board) => json(res, 200, signalService.getPlans(board)))
+      .catch((e) => {
+        console.warn('[AuraFX] /api/signals/plans:', e.message);
+        return json(res, 500, { error: 'Plans unavailable' });
+      });
+  }
+  if (url === '/api/signals/free' && req.method === 'GET') {
+    if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
+    const force = rawUrl.includes('force=1');
+    return signalService.getBoard({ force, news: signalNewsContext() })
+      .then(() => json(res, 200, signalService.getDelayedBoard()))
+      .catch((e) => {
+        console.warn('[AuraFX] /api/signals/free:', e.message);
+        return json(res, 500, { error: 'Delayed scan unavailable' });
+      });
   }
   if (url === '/api/signals/track-record' && req.method === 'GET') {
     if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });

@@ -25,6 +25,8 @@ Each published card has a position-size calculator: account size, risk percent, 
 
 Alerts are opt-in on the track record page. A published signal, a take-profit, or a stop sends a Telegram message when `TELEGRAM_BOT_TOKEN` is set, and an email when SMTP is set. The token and SMTP password stay in the server environment. Opt-ins are stored in `website/data/signal-alerts.json`, and in Neon when `DATABASE_URL` is set, so a redeploy does not drop them.
 
+The homepage, daily plans (`/trading-plans.html`), engine (`/ai-engine.html`), pricing and legal hub sit on the same scan. Prices are placeholders in `website/public/pricing.json` until you set them (`price: null` shows “Set by owner”). `GET /api/signals/free` returns a saved scan only after it is older than `SIGNAL_FREE_DELAY_MIN` (default 15 minutes, or the free tier’s `delay_minutes`). Until that window fills, the response is `ready: false` and does not label the live board as delayed. The homepage preview uses the current `/api/signals` scan. Auto trading and broker execution are not connected. The site is an installable PWA (`manifest.webmanifest` and `sw.js`). The service worker does not cache `/api/` responses.
+
 The signal engine calculates direction, levels, and the plain-English note. The same note says which regime is in force. An optional language model rewrites that wording and can answer questions from the on-dashboard assistant. It cannot change the trade. With no key, the assistant still answers from the current board and the default risk limits (1% per trade, 3% daily, 7% weekly, 3 open trades, auto trading off).
 
 | Variable | Required | Purpose |
@@ -38,6 +40,7 @@ The signal engine calculates direction, levels, and the plain-English note. The 
 | `SIGNAL_NEWS_BEFORE_MIN` | No | Minutes before a high-impact release to pause new signals. Default 30 |
 | `SIGNAL_NEWS_AFTER_MIN` | No | Minutes after a high-impact release to keep that pause. Default 30 |
 | `SIGNAL_RANGE_INSTRUMENTS` | No | Comma-separated ids allowed to publish ranging mean-reversion. Default `XAUUSD`. Set to `none` to turn range trades off. Other markets keep the trend rules |
+| `SIGNAL_FREE_DELAY_MIN` | No | Minutes before a saved scan can appear on the free delayed view. Overrides `delay_minutes` on the free tier in `website/public/pricing.json`. Default 15 |
 | `TELEGRAM_BOT_TOKEN` | No | Server-side Telegram bot token. Users opt in with their numeric chat id on the track record page |
 | `SMTP_HOST` | No | SMTP host for signal alert email. Leave blank to keep email alerts off |
 | `SMTP_PORT` | No | SMTP port. 587 uses STARTTLS. 465 uses TLS. Default 587 |

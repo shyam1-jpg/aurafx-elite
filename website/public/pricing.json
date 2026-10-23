@@ -1,0 +1,43 @@
+{
+  "currency": null,
+  "note": "Prices are placeholders until the owner edits this file. A null price means the amount is not set.",
+  "tiers": [
+    {
+      "id": "free",
+      "name": "Free",
+      "price": null,
+      "price_label": "Set by owner",
+      "period": null,
+      "delay_minutes": 15,
+      "features": [
+        "Signal board after the free-tier delay",
+        "Public measured track record",
+        "Risk disclosure on every page"
+      ]
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "price": null,
+      "price_label": "Set by owner",
+      "period": null,
+      "features": [
+        "Current signal scan",
+        "Daily plan per instrument",
+        "Assistant answers from the current board"
+      ]
+    },
+    {
+      "id": "elite",
+      "name": "Elite",
+      "price": null,
+      "price_label": "Set by owner",
+      "period": null,
+      "features": [
+        "Everything in Pro",
+        "Dashboard journal and risk tools",
+        "MT5 install guides"
+      ]
+    }
+  ]
+}

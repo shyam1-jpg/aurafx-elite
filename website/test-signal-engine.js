@@ -735,6 +735,95 @@ assert.strictEqual(rationale.acceptableRationale('Wait on EUR/USD until the hour
     });
   });
 
+  const { buildPlans } = require('./signal-plans');
+  const publishedBuy = {
+    instrument: 'EURUSD',
+    name: 'EUR/USD',
+    action: 'BUY',
+    published: true,
+    regime: 'trending',
+    regime_note: 'Trend regime: trend, momentum, structure and higher timeframes agree.',
+    price: 1.1,
+    entry: 1.1,
+    stop_loss: 1.09,
+    take_profit_1: 1.12,
+    take_profit_2: null,
+    risk_reward: 2,
+    confidence: 86,
+    confidence_basis: 'Setup quality. Fewer than 8 closed signals, so this is not calibrated.',
+    blockers: [],
+    session: 'London'
+  };
+  const waiting = {
+    instrument: 'GBPUSD',
+    name: 'GBP/USD',
+    action: 'WAIT',
+    published: false,
+    regime: 'ranging',
+    regime_note: 'Regime is ranging.',
+    price: 1.27,
+    entry: 1.27,
+    stop_loss: 1.26,
+    take_profit_1: 1.29,
+    blockers: ['Range regime: price is not at the edge of the range.'],
+    confidence: 48
+  };
+  const plans = buildPlans({ updated_at: '2026-10-23T00:00:00.000Z', signals: [publishedBuy, waiting] });
+  assert.strictEqual(plans.plans[0].bias, 'BUY');
+  assert.strictEqual(plans.plans[0].key_levels.entry, 1.1);
+  assert.strictEqual(plans.plans[0].key_levels.stop_loss, 1.09);
+  assert.strictEqual(plans.plans[1].key_levels, null);
+  assert.ok(!/1\.26|1\.29/.test(JSON.stringify(plans.plans[1])));
+  assert.ok(/not at the edge/.test(plans.plans[1].scenario.detail));
+  assert.strictEqual(plans.risk.per_trade_pct, 1);
+  assert.strictEqual(plans.risk.max_daily_loss_pct, 3);
+  assert.strictEqual(plans.risk.max_weekly_loss_pct, 7);
+  assert.strictEqual(plans.risk.max_open_trades, 3);
+  assert.strictEqual(plans.risk.auto_trading, 'off');
+  assert.ok(/not an order/.test(plans.plans[0].note));
+  assert.ok(/no result is guaranteed/i.test(plans.disclaimer));
+  const planBlob = JSON.stringify(plans);
+  assert.ok(!/(\b80\b|\b90\b|\b96\b|\b100\b)\s*%|%\s*accura|guaranteed profit|let ai trade|high accuracy/i.test(planBlob));
+  assert.deepStrictEqual(buildPlans({ signals: [] }).plans, []);
+
+  const pricing = JSON.parse(fs.readFileSync(path.join(__dirname, 'public', 'pricing.json'), 'utf8'));
+  pricing.tiers.forEach((tier) => {
+    assert.strictEqual(tier.price, null);
+    assert.strictEqual(tier.price_label, 'Set by owner');
+  });
+  assert.strictEqual(pricing.tiers.find((tier) => tier.id === 'free').delay_minutes, 15);
+
+  const priorDelay = process.env.SIGNAL_FREE_DELAY_MIN;
+  delete process.env.SIGNAL_FREE_DELAY_MIN;
+  signalService.clearSnapshotsForTests();
+  const notReady = signalService.getDelayedBoard(Date.now());
+  assert.strictEqual(notReady.ready, false);
+  assert.strictEqual(notReady.delayed, true);
+  assert.deepStrictEqual(notReady.signals, []);
+  assert.ok(/old enough/i.test(notReady.note));
+  assert.ok(!/live board is delayed/i.test(notReady.note));
+  signalService.rememberSnapshotForTests({ signals: [{ instrument: 'EURUSD', action: 'WAIT' }], disclaimer: math.DISCLAIMER }, Date.now() - 16 * 60 * 1000);
+  signalService.rememberSnapshotForTests({ signals: [{ instrument: 'FRESH', action: 'BUY' }] }, Date.now());
+  const delayed = signalService.getDelayedBoard(Date.now());
+  assert.strictEqual(delayed.ready, true);
+  assert.strictEqual(delayed.delayed, true);
+  assert.strictEqual(delayed.signals[0].instrument, 'EURUSD');
+  assert.ok(/not the live board/i.test(delayed.note));
+  process.env.SIGNAL_FREE_DELAY_MIN = '0';
+  const immediate = signalService.getDelayedBoard(Date.now());
+  assert.strictEqual(immediate.ready, true);
+  assert.strictEqual(immediate.signals[0].instrument, 'FRESH');
+  if (priorDelay == null) delete process.env.SIGNAL_FREE_DELAY_MIN;
+  else process.env.SIGNAL_FREE_DELAY_MIN = priorDelay;
+  signalService.clearSnapshotsForTests();
+
+  const bannedPage = /let ai trade for you|think with ai|high accuracy|(\b80\b|\b90\b|\b96\b)\s*%|%\s*accura|guaranteed profit|risk[- ]free/i;
+  ['index.html', 'trading-plans.html', 'ai-engine.html', 'pricing.html', 'legal.html', 'disclaimer.html', 'how-it-works.html'].forEach((file) => {
+    const html = fs.readFileSync(path.join(__dirname, 'public', file), 'utf8');
+    assert.ok(!bannedPage.test(html), file + ' has a disallowed claim');
+    assert.ok(/no result is guaranteed/i.test(html), file + ' is missing the disclaimer');
+  });
+
   console.log('Signal engine tests passed. Sample BUY confidence ' + buy.confidence + ', backtest trades ' + bt.trade_count + ', measured win rate ' + bt.measured.win_rate + ' on ' + bt.measured.resolved + ' resolved.');
 })().catch((error) => {
   console.error(error);

@@ -1,17 +1,70 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const { assessSetup, calibrateConfidence, rangeInstrumentIds, DISCLAIMER } = require('./signal-math');
 const { INSTRUMENTS, loadAll } = require('./market-candles');
 const { applyRationales } = require('./signal-rationale');
 const { createTracker } = require('./signal-tracker');
 const { createAlerts } = require('./signal-alerts');
 const assistant = require('./signal-assistant');
+const { buildPlans } = require('./signal-plans');
 
 const tracker = createTracker();
 const alerts = createAlerts();
 const rationaleCache = new Map();
+const snapshots = [];
+const MAX_SNAPSHOTS = 30;
 let boardCache = null;
 let inflight = null;
+
+function rememberBoard(board, at) {
+  snapshots.push({ at: at == null ? Date.now() : at, payload: board });
+  while (snapshots.length > MAX_SNAPSHOTS) snapshots.shift();
+}
+
+function freeDelayMs() {
+  const env = Number(process.env.SIGNAL_FREE_DELAY_MIN);
+  if (Number.isFinite(env) && env >= 0) return env * 60 * 1000;
+  try {
+    const pricing = JSON.parse(fs.readFileSync(path.join(__dirname, 'public', 'pricing.json'), 'utf8'));
+    const free = (pricing.tiers || []).find((tier) => tier.id === 'free');
+    const mins = free && Number(free.delay_minutes);
+    if (Number.isFinite(mins) && mins >= 0) return mins * 60 * 1000;
+  } catch (error) {
+    /* fall through to the default window */
+  }
+  return 15 * 60 * 1000;
+}
+
+function getDelayedBoard(nowMs) {
+  const now = nowMs == null ? Date.now() : nowMs;
+  const delay = freeDelayMs();
+  const minutes = Math.round(delay / 60000);
+  let chosen = null;
+  snapshots.forEach((snap) => {
+    if (snap.at <= now - delay) chosen = snap;
+  });
+  if (!chosen) {
+    return {
+      ok: true,
+      ready: false,
+      delayed: true,
+      delay_minutes: minutes,
+      signals: [],
+      note: 'The free view waits until a saved scan is old enough. This window has not filled yet, so nothing is shown as delayed.',
+      disclaimer: DISCLAIMER
+    };
+  }
+  return Object.assign({}, chosen.payload, {
+    ready: true,
+    delayed: true,
+    delay_minutes: minutes,
+    snapshot_at: new Date(chosen.at).toISOString(),
+    note: 'This is a saved scan from at least ' + minutes + ' minutes ago. It is not the live board.',
+    disclaimer: DISCLAIMER
+  });
+}
 
 function unavailable(instrument, errors) {
   const setup = assessSetup(instrument, { h1: [], d1: [] }, { now: new Date() });
@@ -134,6 +187,7 @@ async function computeBoard(options) {
     disclaimer: DISCLAIMER
   };
   boardCache = { at: Date.now(), payload: board };
+  rememberBoard(board, boardCache.at);
   return board;
 }
 
@@ -167,6 +221,10 @@ module.exports = {
   getBoard,
   ask,
   getTrackRecord,
+  getPlans: (board) => buildPlans(board),
+  getDelayedBoard,
+  rememberSnapshotForTests: (board, at) => rememberBoard(board, at),
+  clearSnapshotsForTests: () => { snapshots.length = 0; },
   subscribeAlerts: (body) => alerts.subscribe(body),
   unsubscribeAlerts: (token) => alerts.unsubscribe(token),
   alertStatus: () => alerts.status(),
