@@ -57,6 +57,17 @@
     return '<span class="signal-regime ' + name + '">' + esc(label) + '</span>';
   }
 
+  function leadLine(signal) {
+    if ((signal.action || 'WAIT') === 'WAIT') {
+      const line = (signal.blockers || []).find((item) => !/pause window|high-impact news/i.test(item));
+      return line || '';
+    }
+    const text = String(signal.rationale || '').trim();
+    const sentence = text.split(/(?<=\.)\s/)[0] || '';
+    if (sentence.length > 160) return sentence.slice(0, 157) + '…';
+    return sentence;
+  }
+
   function cardHtml(signal, compact) {
     const action = signal.action || 'WAIT';
     const cls = action.toLowerCase();
@@ -75,17 +86,26 @@
         '<div><span>Zone</span>' + zone + '</div>' +
         '</div>';
     }
+    const lead = leadLine(signal);
+    const details = compact ? '' : (
+      '<details class="signal-more"><summary>Details</summary>' +
+      '<p class="signal-rationale">' + esc(signal.rationale || '') + '</p>' +
+      '<div class="signal-factors">' + factorHtml(signal.factors) + '</div>' +
+      '<p class="muted signal-meta">' + esc(signal.session || '') + (signal.feed_note ? ' · ' + esc(signal.feed_note) : '') + '</p>' +
+      feedLine(signal, false) +
+      sizeHtml(signal, false) +
+      '</details>'
+    );
     return '<article class="' + (compact ? 'signal-chip ' : 'signal-card ') + cls + '">' +
       '<div class="' + (compact ? 'signal-chip-top' : 'signal-card-top') + '">' +
       '<div><div class="signal-symbol">' + esc(signal.name || signal.instrument) + ' <span class="muted">' + esc(price(signal, signal.price)) + '</span></div>' +
       '<div class="signal-action">' + esc(action) + ' ' + regimeChip(signal) + '</div></div>' +
       '<div class="signal-confidence">Confidence<strong>' + esc(conf) + '</strong></div></div>' +
       (!compact && signal.confidence_basis ? '<p class="signal-confidence-basis">' + esc(signal.confidence_basis) + '</p>' : '') +
-      (compact ? '' : '<p class="signal-rationale">' + esc(signal.rationale || '') + '</p>' + levels + factorHtml(signal.factors)) +
+      (!compact && lead ? '<p class="signal-lead">' + esc(lead) + '</p>' : '') +
+      levels +
       blockerHtml(signal, compact) +
-      (compact ? '' : '<p class="muted" style="margin-top:.5rem">' + esc(signal.session || '') + (signal.feed_note ? ' · ' + esc(signal.feed_note) : '') + '</p>') +
-      feedLine(signal, compact) +
-      sizeHtml(signal, compact) +
+      details +
       '</article>';
   }
 
@@ -111,9 +131,7 @@
 
   function sizeHtml(signal, compact) {
     if (compact) return '';
-    if (signal.action === 'WAIT' || signal.entry == null || signal.stop_loss == null) {
-      return '<p class="signal-size-note">Position size appears when a Buy or Sell publishes a stop.</p>';
-    }
+    if (signal.action === 'WAIT' || signal.entry == null || signal.stop_loss == null) return '';
     const currency = savedSize('aurafx-size-currency', 'USD');
     return '<form class="signal-size" data-instrument="' + esc(signal.instrument) + '" data-entry="' + esc(signal.entry) + '" data-stop="' + esc(signal.stop_loss) + '" data-price="' + esc(signal.price) + '">' +
       '<label>Account<input name="balance" inputmode="decimal" value="' + esc(savedSize('aurafx-size-balance', '10000')) + '" aria-label="Account size"></label>' +
@@ -320,6 +338,8 @@
     if (!question) return;
     const button = askForm.querySelector('button');
     if (button) button.disabled = true;
+    const askPanel = document.getElementById('signalAsk');
+    if (askPanel) askPanel.open = true;
     if (askAnswer) askAnswer.textContent = 'Checking the current board…';
     if (askNote) askNote.textContent = '';
     try {

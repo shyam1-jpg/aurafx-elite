@@ -49,7 +49,14 @@
 .signal-factor.trending { color: var(--bull); border-color: rgba(46, 204, 113, .35); }
 .signal-factor.ranging { color: var(--gold); border-color: rgba(212, 175, 55, .4); }
 .signal-factor.volatile { color: #e67e22; border-color: rgba(230, 126, 34, .45); }
-.signal-ask { margin: .75rem 0; }
+.signal-ask {
+  margin: 0 0 .75rem;
+  border: 1px solid rgba(212, 175, 55, .16);
+  border-radius: 12px;
+  padding: .7rem .85rem;
+  background: rgba(8, 12, 20, .28);
+}
+.signal-ask[open] summary { margin-bottom: .45rem; }
 .signal-ask-form { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .55rem; }
 .signal-ask-form input {
   flex: 1 1 220px;
@@ -61,7 +68,19 @@
   color: var(--text);
 }
 .signal-ask-answer { margin: .65rem 0 0; font-size: .86rem; line-height: 1.45; }
-.signal-rationale { margin: .55rem 0; font-size: .84rem; line-height: 1.45; }
+.signal-lead { margin: .45rem 0 0; font-size: .8rem; line-height: 1.4; color: var(--muted); }
+.signal-rationale { margin: .45rem 0; font-size: .84rem; line-height: 1.45; }
+.signal-meta { margin: .45rem 0 0; font-size: .75rem; }
+.signal-more { margin-top: .55rem; }
+.signal-more summary, .signal-ask summary {
+  cursor: pointer;
+  color: var(--gold);
+  font-size: .78rem;
+  letter-spacing: .03em;
+}
+.signal-more summary:focus-visible, .signal-ask summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.signal-more[open] summary { margin-bottom: .35rem; }
+.signal-board-note { margin: .35rem 0 .75rem; max-width: 860px; }
 .signal-levels {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -225,9 +244,16 @@
 .signal-table .pos { color: var(--bull); }
 .signal-table .neg { color: var(--bear); }
 body.theme-light .signal-card,
-body.theme-light .signal-chip { background: rgba(255, 255, 255, .72); }
+body.theme-light .signal-chip,
+body.theme-light .signal-ask { background: rgba(255, 255, 255, .72); }
 body.theme-light .signal-table td { border-top-color: rgba(0, 0, 0, .06); }
-@media (max-width: 640px) {
+@media (max-width: 720px) {
+  .signal-preview-row,
+  .signal-grid { grid-template-columns: 1fr; }
+  .signal-card-top, .signal-chip-top { align-items: flex-start; }
   .signal-levels { grid-template-columns: 1fr 1fr; }
   .signal-size { grid-template-columns: 1fr; }
+  .signal-ask-form { flex-direction: column; }
+  .signal-ask-form .btn-dash { align-self: flex-start; }
+  .signal-toolbar .range-toggle { width: 100%; }
 }

@@ -355,8 +355,24 @@ function detectRegime(candles) {
   return {
     name: 'ranging',
     adx: adxRounded,
-    note: 'Regime is ranging: ADX is ' + adxText + ', so only a mean-reversion setup at the range edge can publish.'
+    note: 'Regime is ranging: ADX is ' + adxText + '.'
   };
+}
+
+function rangeInstrumentIds(ctx) {
+  if (ctx && Array.isArray(ctx.rangeInstruments)) {
+    return ctx.rangeInstruments.map((id) => String(id || '').toUpperCase()).filter(Boolean);
+  }
+  const raw = process.env.SIGNAL_RANGE_INSTRUMENTS;
+  if (raw == null || String(raw).trim() === '') return ['XAUUSD'];
+  const text = String(raw).trim();
+  if (/^(none|off|-)$/i.test(text)) return [];
+  return text.split(',').map((id) => id.trim().toUpperCase()).filter(Boolean);
+}
+
+function allowsRangeMeanReversion(instrument, ctx) {
+  const id = String(instrument && instrument.id || '').toUpperCase();
+  return rangeInstrumentIds(ctx).includes(id);
 }
 
 function rangeEdge(close, struct, atrNow, mom, daily) {
@@ -676,10 +692,14 @@ function assessSetup(instrument, frames, ctx) {
   let ruleNote = null;
   if (regime.name === 'volatile') {
     blockers.push('Volatility is too wide for a new signal.');
-  } else if (regime.name === 'trending') {
+  } else if (regime.name === 'trending' || !allowsRangeMeanReversion(instrument, ctx)) {
     if (bullVotes === 4 && bearVotes === 0) side = 'BUY';
     else if (bearVotes === 4 && bullVotes === 0) side = 'SELL';
-    ruleNote = side ? 'Trend regime: trend, momentum, structure and higher timeframes agree.' : null;
+    ruleNote = side
+      ? (regime.name === 'trending'
+        ? 'Trend regime: trend, momentum, structure and higher timeframes agree.'
+        : 'Ranging regime on this market still uses the trend rules: trend, momentum, structure and higher timeframes agree.')
+      : null;
   } else {
     const edge = rangeEdge(last.c, struct, vol.atr, mom, trendD1);
     if (edge.side) {
@@ -794,6 +814,8 @@ module.exports = {
   adx,
   detectRegime,
   rangeEdge,
+  rangeInstrumentIds,
+  allowsRangeMeanReversion,
   calibrateConfidence,
   CALIBRATION_MIN
 };

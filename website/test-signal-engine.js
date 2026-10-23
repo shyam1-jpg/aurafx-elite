@@ -142,9 +142,9 @@ for (let i = 240; i < upH1.length; i += 4) {
 assert.ok(trendAdx >= 25, 'a directional stretch should read trending with ADX at least 25');
 assert.strictEqual(flatRegime.name, 'ranging', 'flat chop should read ranging, ADX ' + flatRegime.adx);
 assert.ok(flatRegime.adx < 25, 'flat ADX should stay under 25');
-assert.strictEqual(buy.regime, 'trending');
-assert.ok(buy.factors.some((factor) => factor.key === 'regime' && factor.state === 'trending'));
-assert.ok(/trending/i.test(buy.regime_note));
+assert.ok(buy.regime === 'trending' || buy.regime === 'ranging', 'a trend-rule buy keeps a regime chip');
+assert.ok(buy.factors.some((factor) => factor.key === 'regime' && factor.state === buy.regime));
+assert.ok(/trend/i.test(buy.regime_note));
 
 const spike = upH1.slice(0, upHits[0].i + 1).map((bar) => Object.assign({}, bar));
 const spikeAt = spike.length - 1;
@@ -195,21 +195,43 @@ for (let k = 1; k <= 8; k++) {
   rangePrice = close;
 }
 const rangeDaily = daily(100, 1.1, 0.00002, Date.UTC(2025, 6, 1));
-const rangeMid = math.assessSetup(EUR, { h1: rangeH1.slice(0, 301), d1: rangeDaily }, {
-  now: new Date(rangeH1[300].t)
-});
+function scaleCandles(rows, factor) {
+  return rows.map((c) => ({ t: c.t, o: c.o * factor, h: c.h * factor, l: c.l * factor, c: c.c * factor }));
+}
+const goldH1 = scaleCandles(rangeH1, 1800);
+const goldDaily = scaleCandles(rangeDaily, 1800);
+const rangeWhen = { now: new Date(goldH1[300].t) };
+const rangeMid = math.assessSetup(XAU, { h1: goldH1.slice(0, 301), d1: goldDaily }, rangeWhen);
 assert.strictEqual(rangeMid.regime, 'ranging');
 assert.strictEqual(rangeMid.action, 'WAIT');
 assert.ok(rangeMid.blockers.some((line) => /not at the edge/i.test(line)));
-const rangeHit = math.assessSetup(EUR, { h1: rangeH1.slice(0, 346), d1: rangeDaily }, {
+const rangeForex = math.assessSetup(EUR, { h1: rangeH1.slice(0, 346), d1: rangeDaily }, {
   now: new Date(rangeH1[345].t)
 });
-assert.strictEqual(rangeHit.action, 'BUY', 'range edge should publish mean reversion\n' + dump(rangeHit));
+assert.strictEqual(rangeForex.regime, 'ranging');
+assert.strictEqual(rangeForex.action, 'WAIT', 'forex keeps the trend rules while ranging\n' + dump(rangeForex));
+assert.ok(!rangeForex.blockers.some((line) => /not at the edge/i.test(line)));
+const rangeHit = math.assessSetup(XAU, { h1: goldH1.slice(0, 346), d1: goldDaily }, {
+  now: new Date(goldH1[345].t)
+});
+assert.strictEqual(rangeHit.action, 'BUY', 'gold range edge should publish mean reversion\n' + dump(rangeHit));
 assert.strictEqual(rangeHit.regime, 'ranging');
 assert.ok(rangeHit.confidence >= 74 && rangeHit.confidence <= 92);
 assert.ok(rangeHit.risk_reward >= 1.8);
 assert.ok(/within one ATR of support/i.test(rangeHit.regime_note));
 assert.ok(rangeHit.factors.some((factor) => factor.key === 'trend' && factor.state !== 'bullish'), 'range buy does not require a bullish hourly trend');
+const rangeOptIn = math.assessSetup(EUR, { h1: rangeH1.slice(0, 346), d1: rangeDaily }, {
+  now: new Date(rangeH1[345].t),
+  rangeInstruments: ['EURUSD']
+});
+assert.strictEqual(rangeOptIn.action, 'BUY');
+const rangeOff = math.assessSetup(XAU, { h1: goldH1.slice(0, 346), d1: goldDaily }, {
+  now: new Date(goldH1[345].t),
+  rangeInstruments: []
+});
+assert.strictEqual(rangeOff.action, 'WAIT');
+assert.deepStrictEqual(math.rangeInstrumentIds({}), ['XAUUSD']);
+assert.deepStrictEqual(math.rangeInstrumentIds({ rangeInstruments: ['xauusd', 'usoil'] }), ['XAUUSD', 'USOIL']);
 const rangeWords = rationale.engineRationale(rangeHit);
 assert.ok(/ranging/i.test(rangeWords));
 assert.ok(!/guarant|(\b80\b|\b90\b|\b96\b)\s*%/i.test(rangeWords));

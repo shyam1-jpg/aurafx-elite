@@ -1,6 +1,6 @@
 'use strict';
 
-const { assessSetup, calibrateConfidence, DISCLAIMER } = require('./signal-math');
+const { assessSetup, calibrateConfidence, rangeInstrumentIds, DISCLAIMER } = require('./signal-math');
 const { INSTRUMENTS, loadAll } = require('./market-candles');
 const { applyRationales } = require('./signal-rationale');
 const { createTracker } = require('./signal-tracker');
@@ -119,7 +119,8 @@ async function computeBoard(options) {
         ? 'The language model rewrites wording only. Direction and levels stay with the rule engine.'
         : 'Rationales are written by the rule engine. Set AI_RATIONALE_PROVIDER=openai and OPENAI_API_KEY to let a language model rewrite them.'
     },
-    publication_rule: 'A trending regime publishes Buy or Sell only when trend, momentum, structure and higher timeframes agree. A ranging regime publishes only a mean-reversion setup at the range edge. A volatile regime publishes nothing. Volatility must be tradable, news must be outside the pause window, and risk/reward must be at least 1.8. Displayed confidence stays a setup-quality score until 8 closed signals exist, then it can show a measured rate from that history. That rate is not a forecast.',
+    publication_rule: 'Trending markets publish Buy or Sell only when trend, momentum, structure and higher timeframes agree. Ranging mean-reversion is limited to the instruments in SIGNAL_RANGE_INSTRUMENTS (default gold). Every other market keeps those trend rules while it is ranging. A volatile regime publishes nothing. Volatility must be tradable, news must be outside the pause window, and risk/reward must be at least 1.8. Displayed confidence stays a setup-quality score until 8 closed signals exist, then it can show a measured rate from that history. That rate is not a forecast.',
+    range_instruments: rangeInstrumentIds({}),
     feed: describeFeed(loaded),
     price_note: 'Candles try Twelve Data when TWELVE_DATA_API_KEY is set, then Yahoo Finance, then Kraken public OHLC for supported forex and PAXG gold. GBP/JPY can be built from GBP/USD and USD/JPY when the direct feed fails. Silver, oil, gas and copper stay on Yahoo or Twelve Data. These are not your broker\'s executable quotes, and spread is not included.',
     signals: setups,
