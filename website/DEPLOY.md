@@ -25,7 +25,7 @@ Green **LIVE** pill on home = working.
 5. Start: `npm start`
 6. Add env `PORT` = `10000` (Render sets this automatically)
 7. **Recommended:** `DATABASE_URL` from [Neon](https://neon.tech) — keeps client registrations after redeploy (see `NEON-SETUP.txt`)
-8. Optional: `FINNHUB_API_KEY` (live calendar), `TWELVE_DATA_API_KEY` (candles), `OPENAI_API_KEY` plus `AI_RATIONALE_PROVIDER=openai` (wording only). Yahoo Finance candles work with no key. See the root README section **AI signal board**.
+8. Optional: `FINNHUB_API_KEY` (live calendar), `TWELVE_DATA_API_KEY` (candles, tried first), `OPENAI_API_KEY` plus `AI_RATIONALE_PROVIDER=openai` (wording only). With no candle key the server uses Yahoo Finance and falls back to Kraken public OHLC for supported forex and PAXG gold. See the root README section **AI signal board**.
 
 You get URL like `https://aurafx.onrender.com`
 

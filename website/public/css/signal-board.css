@@ -64,6 +64,31 @@
   line-height: 1.45;
   color: var(--gold);
 }
+.signal-feed-status {
+  margin: .55rem 0;
+  padding: .55rem .7rem;
+  border-radius: 10px;
+  font-size: .8rem;
+  line-height: 1.45;
+  border: 1px solid rgba(230, 126, 34, .45);
+  color: #f0c674;
+  background: rgba(230, 126, 34, .1);
+}
+.signal-feed-status.down {
+  border-color: rgba(231, 76, 60, .5);
+  color: #f5b7b1;
+  background: rgba(231, 76, 60, .12);
+}
+.signal-feed-status.stale {
+  border-color: rgba(212, 175, 55, .45);
+  color: var(--gold);
+  background: rgba(212, 175, 55, .08);
+}
+.signal-feed-error {
+  color: var(--muted);
+  font-size: .75rem;
+  margin: .35rem 0 0;
+}
 .signal-toolbar {
   display: flex;
   flex-wrap: wrap;

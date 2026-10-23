@@ -75,7 +75,35 @@
       '<div class="signal-confidence">Confidence<strong>' + esc(conf) + '</strong></div></div>' +
       (compact ? '' : '<p class="signal-rationale">' + esc(signal.rationale || '') + '</p>' + levels + factorHtml(signal.factors)) +
       (compact ? '' : '<p class="muted" style="margin-top:.5rem">' + esc(signal.session || '') + (signal.feed_note ? ' · ' + esc(signal.feed_note) : '') + '</p>') +
+      feedLine(signal, compact) +
       '</article>';
+  }
+
+  function feedLine(signal, compact) {
+    if (compact) return '';
+    let html = '';
+    if (signal.data_quality === 'unavailable' && signal.feed_errors && signal.feed_errors.length) {
+      html += '<p class="signal-feed-error">Feed: ' + esc(signal.feed_errors[0]) + '</p>';
+    }
+    if (signal.feed_stale) {
+      html += '<p class="signal-feed-error">Using cached candles after a feed refresh failed.</p>';
+    }
+    return html;
+  }
+
+  function renderFeedStatus() {
+    const feed = latest && latest.feed;
+    document.querySelectorAll('[data-signal-feed]').forEach((el) => {
+      if (!feed || feed.status === 'live') {
+        el.hidden = true;
+        el.className = 'signal-feed-status';
+        el.textContent = '';
+        return;
+      }
+      el.hidden = false;
+      el.className = 'signal-feed-status ' + feed.status;
+      el.textContent = feed.detail || 'Price history is unavailable.';
+    });
   }
 
   function renderPreview() {
@@ -150,6 +178,7 @@
   }
 
   function render() {
+    renderFeedStatus();
     renderPreview();
     renderBoard();
   }
@@ -162,6 +191,11 @@
       latest = await res.json();
       render();
     } catch (error) {
+      document.querySelectorAll('[data-signal-feed]').forEach((el) => {
+        el.hidden = false;
+        el.className = 'signal-feed-status down';
+        el.textContent = 'Price history is down. The signal board cannot reach the server feed.';
+      });
       if (meta && !latest) meta.textContent = 'Signal feed unavailable. The rest of the dashboard is unchanged.';
       const host = document.getElementById('signalPreviewBody');
       if (host && !latest) host.innerHTML = '<p class="muted">Signals will appear when the server can reach the price feed.</p>';

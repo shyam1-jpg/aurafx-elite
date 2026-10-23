@@ -18,6 +18,55 @@ function unavailable(instrument, errors) {
   return setup;
 }
 
+function describeFeed(loaded) {
+  const rows = loaded || [];
+  const usable = rows.filter((row) => row.h1 && row.h1.length >= 80);
+  const staleCount = usable.filter((row) => row.stale).length;
+  const sources = [...new Set(rows.map((row) => row.source).filter(Boolean))];
+  const errorSample = [];
+  rows.forEach((row) => {
+    (row.errors || []).forEach((message) => {
+      if (errorSample.length < 2 && !errorSample.includes(message)) errorSample.push(message);
+    });
+  });
+  if (!usable.length) {
+    return {
+      status: 'down',
+      detail: 'Price history is down, so every instrument stays Wait.' + (errorSample.length ? ' ' + errorSample.join(' ') : ''),
+      available: 0,
+      stale: 0,
+      sources
+    };
+  }
+  if (staleCount && staleCount === rows.length) {
+    return {
+      status: 'stale',
+      detail: 'Live price refresh failed. The board is using the last good candles.',
+      available: usable.length,
+      stale: staleCount,
+      sources
+    };
+  }
+  if (usable.length < rows.length || staleCount) {
+    return {
+      status: 'degraded',
+      detail: usable.length + ' of ' + rows.length + ' instruments have usable price history.' +
+        (staleCount ? ' ' + staleCount + ' are using cached candles.' : '') +
+        (errorSample.length ? ' ' + errorSample[0] : ''),
+      available: usable.length,
+      stale: staleCount,
+      sources
+    };
+  }
+  return {
+    status: 'live',
+    detail: 'Price history is live for all ' + rows.length + ' instruments.',
+    available: usable.length,
+    stale: 0,
+    sources
+  };
+}
+
 async function computeBoard(options) {
   const opts = options || {};
   const started = Date.now();
@@ -37,6 +86,7 @@ async function computeBoard(options) {
     setup.source = row.source;
     setup.feed = row.feed;
     setup.feed_note = row.feed_note;
+    setup.feed_stale = !!row.stale;
     return setup;
   });
   const llm = await applyRationales(setups, { fetchImpl: opts.fetchImpl, cache: rationaleCache });
@@ -55,7 +105,8 @@ async function computeBoard(options) {
         : 'Rationales are written by the rule engine. Set AI_RATIONALE_PROVIDER=openai and OPENAI_API_KEY to let a language model rewrite them.'
     },
     publication_rule: 'Buy or Sell is published only when trend, momentum, structure and higher timeframes agree, volatility is normal, news is clear, and risk/reward is at least 1.8.',
-    price_note: 'Forex candles come from the spot-style feed. Gold, silver, oil, gas and copper use exchange futures (GC, SI, CL, BZ, NG, HG) unless Twelve Data spot symbols are configured. These are not your broker\'s executable quotes, and spread is not included.',
+    feed: describeFeed(loaded),
+    price_note: 'Candles try Twelve Data when TWELVE_DATA_API_KEY is set, then Yahoo Finance, then Kraken public OHLC for supported forex and PAXG gold. GBP/JPY can be built from GBP/USD and USD/JPY when the direct feed fails. Silver, oil, gas and copper stay on Yahoo or Twelve Data. These are not your broker\'s executable quotes, and spread is not included.',
     signals: setups,
     summary: {
       buy: setups.filter((s) => s.action === 'BUY').length,
@@ -83,6 +134,7 @@ function getBoard(options) {
 
 module.exports = {
   getBoard,
+  describeFeed,
   INSTRUMENTS,
   DISCLAIMER
 };
