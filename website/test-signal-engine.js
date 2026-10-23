@@ -96,6 +96,8 @@ assert.ok(buy.stop_loss < buy.entry && buy.entry < buy.take_profit_1, 'BUY level
 if (buy.take_profit_2 != null) assert.ok(buy.take_profit_2 > buy.take_profit_1);
 assert.ok(buy.risk_reward >= 1.8);
 assert.ok(buy.confidence >= 74 && buy.confidence <= 92);
+assert.ok('rsi' in buy && 'atr' in buy && 'atr_ratio' in buy && 'support' in buy && 'resistance' in buy && 'trend' in buy && 'mtf' in buy);
+assert.strictEqual(buy.action, 'BUY');
 assert.strictEqual(buy.disclaimer, math.DISCLAIMER);
 assert.ok(!/guarant|80%|90%|accurate/i.test(buy.rationale || ''), 'engine payload has no rationale yet');
 assert.ok(!JSON.stringify(buy).includes('80% accurate'));

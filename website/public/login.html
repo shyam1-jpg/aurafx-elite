@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a0c12" />
+  <title>Member login — AuraFX Elite</title>
+  <link rel="icon" href="assets/aura-icon-140.png?v=7" type="image/png" />
+  <link rel="stylesheet" href="css/site.css?v=11" />
+  <link rel="stylesheet" href="css/hub.css" />
+  <link rel="stylesheet" href="css/members.css?v=1" />
+  <script src="js/font-loader.js"></script>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary">
+    <a href="index.html" class="logo" aria-label="AuraFX Elite home"><img src="assets/aurafx-elite-logo.png?v=7" alt="" class="logo-img" width="160" height="58" decoding="sync" /></a>
+    <div class="nav-links">
+      <a href="pricing.html">Pricing</a>
+      <a href="signup.html">Sign up</a>
+      <a href="members.html">Members</a>
+      <a href="dashboard.html" class="btn btn-gold">Dashboard</a>
+    </div>
+  </nav>
+  <main class="mem-shell">
+    <form class="mem-card auth-card mem-form" id="loginForm">
+      <h1>Member login</h1>
+      <p>Email and password. New accounts start on Free. The owner sets Pro or Elite in the members file. There is no payment on this page.</p>
+      <label>Email <input name="email" type="email" autocomplete="username" required /></label>
+      <label>Password <input name="password" type="password" autocomplete="current-password" required minlength="8" /></label>
+      <button class="btn btn-gold" type="submit">Log in</button>
+      <p id="loginGoogle"></p>
+      <p id="loginMsg" class="mem-note" role="status"></p>
+      <p class="mem-note"><a href="signup.html">Create an account</a></p>
+    </form>
+    <p class="mem-note">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>
+  </main>
+  <footer class="footer"></footer>
+  <script src="js/site-chrome.js"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+      var data = new FormData(event.target);
+      var msg = document.getElementById('loginMsg');
+      msg.textContent = 'Checking…';
+      fetch('/api/members/login', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.get('email'), password: data.get('password') })
+      }).then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
+        .then(function (result) {
+          if (!result.ok) { msg.textContent = result.body.error || 'Login failed.'; return; }
+          location.href = 'members.html';
+        }).catch(function () { msg.textContent = 'Login failed.'; });
+    });
+    fetch('/api/members/options', { cache: 'no-store' }).then(function (res) { return res.json(); }).then(function (body) {
+      var slot = document.getElementById('loginGoogle');
+      if (body && body.google) slot.innerHTML = '<a class="btn btn-outline" href="/api/members/google">Continue with Google</a>';
+    }).catch(function () {});
+  </script>
+</body>
+</html>

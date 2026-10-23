@@ -1,0 +1,60 @@
+.mem-shell { max-width: 1180px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+.mem-top { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.mem-top h1 { font-size: 1.45rem; margin: 0; }
+.mem-tier { border: 1px solid rgba(212, 175, 55, .4); color: var(--gold); border-radius: 999px; padding: .15rem .6rem; font-size: .75rem; font-weight: 700; letter-spacing: .04em; }
+.mem-layout { display: grid; grid-template-columns: 210px 1fr; gap: 1rem; align-items: start; }
+.mem-side {
+  background: var(--card); border: 1px solid rgba(212, 175, 55, .12); border-radius: 14px; padding: .55rem;
+  position: sticky; top: 84px;
+}
+.mem-side button {
+  display: block; width: 100%; text-align: left; background: transparent; color: var(--text);
+  border: 0; border-radius: 8px; padding: .55rem .7rem; font: inherit; cursor: pointer;
+}
+.mem-side button.active, .mem-side button:hover { background: rgba(212, 175, 55, .12); color: var(--gold); }
+.mem-main { min-width: 0; }
+.mem-card {
+  background: var(--card); border: 1px solid rgba(212, 175, 55, .12); border-radius: 14px;
+  padding: 1rem; margin-bottom: .8rem;
+}
+.mem-card h2 { font-size: 1.15rem; margin: 0 0 .4rem; }
+.mem-card p, .mem-note { color: var(--muted); }
+.mem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .7rem; }
+.mem-table-wrap { overflow-x: auto; }
+table.mem-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+.mem-table th, .mem-table td { padding: .45rem .4rem; border-bottom: 1px solid rgba(212, 175, 55, .12); text-align: left; white-space: nowrap; }
+.mem-table th { color: var(--gold); cursor: pointer; font-weight: 600; }
+.mem-heat { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .5rem; }
+.mem-heat article { border-radius: 12px; padding: .7rem; background: #0a0c12; border: 1px solid rgba(212, 175, 55, .12); }
+.mem-heat .up { border-color: rgba(46, 204, 113, .45); }
+.mem-heat .down { border-color: rgba(231, 76, 60, .45); }
+.mem-bar { display: grid; grid-template-columns: 52px 1fr 64px; gap: .45rem; align-items: center; margin: .35rem 0; }
+.mem-track { position: relative; height: 8px; background: #0a0c12; border-radius: 8px; }
+.mem-fill { position: absolute; top: 0; height: 8px; border-radius: 8px; background: var(--gold); }
+.mem-chat { display: flex; flex-direction: column; gap: .55rem; }
+.mem-chat form, .mem-form { display: grid; gap: .45rem; }
+.mem-form input, .mem-form select, .mem-form textarea, .mem-chat input, .mem-chat textarea {
+  width: 100%; box-sizing: border-box; background: #0a0c12; color: var(--text);
+  border: 1px solid rgba(212, 175, 55, .25); border-radius: 8px; padding: .55rem .65rem; font: inherit;
+}
+.mem-pills { display: flex; flex-wrap: wrap; gap: .4rem; margin: .4rem 0 .7rem; }
+.mem-pills button {
+  background: transparent; color: var(--text); border: 1px solid rgba(212, 175, 55, .3);
+  border-radius: 999px; padding: .25rem .6rem; font: inherit; cursor: pointer;
+}
+#memChart { height: 380px; }
+.mem-lock { border-style: dashed; }
+.mem-menu { display: none; }
+.tag-buy { color: var(--bull); font-weight: 700; }
+.tag-sell { color: var(--bear); font-weight: 700; }
+.tag-wait { color: var(--gold); font-weight: 700; }
+.auth-card { max-width: 460px; margin: 2rem auto; }
+
+@media (max-width: 860px) {
+  .mem-layout { display: block; }
+  .mem-menu { display: inline-flex; }
+  .mem-side {
+    display: none; position: fixed; z-index: 40; top: 72px; left: .6rem; right: .6rem; bottom: auto;
+  }
+  .mem-side.open { display: block; }
+}

@@ -147,6 +147,13 @@ try {
   console.warn('[AuraFX] signal-service not loaded:', e.message);
 }
 
+let memberDesk = null;
+try {
+  memberDesk = require('./member-desk').createMemberDesk({ signals: signalService });
+} catch (e) {
+  console.warn('[AuraFX] member-desk not loaded:', e.message);
+}
+
 function applyCalendarToCache(calPayload) {
   if (!calPayload) return;
   cache.calendar = calPayload.calendar || calPayload.items || [];
@@ -742,7 +749,7 @@ function signalNewsContext() {
 function apiWiring() {
   const base = 'http://127.0.0.1:' + PORT;
   const pages = [
-    'index.html', 'dashboard.html', 'track-record.html', 'trading-plans.html', 'ai-engine.html', 'pricing.html', 'how-it-works.html', 'legal.html', 'disclaimer.html', 'hard-sell.html', 'aura-lite.html', 'mt5-install.html',
+    'index.html', 'dashboard.html', 'members.html', 'login.html', 'signup.html', 'track-record.html', 'trading-plans.html', 'ai-engine.html', 'pricing.html', 'how-it-works.html', 'legal.html', 'disclaimer.html', 'hard-sell.html', 'aura-lite.html', 'mt5-install.html',
     'register.html', 'verify-email.html', 'terms.html', 'privacy.html', 'risk-warning.html',
     'responsible-trading.html', 'regulatory.html', 'refunds.html', 'cookies.html',
     'system-status.html', 'owner-email.html', 'owner-leads.html', 'owner-preview.html'
@@ -966,6 +973,19 @@ const server = http.createServer((req, res) => {
 
   if (req.method === 'OPTIONS' && url.startsWith('/api/')) return corsPreflight(res);
 
+  if (url.startsWith('/api/members')) {
+    if (!memberDesk) return json(res, 503, { error: 'Members area unavailable' });
+    return memberDesk.handle(req, res, {
+      url,
+      rawUrl,
+      json,
+      readBody,
+      news: signalNewsContext,
+      newsWindow: signalNewsWindow,
+      calendar: () => cache.calendar || []
+    });
+  }
+
   if (url === '/api/register' && req.method === 'POST') return handleRegister(req, res);
   if (url === '/api/verify-email' && req.method === 'GET') return handleVerifyEmail(req, res, rawUrl);
   if (url === '/api/resend-verification' && req.method === 'POST') return handleResendVerify(req, res);
@@ -1126,7 +1146,15 @@ const server = http.createServer((req, res) => {
     if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
     const force = rawUrl.includes('force=1');
     return signalService.getBoard({ force, news: signalNewsContext() })
-      .then((board) => json(res, 200, signalService.getPlans(board)))
+      .then((board) => {
+        const plans = signalService.getPlans(board);
+        plans.public_teaser = true;
+        plans.plans = (plans.plans || []).map((plan) => Object.assign({}, plan, {
+          key_levels: null,
+          levels_note: 'Entry, stop and targets are in the members area.'
+        }));
+        return json(res, 200, plans);
+      })
       .catch((e) => {
         console.warn('[AuraFX] /api/signals/plans:', e.message);
         return json(res, 500, { error: 'Plans unavailable' });
