@@ -317,12 +317,57 @@ function sessionInfo(now) {
   return { name: 'Off-hours', preferred: false, overlap: false };
 }
 
-function newsBlocks(instrument, ctx) {
-  if (!ctx || !ctx.newsImminent) return false;
-  const cur = String(ctx.newsCurrency || '').toUpperCase();
+function newsAffects(instrument, event) {
+  const cur = String(event && event.currency || '').toUpperCase();
   if (!cur) return true;
-  if (instrument.asset !== 'forex') return cur === 'USD';
+  if (!instrument || instrument.asset !== 'forex') return cur === 'USD';
   return String(instrument.id || '').toUpperCase().includes(cur);
+}
+
+function selectNewsEvents(events, now, beforeMin, afterMin) {
+  const clock = now instanceof Date ? now.getTime() : new Date(now || Date.now()).getTime();
+  const before = Number.isFinite(Number(beforeMin)) ? Number(beforeMin) : 30;
+  const after = Number.isFinite(Number(afterMin)) ? Number(afterMin) : 30;
+  return (events || []).map((event) => {
+    if (!event || String(event.risk || '').toUpperCase() !== 'HIGH') return null;
+    const when = new Date(event.time).getTime();
+    if (!Number.isFinite(when)) return null;
+    const minutesUntil = (when - clock) / 60000;
+    if (minutesUntil > before || minutesUntil < -after) return null;
+    return {
+      title: String(event.title || ''),
+      currency: String(event.currency || '').toUpperCase(),
+      risk: 'HIGH',
+      minutesUntil: Math.round(minutesUntil * 10) / 10
+    };
+  }).filter(Boolean);
+}
+
+function newsEventsFromContext(ctx) {
+  const context = ctx || {};
+  if (Array.isArray(context.newsEvents)) return context.newsEvents;
+  if (!context.newsImminent) return [];
+  return [{
+    currency: context.newsCurrency,
+    title: context.newsTitle,
+    minutesUntil: context.minutesUntil
+  }];
+}
+
+function newsBlockerText(event) {
+  const title = event && event.title ? ' (' + event.title + ')' : '';
+  const mins = Number(event && event.minutesUntil);
+  let when = '';
+  if (Number.isFinite(mins)) {
+    when = mins >= 0
+      ? ', ' + Math.round(mins) + ' min before'
+      : ', ' + Math.round(Math.abs(mins)) + ' min after';
+  }
+  return 'High-impact news is inside the pause window for this market' + title + when + '.';
+}
+
+function newsBlockersFor(instrument, ctx) {
+  return newsEventsFromContext(ctx).filter((event) => newsAffects(instrument, event)).map(newsBlockerText);
 }
 
 function scoreSetup(side, vol, session, mom, struct) {
@@ -467,10 +512,8 @@ function assessSetup(instrument, frames, ctx) {
   else if (ageMs > 8 * 3600 * 1000) blockers.push('Hourly price feed is stale.');
   if (!vol.ok) blockers.push(vol.note);
   if (mom.exhausted) blockers.push(mom.note);
-  if (newsBlocks(instrument, ctx || {})) {
-    const title = ctx && ctx.newsTitle ? ' (' + ctx.newsTitle + ')' : '';
-    blockers.push('High-impact news is close for this market' + title + '.');
-  }
+  const newsBlockers = newsBlockersFor(instrument, ctx || {});
+  newsBlockers.forEach((line) => blockers.push(line));
 
   const dirs = {
     trend: trend.dir,
@@ -522,7 +565,7 @@ function assessSetup(instrument, frames, ctx) {
       factor('structure', 'Structure', dirs.structure, struct.note),
       factor('volatility', 'Volatility', volState, vol.note),
       factor('mtf', 'Higher timeframes', mtfDir, mtfNote)
-    ],
+    ].concat(newsBlockers.length ? [factor('news', 'News', 'blocked', newsBlockers[0])] : []),
     blockers: published ? [] : blockers,
     session: session.name,
     data_quality: !open ? 'closed' : (ageMs > 8 * 3600 * 1000 ? 'stale' : 'ok'),
@@ -572,6 +615,9 @@ module.exports = {
   resample,
   marketOpen,
   sessionInfo,
+  selectNewsEvents,
+  newsAffects,
+  newsBlockersFor,
   assessSetup,
   barOutcome
 };

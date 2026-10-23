@@ -10,7 +10,7 @@
   <script src="js/site-boot.js?v=8"></script>
 
   <link rel="stylesheet" href="css/pro-dashboard.css?v=12" />
-  <link rel="stylesheet" href="css/signal-board.css?v=3" />
+  <link rel="stylesheet" href="css/signal-board.css?v=4" />
   <link rel="stylesheet" href="css/institutional.css" />
   <link rel="stylesheet" href="css/luxury.css" />
   <link rel="stylesheet" href="css/hub.css" />
@@ -33,6 +33,7 @@
         <li><button type="button" data-panel="settings" role="tab">Settings</button></li>
       </ul>
       <div class="dash-sidebar-foot">
+        <a href="track-record.html">Measured track record</a>
         <a href="get-started.html">Register &amp; trade guide</a>
         <a href="mt5-install.html">MT5 install</a>
         <a href="mt5-upload.html">Publish MQL5</a>
@@ -251,7 +252,7 @@
           <div id="signalBoardBody" class="signal-grid" aria-live="polite"></div>
           <section class="card card-wide" style="margin-top:1rem" aria-labelledby="signalHistHeading">
             <h2 id="signalHistHeading">Signal tracker</h2>
-            <p class="muted">Every published Buy or Sell is logged here and marked TP hit, SL hit, or open when later candles trade through those levels. Wait is not counted as a trade. The win rate below is the measured result of those closed signals.</p>
+            <p class="muted">Every published Buy or Sell is logged here and marked TP hit, SL hit, or open when later candles trade through those levels. Wait is not counted as a trade. The win rate below is the measured result of those closed signals. The <a href="track-record.html">public track record</a> adds the equity curve and max drawdown.</p>
             <div class="signal-table-wrap">
               <table class="signal-table">
                 <thead><tr><th>Opened</th><th>Instrument</th><th>Signal</th><th>Entry</th><th>Stop</th><th>Target</th><th>Status</th><th>R</th></tr></thead>
@@ -393,7 +394,8 @@
   <script src="js/elite-command.js"></script>
   <script src="js/advanced-market-chart.js?v=1"></script>
   <script src="js/pro-dashboard.js?v=11"></script>
-  <script src="js/signal-board.js?v=3"></script>
+  <script src="js/position-size.js?v=1"></script>
+  <script src="js/signal-board.js?v=4"></script>
   <script src="js/institutional-data.js"></script>
   <script src="js/institutional.js"></script>
   <script src="js/markets-universe.js"></script>

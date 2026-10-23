@@ -4,8 +4,10 @@ const { assessSetup, DISCLAIMER } = require('./signal-math');
 const { INSTRUMENTS, loadAll } = require('./market-candles');
 const { applyRationales } = require('./signal-rationale');
 const { createTracker } = require('./signal-tracker');
+const { createAlerts } = require('./signal-alerts');
 
 const tracker = createTracker();
+const alerts = createAlerts();
 const rationaleCache = new Map();
 let boardCache = null;
 let inflight = null;
@@ -81,7 +83,9 @@ async function computeBoard(options) {
       now,
       newsImminent: !!news.newsImminent,
       newsCurrency: news.newsCurrency,
-      newsTitle: news.newsTitle
+      newsTitle: news.newsTitle,
+      minutesUntil: news.minutesUntil,
+      newsEvents: news.newsEvents
     });
     setup.source = row.source;
     setup.feed = row.feed;
@@ -91,6 +95,14 @@ async function computeBoard(options) {
   });
   const llm = await applyRationales(setups, { fetchImpl: opts.fetchImpl, cache: rationaleCache });
   const tracked = await tracker.sync(setups, candleMap, now);
+  const alertEvents = []
+    .concat((tracked.events && tracked.events.published) || [])
+    .map((signal) => ({ type: 'published', signal }))
+    .concat(((tracked.events && tracked.events.closed) || []).map((signal) => ({ type: signal.status, signal })));
+  delete tracked.events;
+  alerts.dispatch(alertEvents).catch((error) => {
+    console.warn('[AuraFX] signal alert:', error.message);
+  });
   const sources = [...new Set(setups.map((s) => s.source).filter(Boolean))];
   const board = {
     ok: true,
@@ -121,6 +133,14 @@ async function computeBoard(options) {
   return board;
 }
 
+async function getTrackRecord(query) {
+  await tracker.ready();
+  const record = tracker.trackRecord(query || {});
+  record.disclaimer = DISCLAIMER;
+  record.updated_at = new Date().toISOString();
+  return record;
+}
+
 function getBoard(options) {
   const opts = options || {};
   const ttl = Number(process.env.SIGNAL_CACHE_MS) || 60000;
@@ -134,6 +154,10 @@ function getBoard(options) {
 
 module.exports = {
   getBoard,
+  getTrackRecord,
+  subscribeAlerts: (body) => alerts.subscribe(body),
+  unsubscribeAlerts: (token) => alerts.unsubscribe(token),
+  alertStatus: () => alerts.status(),
   describeFeed,
   INSTRUMENTS,
   DISCLAIMER

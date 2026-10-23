@@ -8,6 +8,9 @@ const zlib = require('zlib');
 const math = require('./signal-math');
 const trackerMod = require('./signal-tracker');
 const candles = require('./market-candles');
+const position = require('./public/js/position-size');
+const alertsMod = require('./signal-alerts');
+const net = require('net');
 const rationale = require('./signal-rationale');
 const signalService = require('./signal-service');
 const { backtestInstrument } = require('./signal-backtest');
@@ -133,6 +136,74 @@ const goldNews = math.assessSetup(XAU, { h1: upH1, d1: upDaily }, {
   newsTitle: 'Euro CPI'
 });
 assert.ok(!goldNews.blockers.some((b) => /news/i.test(b)), 'non-USD news does not block gold');
+assert.ok(blocked.factors.some((factor) => factor.key === 'news' && factor.state === 'blocked'));
+
+const clock = new Date('2026-03-18T13:00:00Z');
+const calendar = [
+  { title: 'US CPI', currency: 'USD', risk: 'HIGH', time: '2026-03-18T13:20:00Z' },
+  { title: 'BOJ', currency: 'JPY', risk: 'HIGH', time: '2026-03-18T12:40:00Z' },
+  { title: 'Old NFP', currency: 'USD', risk: 'HIGH', time: '2026-03-18T12:00:00Z' },
+  { title: 'Far FOMC', currency: 'USD', risk: 'HIGH', time: '2026-03-18T15:00:00Z' },
+  { title: 'Retail', currency: 'USD', risk: 'MEDIUM', time: '2026-03-18T13:10:00Z' }
+];
+const windowed = math.selectNewsEvents(calendar, clock, 30, 30);
+assert.deepStrictEqual(windowed.map((event) => event.title), ['US CPI', 'BOJ']);
+const paused = math.assessSetup(EUR, { h1: upH1.slice(0, upHits[0].i + 1), d1: upDaily }, {
+  now: new Date(upH1[upHits[0].i].t),
+  newsEvents: windowed
+});
+assert.strictEqual(paused.action, 'WAIT');
+assert.ok(paused.blockers.some((line) => /US CPI/.test(line) && /before/.test(line)));
+const jpy = { id: 'USDJPY', name: 'USD/JPY', asset: 'forex' };
+const afterBoj = math.newsBlockersFor(jpy, { newsEvents: windowed });
+assert.ok(afterBoj.some((line) => /BOJ/.test(line) && /after/.test(line)));
+const goldUsd = math.newsBlockersFor(XAU, { newsEvents: windowed });
+assert.ok(goldUsd.some((line) => /US CPI/.test(line)));
+assert.strictEqual(math.newsBlockersFor(XAU, { newsEvents: [{ title: 'BOJ', currency: 'JPY', minutesUntil: -5 }] }).length, 0);
+
+const eurusdLot = position.calculate({
+  balance: 10000, risk_pct: 1, account_currency: 'USD', instrument: 'EURUSD', entry: 1.1, stop: 1.095
+});
+assert.strictEqual(eurusdLot.ok, true);
+assert.strictEqual(eurusdLot.lots, 0.2);
+const usdjpyLot = position.calculate({
+  balance: 10000, risk_pct: 1, account_currency: 'USD', instrument: 'USDJPY', entry: 156, stop: 155.5
+});
+assert.strictEqual(usdjpyLot.lots, 0.31);
+const goldLot = position.calculate({
+  balance: 10000, risk_pct: 1, account_currency: 'USD', instrument: 'XAUUSD', entry: 4000, stop: 3980
+});
+assert.strictEqual(goldLot.lots, 0.05);
+const silverLot = position.calculate({
+  balance: 10000, risk_pct: 1, account_currency: 'USD', instrument: 'XAGUSD', entry: 50, stop: 49.5
+});
+assert.strictEqual(silverLot.lots, 0.04);
+const jpyAccount = position.calculate({
+  balance: 1000000, risk_pct: 1, account_currency: 'JPY', instrument: 'EURUSD', entry: 1.1, stop: 1.095,
+  rates: { USDJPY: 156 }
+});
+assert.strictEqual(jpyAccount.lots, 0.13);
+assert.strictEqual(position.calculate({ balance: 10000, risk_pct: 9, instrument: 'EURUSD', entry: 1.1, stop: 1.09 }).ok, false);
+
+const curve = trackerMod.equityCurve([
+  { status: 'tp', result_r: 2, closed_at: '2026-01-02T00:00:00Z', instrument: 'EURUSD' },
+  { status: 'sl', result_r: -1, closed_at: '2026-01-03T00:00:00Z', instrument: 'EURUSD' },
+  { status: 'sl', result_r: -1, closed_at: '2026-01-04T00:00:00Z', instrument: 'XAUUSD' },
+  { status: 'expired', result_r: 9, closed_at: '2026-01-05T00:00:00Z', instrument: 'EURUSD' },
+  { status: 'open', result_r: null, opened_at: '2026-02-01T00:00:00Z', instrument: 'GBPUSD' }
+]);
+assert.strictEqual(curve.ending_r, 0);
+assert.strictEqual(curve.max_drawdown_r, 2);
+const record = trackerMod.buildTrackRecord([
+  { id: 'a', instrument: 'EURUSD', name: 'EUR/USD', action: 'BUY', entry: 1.1, stop_loss: 1.09, take_profit_1: 1.12, opened_at: '2026-01-02T00:00:00Z', closed_at: '2026-01-02T05:00:00Z', status: 'tp', result_r: 2 },
+  { id: 'b', instrument: 'XAUUSD', name: 'Gold', action: 'SELL', entry: 4000, stop_loss: 4020, take_profit_1: 3960, opened_at: '2026-02-02T00:00:00Z', closed_at: '2026-02-02T05:00:00Z', status: 'sl', result_r: -1 }
+], { month: '2026-01' });
+assert.strictEqual(record.signals.length, 1);
+assert.strictEqual(record.measured.wins, 1);
+assert.strictEqual(record.measured.max_drawdown_r, 0);
+assert.ok(record.sample_note == null || /not a forecast/i.test(record.basis));
+assert.ok(/not a forecast/i.test(record.basis));
+assert.ok(!/accurat|guarant|90%/i.test(JSON.stringify(record)));
 
 const both = { t: '2026-01-06T12:00:00Z', o: 1.1, h: 1.3, l: 0.9, c: 1.1 };
 assert.strictEqual(math.barOutcome({
@@ -385,6 +456,89 @@ assert.strictEqual(rationale.acceptableRationale('Wait on EUR/USD until the hour
   assert.strictEqual(stale.status, 'stale');
   const live = signalService.describeFeed([{ h1: new Array(80), source: 'Yahoo Finance' }]);
   assert.strictEqual(live.status, 'live');
+
+  const alertFile = path.join(os.tmpdir(), 'aurafx-alerts-' + Date.now() + '.json');
+  const sent = [];
+  const alerts = alertsMod.createAlerts({
+    file: alertFile,
+    disableNeon: true,
+    smtp: { configured: true, from: 'alerts@example.com', host: '127.0.0.1', port: 2525 },
+    telegram: { configured: true, token: 'test-token' },
+    deliverEmail: async (message) => { sent.push(message); },
+    deliverTelegram: async (chatId, text) => { sent.push({ chatId, text }); }
+  });
+  await assert.rejects(() => alerts.subscribe({ email: 'trader@example.com', consent: false }), /Consent/);
+  const signup = await alerts.subscribe({
+    email: 'trader@example.com',
+    telegram_chat_id: '123456789',
+    consent: true,
+    instruments: ['EURUSD']
+  });
+  assert.ok(signup.token);
+  const published = {
+    type: 'published',
+    signal: {
+      id: 'sig1', instrument: 'EURUSD', name: 'EUR/USD', action: 'BUY',
+      entry: 1.12, stop_loss: 1.11, take_profit_1: 1.14, confidence: 84,
+      opened_at: '2026-03-02T12:00:00Z'
+    }
+  };
+  const firstSend = await alerts.dispatch([published, {
+    type: 'published',
+    signal: { id: 'sig2', instrument: 'XAUUSD', name: 'Gold', action: 'SELL', entry: 4000, stop_loss: 4020, take_profit_1: 3960, opened_at: '2026-03-02T12:00:00Z' }
+  }]);
+  assert.strictEqual(firstSend.delivered, 1);
+  assert.strictEqual(sent.length, 2);
+  assert.ok(sent.every((item) => !/(\b80\b|\b90\b|\b96\b)\s*%|%\s*accura|always profit/i.test(JSON.stringify(item))));
+  assert.ok(/no result is guaranteed/i.test(sent[1].text));
+  assert.ok(/not a predicted win rate/.test(sent[1].text));
+  const secondSend = await alerts.dispatch([published]);
+  assert.strictEqual(secondSend.delivered, 0);
+  await alerts.unsubscribe(signup.token);
+  await assert.rejects(() => alerts.unsubscribe(signup.token), /not active/);
+  fs.rmSync(alertFile, { force: true });
+
+  await new Promise((resolve, reject) => {
+    const server = net.createServer((socket) => {
+      socket.write('220 ready\r\n');
+      let buf = '';
+      let dataMode = false;
+      socket.on('data', (chunk) => {
+        buf += chunk.toString('utf8');
+        if (dataMode) {
+          if (buf.includes('\r\n.\r\n')) {
+            dataMode = false;
+            buf = '';
+            socket.write('250 queued\r\n');
+          }
+          return;
+        }
+        const lines = buf.split('\r\n');
+        buf = lines.pop();
+        lines.forEach((line) => {
+          if (/^EHLO/i.test(line)) socket.write('250 hello\r\n');
+          else if (/^MAIL FROM/i.test(line)) socket.write('250 ok\r\n');
+          else if (/^RCPT TO/i.test(line)) socket.write('250 ok\r\n');
+          else if (/^DATA/i.test(line)) {
+            dataMode = true;
+            buf = '';
+            socket.write('354 go\r\n');
+          } else if (/^QUIT/i.test(line)) socket.end();
+        });
+      });
+    });
+    server.listen(0, '127.0.0.1', () => {
+      const port = server.address().port;
+      alertsMod.deliverSmtp({
+        from: 'alerts@example.com',
+        to: 'trader@example.com',
+        subject: 'AuraFX Elite — signal published',
+        text: 'Analysis only'
+      }, { host: '127.0.0.1', port, mode: 'plain', user: '', from: 'alerts@example.com' })
+        .then(() => { server.close(); resolve(); })
+        .catch((error) => { server.close(); reject(error); });
+    });
+  });
 
   console.log('Signal engine tests passed. Sample BUY confidence ' + buy.confidence + ', backtest trades ' + bt.trade_count + ', measured win rate ' + bt.measured.win_rate + ' on ' + bt.measured.resolved + ' resolved.');
 })().catch((error) => {

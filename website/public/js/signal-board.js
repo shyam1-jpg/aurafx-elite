@@ -74,9 +74,85 @@
       '<div class="signal-action">' + esc(action) + '</div></div>' +
       '<div class="signal-confidence">Confidence<strong>' + esc(conf) + '</strong></div></div>' +
       (compact ? '' : '<p class="signal-rationale">' + esc(signal.rationale || '') + '</p>' + levels + factorHtml(signal.factors)) +
+      blockerHtml(signal, compact) +
       (compact ? '' : '<p class="muted" style="margin-top:.5rem">' + esc(signal.session || '') + (signal.feed_note ? ' · ' + esc(signal.feed_note) : '') + '</p>') +
       feedLine(signal, compact) +
+      sizeHtml(signal, compact) +
       '</article>';
+  }
+
+  function blockerHtml(signal, compact) {
+    const lines = (signal.blockers || []).filter((line) => /pause window|high-impact news/i.test(line));
+    if (compact || !lines.length) return '';
+    return '<p class="signal-blocker">' + lines.map(esc).join(' ') + '</p>';
+  }
+
+  function savedSize(key, fallback) {
+    try {
+      const value = localStorage.getItem(key);
+      return value == null || value === '' ? fallback : value;
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function currencyOptions(selected) {
+    const list = (window.AuraPositionSize && window.AuraPositionSize.CURRENCIES) || ['USD'];
+    return list.map((code) => '<option' + (code === selected ? ' selected' : '') + '>' + code + '</option>').join('');
+  }
+
+  function sizeHtml(signal, compact) {
+    if (compact) return '';
+    if (signal.action === 'WAIT' || signal.entry == null || signal.stop_loss == null) {
+      return '<p class="signal-size-note">Position size appears when a Buy or Sell publishes a stop.</p>';
+    }
+    const currency = savedSize('aurafx-size-currency', 'USD');
+    return '<form class="signal-size" data-instrument="' + esc(signal.instrument) + '" data-entry="' + esc(signal.entry) + '" data-stop="' + esc(signal.stop_loss) + '" data-price="' + esc(signal.price) + '">' +
+      '<label>Account<input name="balance" inputmode="decimal" value="' + esc(savedSize('aurafx-size-balance', '10000')) + '" aria-label="Account size"></label>' +
+      '<label>Risk %<input name="risk" inputmode="decimal" value="' + esc(savedSize('aurafx-size-risk', '1')) + '" aria-label="Risk percent"></label>' +
+      '<label>Currency<select name="currency" aria-label="Account currency">' + currencyOptions(currency) + '</select></label>' +
+      '<p class="signal-size-out" aria-live="polite"></p></form>';
+  }
+
+  function ratesFromBoard() {
+    const rates = {};
+    ((latest && latest.signals) || []).forEach((signal) => {
+      if (Number(signal.price) > 0) rates[signal.instrument] = Number(signal.price);
+    });
+    return rates;
+  }
+
+  function updateSizes(root) {
+    if (!window.AuraPositionSize) return;
+    (root || document).querySelectorAll('form.signal-size').forEach((form) => {
+      const balance = form.querySelector('[name="balance"]').value;
+      const risk = form.querySelector('[name="risk"]').value;
+      const currency = form.querySelector('[name="currency"]').value;
+      try {
+        localStorage.setItem('aurafx-size-balance', balance);
+        localStorage.setItem('aurafx-size-risk', risk);
+        localStorage.setItem('aurafx-size-currency', currency);
+      } catch (error) { /* private mode */ }
+      const result = window.AuraPositionSize.calculate({
+        balance,
+        risk_pct: risk,
+        account_currency: currency,
+        instrument: form.getAttribute('data-instrument'),
+        entry: form.getAttribute('data-entry'),
+        stop: form.getAttribute('data-stop'),
+        price: form.getAttribute('data-price'),
+        rates: ratesFromBoard()
+      });
+      const out = form.querySelector('.signal-size-out');
+      if (!out) return;
+      if (!result.ok) {
+        out.textContent = result.error;
+        return;
+      }
+      const lots = result.below_min_lot ? result.lots + ' (below 0.01)' : result.lots;
+      out.textContent = lots + ' lots · risk ' + result.risk_money + ' ' + result.account_currency +
+        ' · ' + result.loss_per_lot + ' ' + result.account_currency + ' per lot (' + result.contract_label + '). ' + result.note;
+    });
   }
 
   function feedLine(signal, compact) {
@@ -153,6 +229,7 @@
       html += rows.map((s) => cardHtml(s, false)).join('');
     });
     host.innerHTML = html || '<p class="muted">No instruments match this filter.</p>';
+    updateSizes(host);
 
     if (history) {
       const rows = (latest.tracker && latest.tracker.history) || [];
@@ -204,6 +281,9 @@
 
   document.getElementById('btnOpenSignals')?.addEventListener('click', () => {
     document.querySelector('.dash-nav button[data-panel="signals"]')?.click();
+  });
+  document.getElementById('signalBoardBody')?.addEventListener('input', (event) => {
+    if (event.target.closest('form.signal-size')) updateSizes(document.getElementById('signalBoardBody'));
   });
   document.getElementById('signalFilter')?.addEventListener('click', (event) => {
     const btn = event.target.closest('button[data-signal-filter]');

@@ -709,17 +709,31 @@ function fileOk(rel) {
   }
 }
 
-function signalNewsContext() {
-  const ev = cache.nextEvent;
-  const source = cache.calendarSource || '';
-  if (!ev || !source) return { newsImminent: false, newsCurrency: '', newsTitle: '', newsSource: source };
-  const mins = Number(ev.minutesUntil);
-  const imminent = String(ev.risk || '').toUpperCase() === 'HIGH' &&
-    Number.isFinite(mins) && mins >= 0 && mins <= 45;
+function signalNewsWindow() {
+  const before = Number(process.env.SIGNAL_NEWS_BEFORE_MIN);
+  const after = Number(process.env.SIGNAL_NEWS_AFTER_MIN);
   return {
-    newsImminent: imminent,
-    newsCurrency: String(ev.currency || ''),
-    newsTitle: String(ev.title || ''),
+    before: Number.isFinite(before) && before >= 0 ? before : 30,
+    after: Number.isFinite(after) && after >= 0 ? after : 30
+  };
+}
+
+function signalNewsContext() {
+  const source = cache.calendarSource || '';
+  const windowMin = signalNewsWindow();
+  if (!source) {
+    return { newsImminent: false, newsEvents: [], newsWindow: windowMin, newsSource: source };
+  }
+  const { selectNewsEvents } = require('./signal-math');
+  const newsEvents = selectNewsEvents(cache.calendar, new Date(), windowMin.before, windowMin.after);
+  const first = newsEvents[0] || null;
+  return {
+    newsImminent: !!first,
+    newsCurrency: first ? first.currency : '',
+    newsTitle: first ? first.title : '',
+    minutesUntil: first ? first.minutesUntil : null,
+    newsEvents,
+    newsWindow: windowMin,
     newsSource: source
   };
 }
@@ -727,13 +741,13 @@ function signalNewsContext() {
 function apiWiring() {
   const base = 'http://127.0.0.1:' + PORT;
   const pages = [
-    'index.html', 'dashboard.html', 'hard-sell.html', 'aura-lite.html', 'mt5-install.html',
+    'index.html', 'dashboard.html', 'track-record.html', 'hard-sell.html', 'aura-lite.html', 'mt5-install.html',
     'register.html', 'verify-email.html', 'terms.html', 'privacy.html', 'risk-warning.html',
     'responsible-trading.html', 'regulatory.html', 'refunds.html', 'cookies.html',
     'system-status.html', 'owner-email.html', 'owner-leads.html', 'owner-preview.html'
   ];
   const apis = [
-    '/api/health', '/api/status', '/api/quotes', '/api/signals', '/api/signals/tracker', '/api/pro-summary', '/api/risk-summary',
+    '/api/health', '/api/status', '/api/quotes', '/api/signals', '/api/signals/tracker', '/api/signals/track-record', '/api/signals/alerts', '/api/pro-summary', '/api/risk-summary',
     '/api/calendar', '/api/news', '/api/ai/status', '/api/ai/analyze', '/api/institutional', '/api/institutional-live', '/api/markets', '/api/wiring'
   ];
   return {
@@ -1097,6 +1111,35 @@ const server = http.createServer((req, res) => {
         .catch(() => respond(economicCalendar.getPayload()));
     }
     return respond({ calendar: cache.calendar, nextEvent: cache.nextEvent, updatedAt: cache.updatedAt });
+  }
+  if (url === '/api/signals/track-record' && req.method === 'GET') {
+    if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
+    const params = new URLSearchParams(rawUrl.includes('?') ? rawUrl.split('?')[1] : '');
+    return signalService.getTrackRecord({
+      instrument: params.get('instrument') || '',
+      month: params.get('month') || ''
+    }).then((record) => json(res, 200, record))
+      .catch((e) => {
+        console.warn('[AuraFX] /api/signals/track-record:', e.message);
+        return json(res, 500, { error: 'Track record unavailable' });
+      });
+  }
+  if (url === '/api/signals/alerts' && req.method === 'GET') {
+    if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
+    return json(res, 200, signalService.alertStatus());
+  }
+  if (url === '/api/signals/alerts' && req.method === 'POST') {
+    if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
+    return readBody(req).then(async (body) => {
+      try {
+        const result = body && body.unsubscribe
+          ? await signalService.unsubscribeAlerts(body.token || body.unsubscribe)
+          : await signalService.subscribeAlerts(body);
+        return json(res, 200, result);
+      } catch (error) {
+        return json(res, error.status || 400, { error: error.message || 'Alert signup failed' });
+      }
+    }).catch((e) => json(res, e.status || 400, { error: e.message || 'Alert signup failed' }));
   }
   if ((url === '/api/signals' || url === '/api/signals/tracker') && req.method === 'GET') {
     if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
