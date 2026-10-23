@@ -1,16 +1,18 @@
 {
-  "currency": null,
-  "note": "Prices are placeholders until the owner edits this file. A null price means the amount is not set.",
+  "currency": "GBP",
+  "currency_symbol": "£",
+  "contact": "support@aurafxelite.com",
+  "note": "Prices are in GBP. Annual billing is two months free. Payment is not taken on this site yet.",
   "tiers": [
     {
       "id": "free",
       "name": "Free",
-      "price": null,
-      "price_label": "Set by owner",
+      "price": 0,
       "period": null,
+      "annual_price": null,
       "delay_minutes": 15,
       "features": [
-        "Signal board after the free-tier delay",
+        "Delayed signals",
         "Public measured track record",
         "Risk disclosure on every page"
       ]
@@ -18,9 +20,10 @@
     {
       "id": "pro",
       "name": "Pro",
-      "price": null,
-      "price_label": "Set by owner",
-      "period": null,
+      "price": 19,
+      "period": "month",
+      "annual_price": 190,
+      "annual_period": "year",
       "features": [
         "Current signal scan",
         "Daily plan per instrument",
@@ -30,9 +33,10 @@
     {
       "id": "elite",
       "name": "Elite",
-      "price": null,
-      "price_label": "Set by owner",
-      "period": null,
+      "price": 49,
+      "period": "month",
+      "annual_price": 490,
+      "annual_period": "year",
       "features": [
         "Everything in Pro",
         "Dashboard journal and risk tools",

@@ -130,28 +130,41 @@
       });
   }
 
-  function priceText(tier) {
+  function formatMoney(amount, symbol) {
+    var n = Number(amount);
+    if (!Number.isFinite(n)) return '';
+    return symbol + (n % 1 === 0 ? String(n) : n.toFixed(2));
+  }
+
+  function priceText(tier, symbol) {
     if (tier.price == null || tier.price === '') return tier.price_label || 'Set by owner';
-    var amount = String(tier.price);
-    if (tier.period) amount += ' / ' + tier.period;
+    var amount = formatMoney(tier.price, symbol);
+    if (tier.period) amount += '/' + tier.period;
     return amount;
   }
 
-  function tierCard(tier) {
+  function tierCard(tier, data) {
+    var symbol = (data && data.currency_symbol) || '£';
+    var contact = (data && data.contact) || 'support@aurafxelite.com';
     var delay = tier.id === 'free' && tier.delay_minutes != null
       ? '<p class="pf-fine">Delay window: ' + esc(tier.delay_minutes) + ' minutes. The free snapshot stays empty until a saved scan is that old.</p>'
       : '';
+    var annual = tier.annual_price == null ? ''
+      : '<p class="pf-annual">' + esc(formatMoney(tier.annual_price, symbol)) + '/' + esc(tier.annual_period || 'year') + ' · two months free</p>';
+    var href = 'mailto:' + contact + '?subject=' + encodeURIComponent('AuraFX Elite — ' + (tier.name || 'pricing'));
     return '<article class="pf-card pf-price' + (tier.id === 'pro' ? ' is-pro' : '') + '">' +
       '<h3>' + esc(tier.name) + '</h3>' +
-      '<p class="pf-amount">' + esc(priceText(tier)) + '</p>' +
+      '<p class="pf-amount">' + esc(priceText(tier, symbol)) + '</p>' +
+      annual +
       '<ul>' + (tier.features || []).map(function (line) { return '<li>' + esc(line) + '</li>'; }).join('') + '</ul>' +
-      delay + '</article>';
+      delay +
+      '<a class="pf-btn pf-btn-sm" href="' + esc(href) + '">Contact us</a></article>';
   }
 
   function renderPricing(data, mount) {
     var tiers = (data && data.tiers) || [];
-    mount.innerHTML = tiers.map(tierCard).join('') +
-      '<p class="pf-fine">' + esc((data && data.note) || 'Prices are set by the owner.') + '</p>';
+    mount.innerHTML = tiers.map(function (tier) { return tierCard(tier, data); }).join('') +
+      '<p class="pf-fine">' + esc((data && data.note) || 'Payment is not taken on this site yet.') + '</p>';
   }
 
   function loadPricing() {

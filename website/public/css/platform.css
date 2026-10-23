@@ -310,8 +310,10 @@ img { max-width: 100%; }
   font-size: 1.7rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  margin: .2rem 0 .7rem;
+  margin: .2rem 0 .35rem;
 }
+.pf-annual { margin: 0 0 .7rem; color: #d7d7e2; }
+.pf-price .pf-btn { margin-top: .9rem; }
 .pf-price ul { margin: 0; padding-left: 1.1rem; }
 .pf-price li { margin: .28rem 0; }
 .pf-price.is-pro {

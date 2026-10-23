@@ -787,11 +787,29 @@ assert.strictEqual(rationale.acceptableRationale('Wait on EUR/USD until the hour
   assert.deepStrictEqual(buildPlans({ signals: [] }).plans, []);
 
   const pricing = JSON.parse(fs.readFileSync(path.join(__dirname, 'public', 'pricing.json'), 'utf8'));
-  pricing.tiers.forEach((tier) => {
-    assert.strictEqual(tier.price, null);
-    assert.strictEqual(tier.price_label, 'Set by owner');
-  });
-  assert.strictEqual(pricing.tiers.find((tier) => tier.id === 'free').delay_minutes, 15);
+  const freeTier = pricing.tiers.find((tier) => tier.id === 'free');
+  const proTier = pricing.tiers.find((tier) => tier.id === 'pro');
+  const eliteTier = pricing.tiers.find((tier) => tier.id === 'elite');
+  assert.strictEqual(pricing.currency, 'GBP');
+  assert.strictEqual(pricing.currency_symbol, '£');
+  assert.strictEqual(pricing.contact, 'support@aurafxelite.com');
+  assert.strictEqual(freeTier.price, 0);
+  assert.strictEqual(freeTier.delay_minutes, 15);
+  assert.ok(freeTier.features.some((line) => /delayed signals/i.test(line)));
+  assert.strictEqual(proTier.price, 19);
+  assert.strictEqual(proTier.period, 'month');
+  assert.strictEqual(proTier.annual_price, 190);
+  assert.strictEqual(eliteTier.price, 49);
+  assert.strictEqual(eliteTier.period, 'month');
+  assert.strictEqual(eliteTier.annual_price, 490);
+  assert.strictEqual(proTier.annual_price, proTier.price * 10);
+  assert.strictEqual(eliteTier.annual_price, eliteTier.price * 10);
+  assert.ok(!/parslia/i.test(JSON.stringify(pricing)));
+  const pricingPage = fs.readFileSync(path.join(__dirname, 'public', 'pricing.html'), 'utf8');
+  assert.ok(/Contact us/.test(pricingPage));
+  assert.ok(/support@aurafxelite.com/.test(pricingPage));
+  assert.ok(/£19/.test(pricingPage) && /£49/.test(pricingPage) && /£190/.test(pricingPage) && /£490/.test(pricingPage));
+  assert.ok(!/parslia/i.test(pricingPage));
 
   const priorDelay = process.env.SIGNAL_FREE_DELAY_MIN;
   delete process.env.SIGNAL_FREE_DELAY_MIN;
