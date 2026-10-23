@@ -12,6 +12,7 @@ const position = require('./public/js/position-size');
 const alertsMod = require('./signal-alerts');
 const net = require('net');
 const rationale = require('./signal-rationale');
+const assistant = require('./signal-assistant');
 const signalService = require('./signal-service');
 const { backtestInstrument } = require('./signal-backtest');
 
@@ -128,6 +129,140 @@ const flatBuy = findPublished(EUR, flatH1, flatDaily, 'BUY');
 const flatSell = findPublished(EUR, flatH1, flatDaily, 'SELL');
 assert.strictEqual(flatBuy.length, 0, 'chop must not publish BUY');
 assert.strictEqual(flatSell.length, 0, 'chop must not publish SELL');
+
+const flatRegime = math.detectRegime(flatH1);
+let trendAdx = null;
+for (let i = 240; i < upH1.length; i += 4) {
+  const regime = math.detectRegime(upH1.slice(0, i + 1));
+  if (regime.name === 'trending' && regime.adx >= 25) {
+    trendAdx = regime.adx;
+    break;
+  }
+}
+assert.ok(trendAdx >= 25, 'a directional stretch should read trending with ADX at least 25');
+assert.strictEqual(flatRegime.name, 'ranging', 'flat chop should read ranging, ADX ' + flatRegime.adx);
+assert.ok(flatRegime.adx < 25, 'flat ADX should stay under 25');
+assert.ok(buy.regime === 'trending' || buy.regime === 'ranging', 'a trend-rule buy keeps a regime chip');
+assert.ok(buy.factors.some((factor) => factor.key === 'regime' && factor.state === buy.regime));
+assert.ok(/trend/i.test(buy.regime_note));
+
+const spike = upH1.slice(0, upHits[0].i + 1).map((bar) => Object.assign({}, bar));
+const spikeAt = spike.length - 1;
+const spiked = spike[spikeAt];
+spike[spikeAt] = Object.assign({}, spiked, {
+  h: Math.max(spiked.o, spiked.c) * 1.04,
+  l: Math.min(spiked.o, spiked.c) * 0.995
+});
+const volatile = math.assessSetup(EUR, { h1: spike, d1: upDaily }, { now: new Date(spike[spike.length - 1].t) });
+assert.strictEqual(volatile.regime, 'volatile', 'a wide bar should switch the regime to volatile');
+assert.strictEqual(volatile.action, 'WAIT');
+assert.strictEqual(volatile.entry, null);
+assert.ok(volatile.blockers.some((line) => /too wide/i.test(line)));
+
+function rangeBar(origin, i, o, c) {
+  const wick = 0.00012;
+  return {
+    t: new Date(origin + i * 3600000).toISOString(),
+    o,
+    c,
+    h: Math.max(o, c) + wick,
+    l: Math.min(o, c) - wick
+  };
+}
+const rangeOrigin = Date.UTC(2026, 0, 7, 13) - 345 * 3600000;
+const rangeH1 = [];
+let rangePrice = 1.1;
+for (let i = 0; i < 40; i++) {
+  const close = rangePrice + 0.00018;
+  rangeH1.push(rangeBar(rangeOrigin, i, rangePrice, close));
+  rangePrice = close;
+}
+for (let i = 40; i < 70; i++) {
+  const close = rangePrice - 0.00012;
+  rangeH1.push(rangeBar(rangeOrigin, i, rangePrice, close));
+  rangePrice = close;
+}
+for (let i = 70; i < 340; i++) {
+  const close = rangePrice + Math.sin(i) * 0.00022;
+  rangeH1.push(rangeBar(rangeOrigin, i, rangePrice, close));
+  rangePrice = close;
+}
+rangeH1.push(rangeBar(rangeOrigin, 340, rangePrice, rangePrice - 0.0011));
+rangePrice = rangeH1[rangeH1.length - 1].c;
+for (let k = 1; k <= 8; k++) {
+  const close = rangePrice + 0.00005;
+  rangeH1.push(rangeBar(rangeOrigin, 340 + k, rangePrice, close));
+  rangePrice = close;
+}
+const rangeDaily = daily(100, 1.1, 0.00002, Date.UTC(2025, 6, 1));
+function scaleCandles(rows, factor) {
+  return rows.map((c) => ({ t: c.t, o: c.o * factor, h: c.h * factor, l: c.l * factor, c: c.c * factor }));
+}
+const goldH1 = scaleCandles(rangeH1, 1800);
+const goldDaily = scaleCandles(rangeDaily, 1800);
+const rangeWhen = { now: new Date(goldH1[300].t) };
+const rangeMid = math.assessSetup(XAU, { h1: goldH1.slice(0, 301), d1: goldDaily }, rangeWhen);
+assert.strictEqual(rangeMid.regime, 'ranging');
+assert.strictEqual(rangeMid.action, 'WAIT');
+assert.ok(rangeMid.blockers.some((line) => /not at the edge/i.test(line)));
+const rangeForex = math.assessSetup(EUR, { h1: rangeH1.slice(0, 346), d1: rangeDaily }, {
+  now: new Date(rangeH1[345].t)
+});
+assert.strictEqual(rangeForex.regime, 'ranging');
+assert.strictEqual(rangeForex.action, 'WAIT', 'forex keeps the trend rules while ranging\n' + dump(rangeForex));
+assert.ok(!rangeForex.blockers.some((line) => /not at the edge/i.test(line)));
+const rangeHit = math.assessSetup(XAU, { h1: goldH1.slice(0, 346), d1: goldDaily }, {
+  now: new Date(goldH1[345].t)
+});
+assert.strictEqual(rangeHit.action, 'BUY', 'gold range edge should publish mean reversion\n' + dump(rangeHit));
+assert.strictEqual(rangeHit.regime, 'ranging');
+assert.ok(rangeHit.confidence >= 74 && rangeHit.confidence <= 92);
+assert.ok(rangeHit.risk_reward >= 1.8);
+assert.ok(/within one ATR of support/i.test(rangeHit.regime_note));
+assert.ok(rangeHit.factors.some((factor) => factor.key === 'trend' && factor.state !== 'bullish'), 'range buy does not require a bullish hourly trend');
+const rangeOptIn = math.assessSetup(EUR, { h1: rangeH1.slice(0, 346), d1: rangeDaily }, {
+  now: new Date(rangeH1[345].t),
+  rangeInstruments: ['EURUSD']
+});
+assert.strictEqual(rangeOptIn.action, 'BUY');
+const rangeOff = math.assessSetup(XAU, { h1: goldH1.slice(0, 346), d1: goldDaily }, {
+  now: new Date(goldH1[345].t),
+  rangeInstruments: []
+});
+assert.strictEqual(rangeOff.action, 'WAIT');
+assert.deepStrictEqual(math.rangeInstrumentIds({}), ['XAUUSD']);
+assert.deepStrictEqual(math.rangeInstrumentIds({ rangeInstruments: ['xauusd', 'usoil'] }), ['XAUUSD', 'USOIL']);
+const rangeWords = rationale.engineRationale(rangeHit);
+assert.ok(/ranging/i.test(rangeWords));
+assert.ok(!/guarant|(\b80\b|\b90\b|\b96\b)\s*%/i.test(rangeWords));
+
+const calibratedRows = [];
+for (let i = 0; i < 8; i++) calibratedRows.push({ status: 'tp', regime: 'trending', action: 'BUY' });
+for (let i = 0; i < 8; i++) calibratedRows.push({ status: 'sl', regime: 'ranging', action: 'SELL' });
+const calibrated = math.calibrateConfidence({ action: 'BUY', regime: 'trending', confidence: 90 }, calibratedRows);
+assert.strictEqual(calibrated.confidence, 83);
+assert.strictEqual(calibrated.confidence_raw, 90);
+assert.strictEqual(calibrated.confidence_calibrated, true);
+assert.ok(/8 closed signals \(trending BUY\)/.test(calibrated.confidence_basis));
+assert.ok(/not a forecast/i.test(calibrated.confidence_basis));
+const uncalibrated = math.calibrateConfidence({ action: 'BUY', regime: 'trending', confidence: 88 }, calibratedRows.slice(0, 3));
+assert.strictEqual(uncalibrated.confidence, 88);
+assert.strictEqual(uncalibrated.confidence_calibrated, false);
+assert.ok(/Fewer than 8/.test(uncalibrated.confidence_basis));
+const mixedRows = calibratedRows.slice(0, 3).concat([
+  { status: 'sl', regime: 'ranging', action: 'SELL' },
+  { status: 'sl', regime: 'ranging', action: 'SELL' },
+  { status: 'sl', regime: 'ranging', action: 'SELL' },
+  { status: 'sl', regime: 'ranging', action: 'SELL' },
+  { status: 'sl', regime: 'ranging', action: 'SELL' }
+]);
+const mixed = math.calibrateConfidence({ action: 'BUY', regime: 'trending', confidence: 80 }, mixedRows);
+assert.strictEqual(mixed.confidence, 42);
+assert.ok(/all closed signals/.test(mixed.confidence_basis));
+const waitScore = math.calibrateConfidence({ action: 'WAIT', regime: 'ranging', confidence: 40 }, calibratedRows);
+assert.strictEqual(waitScore.confidence, 40);
+assert.strictEqual(waitScore.confidence_calibrated, false);
+assert.strictEqual(buy.confidence_calibrated, false, 'the backtest path must keep the raw setup-quality score');
 
 const goldNews = math.assessSetup(XAU, { h1: upH1, d1: upDaily }, {
   now: new Date(upH1[upH1.length - 1].t),
@@ -309,6 +444,66 @@ assert.strictEqual(rationale.acceptableRationale('Wait on EUR/USD until the hour
   assert.strictEqual(clean.action, 'BUY');
   assert.strictEqual(clean.entry, 1.1);
   assert.strictEqual(clean.rationale_source, 'openai');
+
+  if (previousProvider === undefined) delete process.env.AI_RATIONALE_PROVIDER;
+  else process.env.AI_RATIONALE_PROVIDER = previousProvider;
+  if (previousKey === undefined) delete process.env.OPENAI_API_KEY;
+  else process.env.OPENAI_API_KEY = previousKey;
+
+  delete process.env.AI_RATIONALE_PROVIDER;
+  delete process.env.OPENAI_API_KEY;
+  let assistantFetched = false;
+  const engineReply = await assistant.answer('What is the risk on EURUSD right now?', {
+    signals: [{
+      instrument: 'EURUSD',
+      name: 'EUR/USD',
+      action: 'WAIT',
+      regime: 'ranging',
+      blockers: ['Range regime: price is not at the edge of the range.'],
+      confidence: 48
+    }],
+    tracker: { measured: { resolved: 2, wins: 1, losses: 1, open: 0 } }
+  }, {
+    fetchImpl: async () => {
+      assistantFetched = true;
+      throw new Error('fetch should not run without a key');
+    }
+  });
+  assert.strictEqual(assistantFetched, false);
+  assert.strictEqual(engineReply.source, 'engine');
+  assert.ok(/EUR\/USD/.test(engineReply.answer));
+  assert.ok(/1% per trade/.test(engineReply.answer));
+  assert.ok(!/(\b80\b|\b90\b|\b96\b|\b100\b)\s*%|%\s*accura|guarant/i.test(engineReply.answer));
+
+  process.env.AI_RATIONALE_PROVIDER = 'openai';
+  process.env.OPENAI_API_KEY = 'test-key';
+  const rejected = await assistant.answer('Should I buy gold?', {
+    signals: [{ instrument: 'XAUUSD', name: 'Gold', action: 'WAIT', regime: 'volatile', blockers: ['Volatility is too wide for a new signal.'], confidence: 40 }],
+    tracker: { measured: { resolved: 0, wins: 0, losses: 0, open: 0 } }
+  }, {
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({ output_text: 'Gold is a sure win and 90% accurate. This will always profit.' })
+    })
+  });
+  assert.strictEqual(rejected.source, 'engine');
+  assert.ok(/Gold/.test(rejected.answer));
+  assert.ok(!/90%|guarant|sure win/i.test(rejected.answer));
+  const accepted = await assistant.answer('Why is gold waiting?', {
+    signals: [{ instrument: 'XAUUSD', name: 'Gold', action: 'WAIT', regime: 'volatile', blockers: ['Volatility is too wide for a new signal.'], confidence: 40 }],
+    tracker: { measured: { resolved: 0, wins: 0, losses: 0, open: 0 } }
+  }, {
+    fetchImpl: async () => ({
+      ok: true,
+      json: async () => ({
+        output_text: 'Gold is waiting because the regime is volatile, so no new signal is published. Risk stays at the stated limits. This is analysis only.'
+      })
+    })
+  });
+  assert.strictEqual(accepted.source, 'openai');
+  assert.ok(/volatile/i.test(accepted.answer));
+  const emptyAsk = await assistant.answer('   ', { signals: [] });
+  assert.strictEqual(emptyAsk.ok, false);
 
   if (previousProvider === undefined) delete process.env.AI_RATIONALE_PROVIDER;
   else process.env.AI_RATIONALE_PROVIDER = previousProvider;

@@ -2,23 +2,33 @@
 
 const BANNED = /guarant|certain profit|sure win|risk[- ]free|always (profit|win)|(\b80\b|\b90\b|\b96\b|\b100\b)\s*%|%\s*accura/i;
 
+function confidenceSentence(setup) {
+  if (setup.confidence_calibrated) {
+    return 'The confidence figure is a measured rate from ' + (setup.confidence_sample || 'the closed') +
+      ' closed signals, not a forecast.';
+  }
+  return 'The confidence figure is setup quality, not a predicted win rate.';
+}
+
 function engineRationale(setup) {
   const name = setup.name || setup.instrument;
+  const regime = setup.regime_note ? setup.regime_note + ' ' : '';
   if (setup.action === 'BUY' || setup.action === 'SELL') {
     const word = setup.action === 'BUY' ? 'Buy' : 'Sell';
+    const aligned = setup.action === 'BUY' ? 'bullish' : 'bearish';
     const notes = (setup.factors || [])
-      .filter((f) => f.state === 'bullish' || f.state === 'bearish' || f.key === 'volatility')
+      .filter((f) => f.state === aligned || f.key === 'volatility')
       .map((f) => f.note)
-      .slice(0, 4);
+      .slice(0, 3);
     const joined = notes.join(' ');
     const rr = setup.risk_reward != null ? setup.risk_reward : '2';
-    return word + ' bias on ' + name + '. ' + joined +
+    return word + ' bias on ' + name + '. ' + regime + joined +
       ' Entry is the latest price, the stop sits beyond recent structure using ATR, and the first target is ' +
-      rr + 'R. The confidence figure is setup quality, not a predicted win rate.';
+      rr + 'R. ' + confidenceSentence(setup);
   }
   const why = (setup.blockers && setup.blockers[0]) ||
     ('Confluence is incomplete (' + (setup.factors || []).map((f) => f.label + ' ' + (f.state === 'clear' ? 'normal' : f.state)).join(', ') + ').');
-  return 'Wait on ' + name + '. ' + why + ' No entry, stop or target is published until confluence is high.';
+  return 'Wait on ' + name + '. ' + regime + why + ' No entry, stop or target is published until the rules for this regime pass.';
 }
 
 function acceptableRationale(text) {
@@ -49,7 +59,11 @@ async function rewriteWithOpenAI(setup, fallback, fetchImpl) {
   const input = JSON.stringify({
     action: setup.action,
     instrument: setup.name,
-    confidence_is: 'setup quality score, not a win probability',
+    confidence_is: setup.confidence_calibrated
+      ? 'measured rate from closed signals, not a forecast'
+      : 'setup quality score, not a win probability',
+    regime: setup.regime,
+    regime_note: setup.regime_note,
     entry: setup.entry,
     stop_loss: setup.stop_loss,
     take_profit_1: setup.take_profit_1,

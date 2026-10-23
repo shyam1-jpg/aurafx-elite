@@ -747,7 +747,7 @@ function apiWiring() {
     'system-status.html', 'owner-email.html', 'owner-leads.html', 'owner-preview.html'
   ];
   const apis = [
-    '/api/health', '/api/status', '/api/quotes', '/api/signals', '/api/signals/tracker', '/api/signals/track-record', '/api/signals/alerts', '/api/pro-summary', '/api/risk-summary',
+    '/api/health', '/api/status', '/api/quotes', '/api/signals', '/api/signals/tracker', '/api/signals/track-record', '/api/signals/alerts', '/api/signals/ask', '/api/pro-summary', '/api/risk-summary',
     '/api/calendar', '/api/news', '/api/ai/status', '/api/ai/analyze', '/api/institutional', '/api/institutional-live', '/api/markets', '/api/wiring'
   ];
   return {
@@ -1140,6 +1140,18 @@ const server = http.createServer((req, res) => {
         return json(res, error.status || 400, { error: error.message || 'Alert signup failed' });
       }
     }).catch((e) => json(res, e.status || 400, { error: e.message || 'Alert signup failed' }));
+  }
+  if (url === '/api/signals/ask' && req.method === 'POST') {
+    if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });
+    return readBody(req).then(async (body) => {
+      try {
+        const result = await signalService.ask(body && body.question, { news: signalNewsContext() });
+        return json(res, result.ok === false ? 400 : 200, result);
+      } catch (error) {
+        console.warn('[AuraFX] /api/signals/ask:', error.message);
+        return json(res, 500, { error: 'Assistant unavailable' });
+      }
+    }).catch((e) => json(res, e.status || 400, { error: e.message || 'Assistant unavailable' }));
   }
   if ((url === '/api/signals' || url === '/api/signals/tracker') && req.method === 'GET') {
     if (!signalService) return json(res, 503, { error: 'Signal service unavailable' });

@@ -274,6 +274,164 @@ function structureState(candles, atrNow) {
   };
 }
 
+function adx(candles, period) {
+  const p = period || 14;
+  const n = candles.length;
+  const out = new Array(n).fill(null);
+  if (n <= p * 2) return out;
+  const tr = new Array(n).fill(0);
+  const plusDM = new Array(n).fill(0);
+  const minusDM = new Array(n).fill(0);
+  for (let i = 1; i < n; i++) {
+    tr[i] = trueRange(candles, i);
+    const upMove = candles[i].h - candles[i - 1].h;
+    const downMove = candles[i - 1].l - candles[i].l;
+    plusDM[i] = upMove > downMove && upMove > 0 ? upMove : 0;
+    minusDM[i] = downMove > upMove && downMove > 0 ? downMove : 0;
+  }
+  let trS = 0;
+  let plusS = 0;
+  let minusS = 0;
+  for (let i = 1; i <= p; i++) {
+    trS += tr[i];
+    plusS += plusDM[i];
+    minusS += minusDM[i];
+  }
+  const dx = new Array(n).fill(null);
+  const dxAt = (plus, minus, trSum) => {
+    if (!(trSum > 0)) return null;
+    const plusDI = 100 * plus / trSum;
+    const minusDI = 100 * minus / trSum;
+    const sum = plusDI + minusDI;
+    if (!(sum > 0)) return null;
+    return 100 * Math.abs(plusDI - minusDI) / sum;
+  };
+  dx[p] = dxAt(plusS, minusS, trS);
+  for (let i = p + 1; i < n; i++) {
+    trS = trS - trS / p + tr[i];
+    plusS = plusS - plusS / p + plusDM[i];
+    minusS = minusS - minusS / p + minusDM[i];
+    dx[i] = dxAt(plusS, minusS, trS);
+  }
+  let seed = 0;
+  for (let i = p; i < p + p; i++) {
+    if (dx[i] == null) return out;
+    seed += dx[i];
+  }
+  let prev = seed / p;
+  out[p + p - 1] = prev;
+  for (let i = p + p; i < n; i++) {
+    if (dx[i] == null) continue;
+    prev = (prev * (p - 1) + dx[i]) / p;
+    out[i] = prev;
+  }
+  return out;
+}
+
+function detectRegime(candles) {
+  const rows = sanitizeCandles(candles);
+  const vol = volatilityState(rows);
+  const series = adx(rows, 14);
+  const adxNow = series.length ? series[series.length - 1] : null;
+  const atrNow = vol.atr;
+  const adxRounded = adxNow == null ? null : Math.round(adxNow * 10) / 10;
+  const currentSpan = rows.length ? rows[rows.length - 1].h - rows[rows.length - 1].l : 0;
+  const wideNow = atrNow > 0 && currentSpan > atrNow * 2.2;
+  if (vol.regime === 'extreme' || wideNow) {
+    return {
+      name: 'volatile',
+      adx: adxRounded,
+      note: 'Regime is volatile: this hourly bar or ATR is above 2.2 times its recent norm, so no new signal is published.'
+    };
+  }
+  if (adxNow != null && adxNow >= 25) {
+    return {
+      name: 'trending',
+      adx: adxRounded,
+      note: 'Regime is trending: ADX is ' + Math.round(adxNow) + ', so the trend-following rules apply.'
+    };
+  }
+  const adxText = adxNow == null ? 'not ready' : String(Math.round(adxNow));
+  return {
+    name: 'ranging',
+    adx: adxRounded,
+    note: 'Regime is ranging: ADX is ' + adxText + '.'
+  };
+}
+
+function rangeInstrumentIds(ctx) {
+  if (ctx && Array.isArray(ctx.rangeInstruments)) {
+    return ctx.rangeInstruments.map((id) => String(id || '').toUpperCase()).filter(Boolean);
+  }
+  const raw = process.env.SIGNAL_RANGE_INSTRUMENTS;
+  if (raw == null || String(raw).trim() === '') return ['XAUUSD'];
+  const text = String(raw).trim();
+  if (/^(none|off|-)$/i.test(text)) return [];
+  return text.split(',').map((id) => id.trim().toUpperCase()).filter(Boolean);
+}
+
+function allowsRangeMeanReversion(instrument, ctx) {
+  const id = String(instrument && instrument.id || '').toUpperCase();
+  return rangeInstrumentIds(ctx).includes(id);
+}
+
+function rangeEdge(close, struct, atrNow, mom, daily) {
+  if (!(atrNow > 0) || !Number.isFinite(close)) {
+    return { side: null, note: 'Range edge cannot be measured yet.' };
+  }
+  const rsiNow = mom && mom.rsi;
+  const dailyDir = daily && daily.dir;
+  const supportDist = struct && struct.support != null ? (close - struct.support) / atrNow : null;
+  const resistDist = struct && struct.resistance != null ? (struct.resistance - close) / atrNow : null;
+  const buyOk = supportDist != null && supportDist >= 0 && supportDist <= 1 &&
+    rsiNow != null && rsiNow <= 42 && dailyDir !== 'bearish';
+  const sellOk = resistDist != null && resistDist >= 0 && resistDist <= 1 &&
+    rsiNow != null && rsiNow >= 58 && dailyDir !== 'bullish';
+  if (buyOk && (!sellOk || supportDist <= resistDist)) {
+    return {
+      side: 'BUY',
+      note: 'Range regime: price is within one ATR of support, RSI is ' + Math.round(rsiNow) + ', and the daily trend is not down.'
+    };
+  }
+  if (sellOk) {
+    return {
+      side: 'SELL',
+      note: 'Range regime: price is within one ATR of resistance, RSI is ' + Math.round(rsiNow) + ', and the daily trend is not up.'
+    };
+  }
+  return { side: null, note: 'Range regime: price is not at the edge of the range.' };
+}
+
+const CALIBRATION_MIN = 8;
+
+function calibrateConfidence(setup, records) {
+  if (!setup) return setup;
+  const raw = setup.confidence;
+  setup.confidence_raw = raw;
+  setup.confidence_calibrated = false;
+  setup.confidence_sample = 0;
+  if (setup.action !== 'BUY' && setup.action !== 'SELL') {
+    setup.confidence_basis = null;
+    return setup;
+  }
+  const closed = (Array.isArray(records) ? records : []).filter((row) => row && (row.status === 'tp' || row.status === 'sl'));
+  const bucket = closed.filter((row) => row.regime === setup.regime && row.action === setup.action);
+  const useBucket = bucket.length >= CALIBRATION_MIN;
+  const pool = useBucket ? bucket : closed;
+  setup.confidence_sample = pool.length;
+  if (pool.length < CALIBRATION_MIN) {
+    setup.confidence_basis = 'Setup quality. Fewer than 8 closed signals, so this is not calibrated.';
+    return setup;
+  }
+  const wins = pool.filter((row) => row.status === 'tp').length;
+  const shrunk = (wins + 2) / (pool.length + 4);
+  setup.confidence = clamp(Math.round(shrunk * 100), 1, 92);
+  setup.confidence_calibrated = true;
+  const scope = useBucket ? (setup.regime + ' ' + setup.action) : 'all closed signals';
+  setup.confidence_basis = 'Calibrated from ' + pool.length + ' closed signals (' + scope + '). This is a measured rate, not a forecast.';
+  return setup;
+}
+
 function volatilityState(candles) {
   const series = atr(candles, 14);
   const i = candles.length - 1;
@@ -462,6 +620,12 @@ function emptySetup(instrument, extra) {
     timeframe: 'H1',
     factors: [],
     blockers: [],
+    regime: null,
+    regime_note: null,
+    confidence_raw: null,
+    confidence_calibrated: false,
+    confidence_sample: null,
+    confidence_basis: null,
     session: null,
     data_quality: 'insufficient',
     history: { h1: 0, h4: 0, d1: 0 },
@@ -505,6 +669,7 @@ function assessSetup(instrument, frames, ctx) {
   }
 
   const session = sessionInfo(now);
+  const regime = detectRegime(h1);
   const blockers = [];
   const open = marketOpen(now);
   const ageMs = now.getTime() - new Date(last.t).getTime();
@@ -524,8 +689,26 @@ function assessSetup(instrument, frames, ctx) {
   const bullVotes = Object.values(dirs).filter((d) => d === 'bullish').length;
   const bearVotes = Object.values(dirs).filter((d) => d === 'bearish').length;
   let side = null;
-  if (bullVotes === 4 && bearVotes === 0) side = 'BUY';
-  else if (bearVotes === 4 && bullVotes === 0) side = 'SELL';
+  let ruleNote = null;
+  if (regime.name === 'volatile') {
+    blockers.push('Volatility is too wide for a new signal.');
+  } else if (regime.name === 'trending' || !allowsRangeMeanReversion(instrument, ctx)) {
+    if (bullVotes === 4 && bearVotes === 0) side = 'BUY';
+    else if (bearVotes === 4 && bullVotes === 0) side = 'SELL';
+    ruleNote = side
+      ? (regime.name === 'trending'
+        ? 'Trend regime: trend, momentum, structure and higher timeframes agree.'
+        : 'Ranging regime on this market still uses the trend rules: trend, momentum, structure and higher timeframes agree.')
+      : null;
+  } else {
+    const edge = rangeEdge(last.c, struct, vol.atr, mom, trendD1);
+    if (edge.side) {
+      side = edge.side;
+      ruleNote = edge.note;
+    } else {
+      blockers.push('Range regime: price is not at the edge of the range.');
+    }
+  }
 
   let levels = null;
   let confidence = clamp(32 + Math.max(bullVotes, bearVotes) * 8, 0, 68);
@@ -560,6 +743,7 @@ function assessSetup(instrument, frames, ctx) {
     price: roundPrice(last.c, instrument.id),
     timeframe: 'H1',
     factors: [
+      factor('regime', 'Regime', regime.name, regime.note),
       factor('trend', 'Trend', dirs.trend, trend.note),
       factor('momentum', 'Momentum', dirs.momentum, mom.note),
       factor('structure', 'Structure', dirs.structure, struct.note),
@@ -567,6 +751,13 @@ function assessSetup(instrument, frames, ctx) {
       factor('mtf', 'Higher timeframes', mtfDir, mtfNote)
     ].concat(newsBlockers.length ? [factor('news', 'News', 'blocked', newsBlockers[0])] : []),
     blockers: published ? [] : blockers,
+    regime: regime.name,
+    regime_note: [regime.note, ruleNote].filter((line, index, list) => line && list.indexOf(line) === index).join(' '),
+    regime_adx: regime.adx,
+    confidence_raw: confidence,
+    confidence_calibrated: false,
+    confidence_sample: null,
+    confidence_basis: null,
     session: session.name,
     data_quality: !open ? 'closed' : (ageMs > 8 * 3600 * 1000 ? 'stale' : 'ok'),
     history: { h1: h1.length, h4: h4.length, d1: d1.length },
@@ -619,5 +810,12 @@ module.exports = {
   newsAffects,
   newsBlockersFor,
   assessSetup,
-  barOutcome
+  barOutcome,
+  adx,
+  detectRegime,
+  rangeEdge,
+  rangeInstrumentIds,
+  allowsRangeMeanReversion,
+  calibrateConfidence,
+  CALIBRATION_MIN
 };
