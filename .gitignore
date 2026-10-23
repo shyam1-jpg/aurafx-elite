@@ -10,3 +10,5 @@ aura-fx-elite-ai/.env
 aura-fx-elite-ai/.env.local
 website/.env
 website/data/registrations.json
+website/data/signal-log.json
+website/data/backtest-last.json
