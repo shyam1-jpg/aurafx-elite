@@ -29,6 +29,7 @@
     window.AURAFX_LIVE_QUOTES.metals = d.metals || {};
     window.AURAFX_LIVE_QUOTES.crypto = d.crypto || {};
     window.AURAFX_LIVE_QUOTES.changes = d.changes || {};
+    window.AURAFX_LIVE_QUOTES.symbolTimes = d.symbolTimes || {};
     document.dispatchEvent(new CustomEvent('aurafx-quotes-updated'));
   }
 
