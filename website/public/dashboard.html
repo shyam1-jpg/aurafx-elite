@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="css/institutional.css" />
   <link rel="stylesheet" href="css/luxury.css" />
   <link rel="stylesheet" href="css/hub.css" />
+  <link rel="stylesheet" href="css/trading-tools.css?v=1" />
   <script src="js/font-loader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
@@ -28,6 +29,7 @@
       <ul class="dash-nav" role="tablist">
         <li><button type="button" class="active" data-panel="overview" role="tab" aria-selected="true">Overview</button></li>
         <li><button type="button" data-panel="signals" role="tab" aria-selected="false">AI Signals</button></li>
+        <li><button type="button" data-panel="trading-tools" role="tab" aria-selected="false">Charts &amp; alerts</button></li>
         <li><button type="button" data-panel="markets" role="tab">Markets</button></li>
         <li><button type="button" data-panel="calendar" role="tab">Calendar &amp; News</button></li>
         <li><button type="button" data-panel="journal" role="tab">Trade journal</button></li>
@@ -93,6 +95,32 @@
           <div class="kpi-card"><div class="kpi-label">Quote age</div><div class="kpi-value" id="kpiQuoteAge">—</div></div>
         </div>
 
+        <section id="panel-trading-tools" class="dash-panel trading-tools" role="tabpanel" aria-label="Charts, watchlist and price alerts" hidden>
+          <div class="trading-tools-header"><div><div class="eyebrow">YOUR MARKET WORKSPACE</div><h1>Charts &amp; alerts</h1></div><span class="edu-badge">Analysis only</span></div>
+          <div class="trading-tools-grid">
+            <div>
+              <section class="card">
+                <h2>Interactive chart</h2>
+                <div class="tools-controls">
+                  <div><label for="toolsSymbol">Market</label><select id="toolsSymbol"></select></div>
+                  <div><label for="toolsInterval">Timeframe</label><select id="toolsInterval"><option value="15">15 minutes</option><option value="60" selected>1 hour</option><option value="240">4 hours</option><option value="D">1 day</option><option value="W">1 week</option></select></div>
+                  <button type="button" class="btn-dash" id="toolsLoadChart">Load TradingView chart</button>
+                </div>
+                <p class="muted">Loading connects to TradingView. Use the chart toolbar for indicators and the left toolbar for drawings. Changing markets or timeframes reloads the chart; drawings may reset.</p>
+                <div class="tools-chart" id="toolsChart"><div class="tools-chart-placeholder">Choose a market and load its interactive chart.</div></div>
+                <p id="toolsChartStatus" class="muted" role="status"></p>
+                <a id="toolsChartLink" href="https://www.tradingview.com/chart/?symbol=OANDA%3AXAUUSD" target="_blank" rel="noopener noreferrer">Open chart on TradingView ↗</a>
+                <p class="muted">Charts by <a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer">TradingView</a>. Chart prices and AuraFX quotes use different providers and can differ. Some market data may be delayed.</p>
+              </section>
+              <section class="card"><h2>Your price alerts</h2><p class="tools-notice">Alerts run while this dashboard is open. They fire once when a fresh AuraFX quote crosses your level. No email, closed-browser delivery or replay of missed crossings. Stale and reference prices never trigger alerts.</p><ul id="toolsAlertList" class="tools-alert-list"></ul></section>
+            </div>
+            <aside>
+              <section class="card"><h2>Watchlist</h2><p id="toolsFeedStatus" class="muted" role="status">Waiting for quotes…</p><table class="tools-watchlist"><caption class="muted">AuraFX quotes · USD pairs</caption><thead><tr><th scope="col">Market</th><th scope="col">Price</th><th scope="col">Remove</th></tr></thead><tbody id="toolsWatchRows"></tbody></table><form id="toolsWatchForm"><label for="toolsWatchSymbol">Add a market</label><select id="toolsWatchSymbol"></select><button class="btn-dash" type="submit">Add to watchlist</button></form></section>
+              <section class="card"><h2>Create price alert</h2><form id="toolsAlertForm"><label for="toolsAlertSymbol">Market</label><select id="toolsAlertSymbol"></select><label for="toolsAlertDirection">Crossing direction</label><select id="toolsAlertDirection"><option value="above">Crosses above</option><option value="below">Crosses below</option></select><label for="toolsAlertPrice">Target price (USD quote)</label><input id="toolsAlertPrice" type="number" step="any" min="0.000001" required inputmode="decimal" /><button class="btn-dash btn-dash-primary" type="submit">Create alert</button></form><p id="toolsAlertMessage" role="status"></p><button id="toolsNotifications" type="button" class="btn-dash">Enable browser notifications</button><p id="toolsNotificationStatus" class="muted"></p><p class="muted">Watchlist and alerts are saved in this browser, separately from your account.</p><p id="toolsStorageStatus" class="muted" role="status"></p></section>
+            </aside>
+          </div>
+        </section>
+        <div id="toolsToast" role="status" aria-live="polite"></div>
         <!-- OVERVIEW -->
         <section id="panel-overview" class="dash-panel active" role="tabpanel">
           <section class="market-command" aria-labelledby="marketCommandTitle">
@@ -408,6 +436,8 @@
   <script src="js/advanced-market-chart.js?v=1"></script>
   <script src="js/pro-dashboard.js?v=11"></script>
   <script src="js/position-size.js?v=1"></script>
+  <script src="js/trading-tools-core.js?v=1"></script>
+  <script src="js/trading-tools.js?v=1"></script>
   <script src="js/signal-board.js?v=6"></script>
   <script src="js/institutional.js?v=2"></script>
   <script src="js/markets-universe.js"></script>
