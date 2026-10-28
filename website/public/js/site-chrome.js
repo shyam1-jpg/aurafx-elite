@@ -4,6 +4,8 @@
 (function () {
   var FOOTER_LINKS = {
     Platform: [
+      { href: 'members.html', label: 'Members area' },
+      { href: 'login.html', label: 'Member login' },
       { href: 'dashboard.html', label: 'Pro dashboard' },
       { href: 'trading-plans.html', label: 'Daily plans' },
       { href: 'ai-engine.html', label: 'AI engine' },
@@ -67,8 +69,28 @@
       '<p>© 2026 AuraFX Elite · Shyam Prasad t/a AuraFX Elite · UK</p>' +
       '<p style="margin-top:.35rem">Educational software only · Not FCA-authorised · Not financial advice</p>' +
       '<p style="margin-top:.35rem">Past performance is not indicative of future results · You trade with your own broker</p>' +
-      '<p style="margin-top:.5rem"><a href="register.html">Register</a> · ' +
+      '<p style="margin-top:.5rem">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>' +
+      '<p style="margin-top:.5rem"><a href="signup.html">Members signup</a> · <a href="register.html">Register</a> · ' +
       '<a href="mailto:support@aurafxelite.com">support@aurafxelite.com</a></p></div>';
+  }
+
+  function injectMenuButton() {
+    var nav = document.querySelector('nav.nav');
+    if (!nav || nav.querySelector('.nav-toggle')) return;
+    if (!nav.querySelector('.nav-links')) return;
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'nav-toggle';
+    btn.textContent = 'Menu';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'siteNavLinks');
+    var links = nav.querySelector('.nav-links');
+    if (links && !links.id) links.id = 'siteNavLinks';
+    btn.addEventListener('click', function () {
+      var open = nav.classList.toggle('nav-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    nav.insertBefore(btn, links);
   }
 
   function injectNavDropdown() {
@@ -94,6 +116,7 @@
   function init() {
     renderMegaFooter();
     injectNavDropdown();
+    injectMenuButton();
   }
 
   if (document.readyState === 'loading') {

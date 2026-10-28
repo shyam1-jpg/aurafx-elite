@@ -629,6 +629,13 @@ function emptySetup(instrument, extra) {
     session: null,
     data_quality: 'insufficient',
     history: { h1: 0, h4: 0, d1: 0 },
+    rsi: null,
+    atr: null,
+    atr_ratio: null,
+    support: null,
+    resistance: null,
+    trend: null,
+    mtf: null,
     disclaimer: DISCLAIMER,
     ...extra
   };
@@ -762,6 +769,13 @@ function assessSetup(instrument, frames, ctx) {
     data_quality: !open ? 'closed' : (ageMs > 8 * 3600 * 1000 ? 'stale' : 'ok'),
     history: { h1: h1.length, h4: h4.length, d1: d1.length },
     votes: { bullish: bullVotes, bearish: bearVotes },
+    rsi: mom.rsi == null ? null : Math.round(mom.rsi * 10) / 10,
+    atr: vol.atr == null ? null : roundPrice(vol.atr, instrument.id),
+    atr_ratio: vol.ratio == null ? null : Math.round(vol.ratio * 100) / 100,
+    support: struct.support == null ? null : roundPrice(struct.support, instrument.id),
+    resistance: struct.resistance == null ? null : roundPrice(struct.resistance, instrument.id),
+    trend: trend.dir,
+    mtf: mtfDir,
     disclaimer: DISCLAIMER
   };
 }

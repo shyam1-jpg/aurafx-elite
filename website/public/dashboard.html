@@ -375,11 +375,14 @@
         <section id="panel-settings" class="dash-panel" role="tabpanel" hidden>
           <div class="card card-wide">
             <h2>Account link</h2>
-            <p id="cloudSyncSettingsNote" class="muted" style="margin-bottom:.75rem">Link your registration email to sync your journal when cloud storage is enabled on the server.</p>
+            <p id="cloudSyncSettingsNote" class="muted" style="margin-bottom:.75rem">Link the journal with your member password, or with a one-time email when SMTP is configured. A registration email on its own does not open the dashboard.</p>
             <div class="settings-block">
-              <label for="linkEmail">Registration email</label>
-              <input type="email" id="linkEmail" placeholder="you@email.com" aria-label="Registration email" />
-              <button type="button" class="btn-dash btn-dash-primary" id="btnLinkAccount" style="margin-top:.5rem">Link account</button>
+              <label for="linkEmail">Email</label>
+              <input type="email" id="linkEmail" placeholder="you@email.com" aria-label="Email" autocomplete="username" />
+              <label for="linkPassword">Member password</label>
+              <input type="password" id="linkPassword" placeholder="Member password" aria-label="Member password" autocomplete="current-password" />
+              <button type="button" class="btn-dash btn-dash-primary" id="btnLinkAccount" style="margin-top:.5rem">Link with password</button>
+              <button type="button" class="btn-dash" id="btnMagicLink" style="margin-top:.5rem">Email me a sign-in link</button>
               <p id="linkMsg" class="muted" style="margin-top:.5rem"></p>
             </div>
             <div class="settings-block">

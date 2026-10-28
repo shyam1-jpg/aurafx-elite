@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a0c12" />
+  <meta name="description" content="AuraFX Elite members area. Live engine tools, charts, scanner, calendar and risk tools. Analysis only." />
+  <title>Members — AuraFX Elite</title>
+  <link rel="icon" href="assets/aura-icon-140.png?v=7" type="image/png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="css/site.css?v=11" />
+  <link rel="stylesheet" href="css/hub.css" />
+  <link rel="stylesheet" href="css/members.css?v=3" />
+  <script src="js/font-loader.js"></script>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary">
+    <a href="index.html" class="logo" aria-label="AuraFX Elite home"><img src="assets/aurafx-elite-logo.png?v=7" alt="" class="logo-img" width="160" height="58" decoding="sync" /></a>
+    <div class="nav-links">
+      <a href="pricing.html">Pricing</a>
+      <a href="login.html">Log in</a>
+      <a href="track-record.html">Track record</a>
+      <a href="dashboard.html" class="btn btn-gold">Dashboard</a>
+    </div>
+  </nav>
+  <main class="mem-shell" id="main">
+    <div class="mem-top">
+      <div>
+        <h1>Members</h1>
+        <p class="mem-note" id="memWho">Sign in to load your tier.</p>
+      </div>
+      <div>
+        <button class="btn btn-outline mem-menu" type="button" id="memMenu">Sections</button>
+        <span class="mem-tier" id="memTier">Guest</span>
+        <button class="btn btn-outline" type="button" id="memOut" hidden>Log out</button>
+      </div>
+    </div>
+    <div class="mem-layout">
+      <aside class="mem-side" id="memSide" aria-label="Member tools">
+        <button type="button" data-section="analyst" class="active">Analyst</button>
+        <button type="button" data-section="charts">Charts</button>
+        <button type="button" data-section="scanner">Scanner</button>
+        <button type="button" data-section="strength">Strength</button>
+        <button type="button" data-section="calendar">Calendar</button>
+        <button type="button" data-section="brief">Daily brief</button>
+        <button type="button" data-section="history">History</button>
+        <button type="button" data-section="risk">Risk</button>
+        <button type="button" data-section="watchlist">Watchlist</button>
+        <button type="button" data-section="sessions">Sessions</button>
+      </aside>
+      <div class="mem-main" id="memView" aria-live="polite">
+        <article class="mem-card"><p>Loading the members area…</p></article>
+      </div>
+    </div>
+    <p class="mem-note">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>
+  </main>
+  <footer class="footer"></footer>
+  <script src="js/site-chrome.js"></script>
+  <script src="js/position-size.js"></script>
+  <script src="js/lightweight-charts.js?v=4.2.0"></script>
+  <script src="js/member-charts.js?v=3"></script>
+  <script src="js/members-app.js?v=2"></script>
+</body>
+</html>

@@ -13,3 +13,4 @@ website/data/registrations.json
 website/data/signal-log.json
 website/data/signal-alerts.json
 website/data/backtest-last.json
+website/data/members.json

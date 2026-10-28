@@ -65,9 +65,25 @@ function engineAnswer(question, board) {
     return (id && q.includes(id)) || (name.length > 3 && q.includes(name));
   });
   const parts = [];
+  if (/half[- ]?hour|\bm30\b|30[- ]minute|\bm15\b|15[- ]minute/.test(q)) {
+    parts.push('The engine scores the hourly chart and checks 4-hour and daily agreement. It does not run a separate 30-minute or 15-minute model.');
+  }
   if (named) parts.push(describeSignal(named));
   else if (/regime|trend|rang|volatil|market/.test(q)) parts.push(regimeSummary(signals));
   else parts.push(regimeSummary(signals));
+  if (named) {
+    const measured = [];
+    if (named.trend) measured.push('Hourly trend is ' + named.trend + '.');
+    if (named.mtf) measured.push('4-hour and daily agreement is ' + named.mtf + '.');
+    if (named.rsi != null) measured.push('Hourly RSI is ' + named.rsi + '.');
+    if (named.atr != null) {
+      measured.push('ATR is ' + named.atr + (named.atr_ratio != null ? ', ' + named.atr_ratio + ' times its recent average' : '') + '.');
+    }
+    if (named.support != null || named.resistance != null) {
+      measured.push('Measured support is ' + (named.support == null ? 'absent on this scan' : named.support) + ' and measured resistance is ' + (named.resistance == null ? 'absent on this scan' : named.resistance) + '.');
+    }
+    if (measured.length) parts.push(measured.join(' '));
+  }
   if (/risk|lot|size|drawdown|loss|account/.test(q) || !named) parts.push(riskParagraph(board));
   else parts.push('Nothing on this board is sent to a broker.');
   parts.push('This is analysis only and it is not a forecast.');

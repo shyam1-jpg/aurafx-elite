@@ -735,48 +735,81 @@
     if (lm) lm.textContent = 'Signed out — journal remains on this device.';
   });
 
+  async function applyDashboardLink(r) {
+    const msg = $('linkMsg');
+    let d = {};
+    try {
+      d = await r.json();
+    } catch {
+      throw new Error('Server response unavailable — try again shortly.');
+    }
+    if (!r.ok || !d.dashboardToken) throw new Error(d.error || d.message || 'Link failed.');
+    saveClient({
+      id: d.id,
+      email: d.email,
+      fullName: d.fullName,
+      dashboardToken: d.dashboardToken,
+      emailVerified: d.emailVerified
+    });
+    updateWelcomeRail();
+    if (msg) {
+      msg.textContent = d.cloudSync
+        ? 'Linked — cloud sync enabled.'
+        : (cloudConfigured() ? 'Linked — local server storage.' : 'Linked — journal stays on this device (cloud sync not configured yet).');
+    }
+    await pullJournalCloud();
+    renderJournal();
+  }
+
   $('btnLinkAccount')?.addEventListener('click', async () => {
     const email = ($('linkEmail').value || '').trim().toLowerCase();
+    const password = $('linkPassword') ? $('linkPassword').value : '';
     const msg = $('linkMsg');
     if (!email) {
-      if (msg) msg.textContent = 'Enter your registration email.';
+      if (msg) msg.textContent = 'Enter the email on your member account.';
       return;
     }
     if (!validEmail(email)) {
       if (msg) msg.textContent = 'Enter a valid email address (e.g. you@email.com).';
       return;
     }
+    if (!password) {
+      if (msg) msg.textContent = 'Enter your member password. An email alone does not link the dashboard.';
+      return;
+    }
     if (msg) msg.textContent = 'Linking…';
     try {
       const r = await fetch(API + '/api/dashboard/session', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, password })
       });
-      let d = {};
-      try {
-        d = await r.json();
-      } catch {
-        throw new Error('Server response unavailable — try again shortly.');
-      }
-      if (!r.ok) throw new Error(d.error || 'Link failed — check your registration email.');
-      saveClient({
-        id: d.id,
-        email: d.email,
-        fullName: d.fullName,
-        dashboardToken: d.dashboardToken,
-        emailVerified: d.emailVerified
-      });
-      updateWelcomeRail();
-      if (msg) {
-        msg.textContent = d.cloudSync
-          ? 'Linked — cloud sync enabled.'
-          : (cloudConfigured() ? 'Linked — local server storage.' : 'Linked — journal stays on this device (cloud sync not configured yet).');
-      }
-      await pullJournalCloud();
-      renderJournal();
+      await applyDashboardLink(r);
     } catch (e) {
       if (msg) msg.textContent = e.message || 'Could not link account.';
+    }
+  });
+
+  $('btnMagicLink')?.addEventListener('click', async () => {
+    const email = ($('linkEmail').value || '').trim().toLowerCase();
+    const msg = $('linkMsg');
+    if (!email || !validEmail(email)) {
+      if (msg) msg.textContent = 'Enter the email that should receive the sign-in link.';
+      return;
+    }
+    if (msg) msg.textContent = 'Checking whether email sign-in is configured…';
+    try {
+      const r = await fetch(API + '/api/dashboard/session', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, magic: true })
+      });
+      const d = await r.json();
+      if (msg) msg.textContent = d.error || d.message || 'No sign-in link was sent.';
+    } catch (e) {
+      if (msg) msg.textContent = 'The sign-in email could not be requested.';
     }
   });
 
@@ -901,19 +934,43 @@
 
   if (localStorage.getItem(THEME_KEY) === 'light') document.body.classList.add('theme-light');
 
-  loadClient();
-  if (client && client.email) {
-    const le = $('linkEmail');
-    if (le) le.value = client.email;
+  async function redeemDashLink() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('dash_link');
+    if (!token) return;
+    const msg = $('linkMsg');
+    if (msg) msg.textContent = 'Opening the sign-in link…';
+    try {
+      const r = await fetch(API + '/api/dashboard/session/redeem', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      await applyDashboardLink(r);
+    } catch (e) {
+      if (msg) msg.textContent = e.message || 'That sign-in link was not accepted.';
+    }
+    params.delete('dash_link');
+    const next = params.toString();
+    window.history.replaceState({}, '', window.location.pathname + (next ? '?' + next : ''));
   }
-  renderUser();
-  updateWelcomeRail();
-  renderJournal();
-  loadSiteConfig().then(() => {
-    pullJournalCloud().then(renderJournal);
-  });
 
-  refresh();
-  setInterval(refresh, REFRESH_MS);
-  setInterval(updateQuoteAgeUi, QUOTE_UI_MS);
+  redeemDashLink().finally(() => {
+    loadClient();
+    if (client && client.email) {
+      const le = $('linkEmail');
+      if (le) le.value = client.email;
+    }
+    renderUser();
+    updateWelcomeRail();
+    renderJournal();
+    loadSiteConfig().then(() => {
+      pullJournalCloud().then(renderJournal);
+    });
+
+    refresh();
+    setInterval(refresh, REFRESH_MS);
+    setInterval(updateQuoteAgeUi, QUOTE_UI_MS);
+  });
 })();
