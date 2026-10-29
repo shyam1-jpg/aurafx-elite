@@ -17,6 +17,7 @@ const AUDIT_FILE = path.join(AUDIT_DIR, 'admin-audit.log');
 
 const ADMIN_HTML = [
   '/owner-leads.html',
+  '/owner-members.html',
   '/system-status.html',
   '/owner-email.html',
   '/owner-preview.html'

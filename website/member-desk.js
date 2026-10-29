@@ -3,7 +3,8 @@
 const crypto = require('crypto');
 const { INSTRUMENTS, loadAll } = require('./market-candles');
 const analytics = require('./market-analytics');
-const { createMembersStore, tierAllows, FEATURES } = require('./members-store');
+const { openMembersStore, tierAllows, FEATURES } = require('./members-store');
+const billing = require('./billing');
 const { DISCLAIMER } = require('./signal-math');
 const { smtpSettings, telegramSettings } = require('./signal-alerts');
 const chartMath = require('./chart-math');
@@ -31,7 +32,7 @@ function locked(feature) {
   return {
     locked: true,
     feature,
-    note: 'This tool is locked on the current tier. The owner sets Free, Pro, or Elite in the members file. There is no payment checkout on the site.'
+    note: 'This tool is locked on the current tier. The owner sets Free, Pro, or Elite. Stripe checkout is used when it is configured.'
   };
 }
 
@@ -103,15 +104,29 @@ function evaluateAlerts(alerts, signals, channels) {
 
 function createMemberDesk(options) {
   const opts = options || {};
-  const store = opts.store || createMembersStore(opts.storeOptions || {});
+  const injected = opts.store || null;
   const signals = opts.signals;
+  let opening;
+
+  function storeReady() {
+    if (injected) return Promise.resolve(injected);
+    if (!opening) {
+      const created = openMembersStore(opts.storeOptions || {});
+      opening = Promise.resolve(created.init ? created.init() : null).then(() => created).catch((error) => {
+        opening = null;
+        throw error;
+      });
+    }
+    return opening;
+  }
 
   function secure(req) {
     const proto = String((req.headers && (req.headers['x-forwarded-proto'] || '')) || '');
     return proto === 'https' || process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
   }
 
-  function member(req) {
+  async function member(req) {
+    const store = await storeReady();
     return store.memberFromRequest(req);
   }
 
@@ -128,7 +143,7 @@ function createMemberDesk(options) {
   }
 
   async function workspace(req, news, calendarItems, windowMin) {
-    const user = member(req);
+    const user = await member(req);
     if (!user) {
       const error = new Error('Sign in to open the members area.');
       error.status = 401;
@@ -208,6 +223,7 @@ function createMemberDesk(options) {
     const json = ctx.json;
     const readBody = ctx.readBody;
     try {
+      const store = await storeReady();
       if (url === '/api/members/options' && req.method === 'GET') {
         json(res, 200, {
           ok: true,
@@ -219,7 +235,7 @@ function createMemberDesk(options) {
       }
       if (url === '/api/members/register' && req.method === 'POST') {
         const body = await readBody(req);
-        const user = store.register(body);
+        const user = await store.register(body);
         res.setHeader('Set-Cookie', store.sessionCookie(user, secure(req)));
         json(res, 200, { ok: true, member: user, disclaimer: DISCLAIMER });
         return true;
@@ -227,7 +243,7 @@ function createMemberDesk(options) {
       if (url === '/api/members/login' && req.method === 'POST') {
         const body = await readBody(req);
         const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown');
-        const user = store.login(body.email, body.password, String(ip).split(',')[0]);
+        const user = await store.login(body.email, body.password, String(ip).split(',')[0]);
         res.setHeader('Set-Cookie', store.sessionCookie(user, secure(req)));
         json(res, 200, { ok: true, member: user });
         return true;
@@ -238,7 +254,7 @@ function createMemberDesk(options) {
         return true;
       }
       if (url === '/api/members/me' && req.method === 'GET') {
-        const user = member(req);
+        const user = await member(req);
         json(res, 200, { ok: !!user, member: user, google: googleConfigured() });
         return true;
       }
@@ -294,7 +310,7 @@ function createMemberDesk(options) {
           return true;
         }
         const profile = await infoRes.json();
-        const user = store.loginGoogle(profile);
+        const user = await store.loginGoogle(profile);
         res.setHeader('Set-Cookie', store.sessionCookie(user, secure(req)));
         res.writeHead(302, { Location: '/members.html' });
         res.end();
@@ -308,7 +324,7 @@ function createMemberDesk(options) {
         return true;
       }
       if (url === '/api/members/candles' && req.method === 'GET') {
-        const user = member(req);
+        const user = await member(req);
         if (!user) {
           json(res, 401, { ok: false, error: 'Sign in to open charts.' });
           return true;
@@ -349,7 +365,7 @@ function createMemberDesk(options) {
         return true;
       }
       if (url === '/api/members/chart-layout' && req.method === 'GET') {
-        const user = member(req);
+        const user = await member(req);
         if (!user) {
           json(res, 401, { ok: false, error: 'Sign in to open a chart layout.' });
           return true;
@@ -358,11 +374,11 @@ function createMemberDesk(options) {
           json(res, 403, locked('charts'));
           return true;
         }
-        json(res, 200, { ok: true, desk: store.getChartDesk(user.id) });
+        json(res, 200, { ok: true, desk: await store.getChartDesk(user.id) });
         return true;
       }
       if (url === '/api/members/chart-layout' && req.method === 'POST') {
-        const user = member(req);
+        const user = await member(req);
         if (!user) {
           json(res, 401, { ok: false, error: 'Sign in to save a chart layout.' });
           return true;
@@ -372,12 +388,12 @@ function createMemberDesk(options) {
           return true;
         }
         const body = await readBody(req);
-        const desk = store.updateChartDesk(user.id, body && body.desk, KNOWN);
+        const desk = await store.updateChartDesk(user.id, body && body.desk, KNOWN);
         json(res, 200, { ok: true, desk });
         return true;
       }
       if (url === '/api/members/ask' && req.method === 'POST') {
-        const user = member(req);
+        const user = await member(req);
         if (!user) {
           json(res, 401, { ok: false, error: 'Sign in to use the analyst.' });
           return true;
@@ -392,18 +408,18 @@ function createMemberDesk(options) {
         return true;
       }
       if (url === '/api/members/watchlist' && req.method === 'POST') {
-        const user = member(req);
+        const user = await member(req);
         if (!user) {
           json(res, 401, { ok: false, error: 'Sign in to save a watchlist.' });
           return true;
         }
         const body = await readBody(req);
-        const next = store.updateWatchlist(user.id, body.instruments, KNOWN);
+        const next = await store.updateWatchlist(user.id, body.instruments, KNOWN);
         json(res, 200, { ok: true, watchlist: next.watchlist });
         return true;
       }
       if (url === '/api/members/alerts' && req.method === 'POST') {
-        const user = member(req);
+        const user = await member(req);
         if (!user) {
           json(res, 401, { ok: false, error: 'Sign in to save alerts.' });
           return true;
@@ -413,13 +429,13 @@ function createMemberDesk(options) {
           return true;
         }
         const body = await readBody(req);
-        const next = store.updateAlerts(user.id, body.alerts);
+        const next = await store.updateAlerts(user.id, body.alerts);
         const board = await liveBoard(ctx.news);
         json(res, 200, { ok: true, alerts: evaluateAlerts(next.alerts, board.signals, channelStatus()), channels: channelStatus() });
         return true;
       }
       if (url === '/api/members/journal' && req.method === 'POST') {
-        const user = member(req);
+        const user = await member(req);
         if (!user) {
           json(res, 401, { ok: false, error: 'Sign in to save a journal.' });
           return true;
@@ -429,12 +445,12 @@ function createMemberDesk(options) {
           return true;
         }
         const body = await readBody(req);
-        const next = store.updateJournal(user.id, body.entries);
+        const next = await store.updateJournal(user.id, body.entries);
         json(res, 200, { ok: true, journal: next.journal });
         return true;
       }
       if (url === '/api/members/history' && req.method === 'GET') {
-        const user = member(req);
+        const user = await member(req);
         if (!user) {
           json(res, 401, { ok: false, error: 'Sign in to open signal history.' });
           return true;
@@ -452,6 +468,38 @@ function createMemberDesk(options) {
         json(res, 200, record);
         return true;
       }
+      if (url === '/api/members/checkout' && req.method === 'POST') {
+        const user = await member(req);
+        if (!user) {
+          json(res, 401, { ok: false, error: 'Sign in before checkout.' });
+          return true;
+        }
+        const body = await readBody(req);
+        const row = await store.findByEmail(user.email);
+        const result = await billing.createCheckoutSession(
+          billing.stripeSettings(),
+          row ? { id: row.id, email: row.email } : user,
+          body && body.tier,
+          process.env.SITE_URL || 'https://aurafxelite.com'
+        );
+        json(res, 200, result);
+        return true;
+      }
+      if (url === '/api/members/billing-portal' && req.method === 'POST') {
+        const user = await member(req);
+        if (!user) {
+          json(res, 401, { ok: false, error: 'Sign in to manage billing.' });
+          return true;
+        }
+        const row = await store.findByEmail(user.email);
+        const result = await billing.createPortalSession(
+          billing.stripeSettings(),
+          row && row.stripe_customer_id,
+          process.env.SITE_URL || 'https://aurafxelite.com'
+        );
+        json(res, 200, result);
+        return true;
+      }
       json(res, 404, { ok: false, error: 'Unknown members route.' });
       return true;
     } catch (error) {
@@ -460,7 +508,7 @@ function createMemberDesk(options) {
     }
   }
 
-  return { handle, store, workspace, evaluateAlerts };
+  return { handle, store: injected, storeReady, workspace, evaluateAlerts };
 }
 
 module.exports = { createMemberDesk, evaluateAlerts, teaseSignals, channelStatus };

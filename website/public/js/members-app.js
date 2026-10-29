@@ -399,6 +399,24 @@
   document.getElementById('memMenu').addEventListener('click', function () {
     document.getElementById('memSide').classList.toggle('open');
   });
+  var billing = document.getElementById('memBilling');
+  if (billing) {
+    fetch('/api/billing/status', { credentials: 'same-origin', cache: 'no-store' })
+      .then(function (res) { return res.json(); })
+      .then(function (body) { billing.hidden = !(body && body.portal); })
+      .catch(function () { billing.hidden = true; });
+    billing.addEventListener('click', function () {
+      billing.disabled = true;
+      fetch('/api/members/billing-portal', { method: 'POST', credentials: 'same-origin' })
+        .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+        .then(function (result) {
+          billing.disabled = false;
+          if (result.data && result.data.url) { window.location.href = result.data.url; return; }
+          var who = document.getElementById('memWho');
+          if (who) who.textContent = (result.data && result.data.error) || 'The billing portal is not available yet.';
+        }).catch(function () { billing.disabled = false; });
+    });
+  }
   document.getElementById('memOut').addEventListener('click', function () {
     fetch('/api/members/logout', { method: 'POST', credentials: 'same-origin' }).then(function () { location.href = 'login.html'; });
   });

@@ -461,6 +461,46 @@ function createMembersStore(options) {
     return JSON.parse(JSON.stringify(next));
   }
 
+  function listPublic(query) {
+    load();
+    const q = String(query || '').trim().toLowerCase();
+    return rows.filter((row) => {
+      if (!q) return true;
+      return String(row.email || '').toLowerCase().includes(q) || String(row.name || '').toLowerCase().includes(q);
+    }).map((row) => ({
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      tier: TIERS.includes(row.tier) ? row.tier : 'free',
+      created_at: row.created_at
+    }));
+  }
+
+  function setStripeCustomer(email, customerId) {
+    load();
+    const row = findByEmail(email);
+    if (!row) return null;
+    row.stripe_customer_id = String(customerId || '').slice(0, 120);
+    save();
+    return publicMember(row);
+  }
+
+  function findByStripeCustomer(customerId) {
+    load();
+    const id = String(customerId || '');
+    if (!id) return null;
+    return rows.find((row) => row.stripe_customer_id === id) || null;
+  }
+
+  const seenBillingEvents = new Set();
+
+  function claimBillingEvent(id) {
+    const key = String(id || '');
+    if (!key || seenBillingEvents.has(key)) return false;
+    seenBillingEvents.add(key);
+    return true;
+  }
+
   function memberFromRequest(req) {
     load();
     const token = parseCookies(req)[COOKIE_NAME];
@@ -493,7 +533,12 @@ function createMembersStore(options) {
     sessionCookie,
     clearCookie,
     publicMember,
-    findByEmail
+    listPublic,
+    setStripeCustomer,
+    findByStripeCustomer,
+    claimBillingEvent,
+    findByEmail,
+    storage: 'file'
   };
 }
 
@@ -526,11 +571,36 @@ function tierAllows(tier, feature) {
   return tierRank(tier) >= needRank;
 }
 
+const FILE_WARNING = '[AuraFX members] DATABASE_URL is unset. Member accounts, tiers, drawings and alerts stay in website/data/members.json. A hosting redeploy can remove that file.';
+let fileWarningSent = false;
+
+function openMembersStore(options) {
+  const opts = options || {};
+  const url = opts.databaseUrl !== undefined
+    ? String(opts.databaseUrl || '')
+    : String(process.env.DATABASE_URL || '');
+  if (!url.trim()) {
+    if (!opts.silent && !fileWarningSent) {
+      fileWarningSent = true;
+      console.warn(FILE_WARNING);
+    }
+    return createMembersStore(opts);
+  }
+  const { createPgMembersStore } = require('./members-pg');
+  return createPgMembersStore({
+    connectionString: url.trim(),
+    pool: opts.pool,
+    file: opts.file
+  });
+}
+
 module.exports = {
   COOKIE_NAME,
   TIERS,
   FEATURES,
+  FILE_WARNING,
   createMembersStore,
+  openMembersStore,
   tierAllows,
   hashPassword,
   passwordMatches,
