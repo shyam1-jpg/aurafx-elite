@@ -65,7 +65,7 @@ function createDashboardLink(options) {
       if (recent.length >= 5) {
         return { status: 429, body: { ok: false, error: 'Too many sign-in emails. Try again later or use your password.' } };
       }
-      const knownMember = opts.members && opts.members.findByEmail ? opts.members.findByEmail(email) : null;
+      const knownMember = opts.members && opts.members.findByEmail ? await opts.members.findByEmail(email) : null;
       const reg = knownMember ? await registrationFor(email) : null;
       const same = {
         status: 200,
@@ -115,7 +115,7 @@ function createDashboardLink(options) {
 
     if (!email) return { status: 400, body: { ok: false, error: 'Email required' } };
     try {
-      opts.members.login(email, password, ctx.ip || 'dashboard');
+      await opts.members.login(email, password, ctx.ip || 'dashboard');
     } catch (error) {
       const status = error.status || 401;
       return {

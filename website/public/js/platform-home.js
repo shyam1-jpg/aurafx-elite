@@ -142,26 +142,76 @@
 
   function tierCard(tier, data) {
     var symbol = (data && data.currency_symbol) || '£';
-    var contact = (data && data.contact) || 'support@aurafxelite.com';
     var delay = tier.id === 'free' && tier.delay_minutes != null
       ? '<p class="pf-fine">Delay window: ' + esc(tier.delay_minutes) + ' minutes. The free snapshot stays empty until a saved scan is that old.</p>'
       : '';
     var annual = tier.annual_price == null ? ''
       : '<p class="pf-annual">' + esc(formatMoney(tier.annual_price, symbol)) + '/' + esc(tier.annual_period || 'year') + ' · two months free</p>';
-    var href = 'mailto:' + contact + '?subject=' + encodeURIComponent('AuraFX Elite — ' + (tier.name || 'pricing'));
+    var action = tier.id === 'free'
+      ? '<a class="pf-btn pf-btn-sm" href="signup.html">Create a free account</a>'
+      : (data && data.checkout
+        ? '<button type="button" class="pf-btn pf-btn-sm" data-checkout="' + esc(tier.id) + '">Checkout</button>'
+        : '<button type="button" class="pf-btn pf-btn-sm" disabled>Coming soon</button>');
     return '<article class="pf-card pf-price' + (tier.id === 'pro' ? ' is-pro' : '') + '">' +
       '<h3>' + esc(tier.name) + '</h3>' +
       '<p class="pf-amount">' + esc(priceText(tier, symbol)) + '</p>' +
       annual +
       '<ul>' + (tier.features || []).map(function (line) { return '<li>' + esc(line) + '</li>'; }).join('') + '</ul>' +
       delay +
-      '<a class="pf-btn pf-btn-sm" href="' + esc(href) + '">Contact us</a></article>';
+      action + '</article>';
+  }
+
+  function startCheckout(tier, mount) {
+    var note = mount.querySelector('.pf-pay-note');
+    if (note) note.textContent = 'Opening Stripe Checkout…';
+    fetch('/api/members/checkout', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier: tier })
+    }).then(function (res) { return res.json().then(function (body) { return { ok: res.ok, status: res.status, body: body }; }); })
+      .then(function (result) {
+        if (result.status === 401) {
+          window.location.href = 'login.html?next=' + encodeURIComponent('pricing.html');
+          return;
+        }
+        if (result.body && result.body.url) {
+          window.location.href = result.body.url;
+          return;
+        }
+        if (note) note.textContent = (result.body && result.body.error) || 'Checkout is coming soon.';
+      }).catch(function () {
+        if (note) note.textContent = 'Checkout could not be opened.';
+      });
   }
 
   function renderPricing(data, mount) {
     var tiers = (data && data.tiers) || [];
+    var portal = data && data.checkout
+      ? '<p><button type="button" class="pf-btn pf-btn-sm" data-portal="1">Manage billing</button></p>'
+      : '';
     mount.innerHTML = tiers.map(function (tier) { return tierCard(tier, data); }).join('') +
-      '<p class="pf-fine">' + esc((data && data.note) || 'Payment is not taken on this site yet.') + '</p>';
+      portal +
+      '<p class="pf-fine pf-pay-note">' + esc((data && data.note) || 'Checkout is coming soon. Email support@aurafxelite.com with questions.') + '</p>';
+    mount.onclick = function (event) {
+      var tier = event.target.getAttribute && event.target.getAttribute('data-checkout');
+      if (tier) startCheckout(tier, mount);
+      if (event.target.getAttribute && event.target.getAttribute('data-portal')) {
+        fetch('/api/members/billing-portal', { method: 'POST', credentials: 'same-origin' })
+          .then(function (res) { return res.json().then(function (body) { return { status: res.status, body: body }; }); })
+          .then(function (result) {
+            if (result.status === 401) {
+              window.location.href = 'login.html?next=' + encodeURIComponent('pricing.html');
+              return;
+            }
+            if (result.body && result.body.url) window.location.href = result.body.url;
+            else {
+              var note = mount.querySelector('.pf-pay-note');
+              if (note) note.textContent = (result.body && result.body.error) || 'The billing portal is not available yet.';
+            }
+          });
+      }
+    };
   }
 
   function loadPricing() {
