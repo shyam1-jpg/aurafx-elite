@@ -1,6 +1,7 @@
 'use strict';
 
 const STORAGE_NOTE = 'Members are stored in website/data/members.json on this server disk. The file is not in git and is not written to the database. A hosting redeploy can remove it unless the host keeps that folder.';
+const POSTGRES_NOTE = 'Members are stored in Postgres from DATABASE_URL. Accounts, tiers, drawings and alerts survive a redeploy. Passwords stay scrypt hashes.';
 
 function slim(member) {
   if (!member) return null;
@@ -15,7 +16,11 @@ function slim(member) {
 
 function createAdminMembers(options) {
   const opts = options || {};
-  const store = opts.store;
+  async function resolveStore() {
+    if (opts.store) return opts.store;
+    if (opts.storeGetter) return opts.storeGetter();
+    return null;
+  }
 
   async function handle(req, res, ctx) {
     const url = ctx.url;
@@ -24,16 +29,19 @@ function createAdminMembers(options) {
       ctx.json(res, 403, { ok: false, error: 'Forbidden — admin sign-in required' });
       return true;
     }
+    const store = await resolveStore();
     if (!store) {
       ctx.json(res, 503, { ok: false, error: 'Members store is unavailable.' });
       return true;
     }
     if (url === '/api/admin/members' && req.method === 'GET') {
+      const params = new URLSearchParams(ctx.rawUrl && ctx.rawUrl.includes('?') ? ctx.rawUrl.split('?')[1] : '');
+      const storage = store.storage === 'postgres' ? 'postgres' : 'file';
       ctx.json(res, 200, {
         ok: true,
-        members: store.listPublic(),
-        storage: 'file',
-        note: STORAGE_NOTE
+        members: await Promise.resolve(store.listPublic(params.get('q') || '')),
+        storage,
+        note: storage === 'postgres' ? POSTGRES_NOTE : STORAGE_NOTE
       });
       return true;
     }
@@ -42,7 +50,7 @@ function createAdminMembers(options) {
       const email = String(body && body.email || '').trim().toLowerCase();
       const tier = String(body && body.tier || '').trim().toLowerCase();
       try {
-        const member = store.setTier(email, tier);
+        const member = await Promise.resolve(store.setTier(email, tier));
         if (ctx.audit) ctx.audit('member_tier', req, email + ' ' + tier);
         ctx.json(res, 200, { ok: true, member: slim(member) });
       } catch (error) {
@@ -57,4 +65,4 @@ function createAdminMembers(options) {
   return { handle };
 }
 
-module.exports = { createAdminMembers, STORAGE_NOTE };
+module.exports = { createAdminMembers, STORAGE_NOTE, POSTGRES_NOTE };

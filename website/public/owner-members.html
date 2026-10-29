@@ -32,8 +32,9 @@
   <main class="mem-shell">
     <article class="mem-card">
       <h1>Members</h1>
-      <p>Signed-in owner view. New accounts from <a href="signup.html">signup</a> start on Free. Change a tier here. This does not take payment.</p>
+      <p>Signed-in owner view. New accounts from <a href="signup.html">signup</a> start on Free. Change a tier here. This does not take payment. Questions: <a href="mailto:support@aurafxelite.com">support@aurafxelite.com</a>.</p>
       <p id="storageNote" class="mem-note"></p>
+      <label>Search <input id="memberSearch" type="search" placeholder="Name or email" aria-label="Search members" /></label>
       <button type="button" class="btn btn-gold" id="btnRefresh">Refresh</button>
       <p id="memberMsg" class="mem-note" role="status"></p>
       <div class="mem-table-wrap">
@@ -73,7 +74,8 @@
       }
       function load() {
         msg.textContent = 'Loading members…';
-        return AURAFX_ADMIN.adminFetch('/api/admin/members')
+        var q = (document.getElementById('memberSearch').value || '').trim();
+        return AURAFX_ADMIN.adminFetch('/api/admin/members?q=' + encodeURIComponent(q))
           .then(function (res) { return res.json(); })
           .then(function (data) {
             document.getElementById('storageNote').textContent = data.note || '';
@@ -99,6 +101,10 @@
           }).catch(function (error) { msg.textContent = error.message || 'The tier was not saved.'; });
       });
       document.getElementById('btnRefresh').addEventListener('click', load);
+      document.getElementById('memberSearch').addEventListener('input', function () {
+        clearTimeout(load.timer);
+        load.timer = setTimeout(load, 200);
+      });
       document.getElementById('btnLogout').addEventListener('click', function () { AURAFX_ADMIN.adminLogout(); });
       AURAFX_ADMIN.requireAdmin().then(function (ok) { if (ok) load(); });
     })();

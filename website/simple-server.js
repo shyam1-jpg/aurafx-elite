@@ -155,21 +155,27 @@ try {
 }
 
 const { createAdminMembers } = require('./admin-members');
-const adminMembers = createAdminMembers({ store: memberDesk ? memberDesk.store : null });
+const billing = require('./billing');
+const adminMembers = createAdminMembers({
+  storeGetter: () => (memberDesk ? memberDesk.storeReady() : null)
+});
 const { createDashboardLink } = require('./dashboard-link');
 const { smtpSettings, deliverSmtp } = require('./signal-alerts');
 const dashboardLink = createDashboardLink({
   members: {
-    findByEmail(email) {
-      return memberDesk ? memberDesk.store.findByEmail(email) : null;
+    async findByEmail(email) {
+      if (!memberDesk) return null;
+      const store = await memberDesk.storeReady();
+      return store.findByEmail(email);
     },
-    login(email, password, ip) {
+    async login(email, password, ip) {
       if (!memberDesk) {
         const error = new Error('Member sign-in is unavailable.');
         error.status = 503;
         throw error;
       }
-      return memberDesk.store.login(email, password, ip);
+      const store = await memberDesk.storeReady();
+      return store.login(email, password, ip);
     }
   },
   findRegistration: async (email) => revealRow(await regStore.findByEmail(email)),
@@ -261,6 +267,24 @@ function corsPreflight(res) {
     'Access-Control-Allow-Headers': 'Content-Type, X-Owner-Key, X-Dashboard-Id, X-Dashboard-Token, X-Dashboard-Email'
   });
   res.end();
+}
+
+function readRawBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    let size = 0;
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > 1e6) {
+        reject(new Error('Body too large'));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
+  });
 }
 
 function readBody(req) {
@@ -885,9 +909,14 @@ function dashboardAuth(req) {
   return { id, email };
 }
 
-function dashboardLinkContext(req) {
+async function dashboardLinkContext(req) {
+  let member = null;
+  if (memberDesk) {
+    const store = await memberDesk.storeReady();
+    member = await store.memberFromRequest(req);
+  }
   return {
-    member: memberDesk ? memberDesk.store.memberFromRequest(req) : null,
+    member,
     ip: String(req.headers['x-forwarded-for'] || (req.socket && req.socket.remoteAddress) || 'dashboard').split(',')[0],
     cloudSync: !!(dashStore && dashStore.storageInfo().backend === 'neon')
   };
@@ -897,7 +926,7 @@ function handleDashboardSession(req, res) {
   if (!dashStore) return json(res, 503, { error: 'Dashboard sync unavailable' });
   readBody(req)
     .then(async (body) => {
-      const result = await dashboardLink.request(body, dashboardLinkContext(req));
+      const result = await dashboardLink.request(body, await dashboardLinkContext(req));
       json(res, result.status, result.body);
     })
     .catch((e) => json(res, 400, { error: e.message }));
@@ -907,7 +936,7 @@ function handleDashboardRedeem(req, res) {
   if (!dashStore) return json(res, 503, { error: 'Dashboard sync unavailable' });
   readBody(req)
     .then(async (body) => {
-      const result = await dashboardLink.redeem(body && body.token, dashboardLinkContext(req).cloudSync);
+      const result = await dashboardLink.redeem(body && body.token, (await dashboardLinkContext(req)).cloudSync);
       json(res, result.status, result.body);
     })
     .catch((e) => json(res, 400, { error: e.message }));
@@ -1061,6 +1090,7 @@ const server = http.createServer((req, res) => {
   if (url === '/api/admin/members' || url === '/api/admin/members/tier') {
     return adminMembers.handle(req, res, {
       url,
+      rawUrl,
       json,
       readBody,
       isAdmin: () => adminAuthOk(req),
@@ -1188,10 +1218,33 @@ const server = http.createServer((req, res) => {
     }
     return respond({ calendar: cache.calendar, nextEvent: cache.nextEvent, updatedAt: cache.updatedAt });
   }
+  if (url === '/api/billing/status' && req.method === 'GET') {
+    const settings = billing.stripeSettings();
+    return json(res, 200, { ok: true, checkout: settings.enabled, portal: settings.enabled });
+  }
+  if (url === '/api/stripe/webhook' && req.method === 'POST') {
+    return readRawBody(req)
+      .then(async (raw) => {
+        if (!memberDesk) return json(res, 503, { ok: false, error: 'Members store is unavailable.' });
+        const store = await memberDesk.storeReady();
+        const result = await billing.handleWebhook(
+          billing.stripeSettings(),
+          raw,
+          req.headers['stripe-signature'],
+          store
+        );
+        return json(res, 200, { ok: true, duplicate: !!result.duplicate });
+      })
+      .catch((error) => json(res, error.status || 400, { ok: false, error: error.message || 'Webhook was not accepted.' }));
+  }
   if (url === '/api/pricing' && req.method === 'GET') {
     try {
       const pricing = JSON.parse(fs.readFileSync(path.join(PUBLIC, 'pricing.json'), 'utf8'));
-      return json(res, 200, Object.assign({ ok: true }, pricing));
+      const checkout = billing.stripeSettings().enabled;
+      if (checkout) {
+        pricing.note = 'Pro and Elite use Stripe Checkout. The amounts above are the listed GBP prices. Cancel from Manage billing after a subscription starts. This pays for the software tier and does not place trades.';
+      }
+      return json(res, 200, Object.assign({ ok: true, checkout }, pricing));
     } catch (error) {
       return json(res, 500, { ok: false, error: 'Pricing file is missing' });
     }
