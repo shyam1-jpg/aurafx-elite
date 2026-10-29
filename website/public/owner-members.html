@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Members — AuraFX Admin</title>
+  <link rel="icon" href="assets/aura-icon-140.png?v=7" type="image/png" />
+  <link rel="stylesheet" href="css/site.css?v=11" />
+  <link rel="stylesheet" href="css/hub.css" />
+  <link rel="stylesheet" href="css/members.css?v=3" />
+  <script src="js/font-loader.js"></script>
+  <style>
+    @media (max-width: 700px) {
+      #memberTable thead { display: none; }
+      #memberTable, #memberTable tbody, #memberTable tr, #memberTable td { display: block; width: 100%; white-space: normal; }
+      #memberTable td { border: 0; padding: .2rem 0; }
+      #memberTable tr { border-bottom: 1px solid rgba(212, 175, 55, .2); padding: .45rem 0; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Admin">
+    <a href="index.html" class="logo" aria-label="AuraFX Elite home"><img src="assets/aurafx-elite-logo.png?v=7" alt="" class="logo-img" width="160" height="58" decoding="sync" /></a>
+    <div class="nav-links">
+      <a href="owner-leads.html">Registrations</a>
+      <a href="owner-members.html">Members</a>
+      <a href="system-status.html">Status</a>
+      <button type="button" class="btn btn-outline" id="btnLogout">Sign out</button>
+    </div>
+  </nav>
+  <main class="mem-shell">
+    <article class="mem-card">
+      <h1>Members</h1>
+      <p>Signed-in owner view. New accounts from <a href="signup.html">signup</a> start on Free. Change a tier here. This does not take payment.</p>
+      <p id="storageNote" class="mem-note"></p>
+      <button type="button" class="btn btn-gold" id="btnRefresh">Refresh</button>
+      <p id="memberMsg" class="mem-note" role="status"></p>
+      <div class="mem-table-wrap">
+        <table class="mem-table" id="memberTable">
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Tier</th><th>Since</th><th></th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="emptyMembers" class="mem-note" hidden>No member accounts on this server yet.</p>
+    </article>
+    <p class="mem-note">Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtesting and risk tools. Trading involves risk and no result is guaranteed.</p>
+  </main>
+  <footer class="footer"></footer>
+  <script src="js/site-chrome.js"></script>
+  <script src="js/admin-pages.js"></script>
+  <script>
+    (function () {
+      var msg = document.getElementById('memberMsg');
+      var body = document.querySelector('#memberTable tbody');
+      function esc(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+      function paint(members) {
+        var rows = members || [];
+        document.getElementById('emptyMembers').hidden = rows.length > 0;
+        body.innerHTML = rows.map(function (member) {
+          var tier = member.tier || 'free';
+          var options = ['free', 'pro', 'elite'].map(function (name) {
+            return '<option value="' + name + '"' + (name === tier ? ' selected' : '') + '>' + name + '</option>';
+          }).join('');
+          var since = member.created_at ? String(member.created_at).slice(0, 10) : '—';
+          return '<tr><td>' + esc(member.name) + '</td><td>' + esc(member.email) + '</td><td><select data-email="' + esc(member.email) + '" aria-label="Tier for ' + esc(member.email) + '">' + options + '</select></td><td>' + esc(since) + '</td><td><button type="button" class="btn btn-gold" data-save="' + esc(member.email) + '">Save</button></td></tr>';
+        }).join('');
+      }
+      function load() {
+        msg.textContent = 'Loading members…';
+        return AURAFX_ADMIN.adminFetch('/api/admin/members')
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            document.getElementById('storageNote').textContent = data.note || '';
+            paint(data.members || []);
+            msg.textContent = (data.members || []).length + ' member account' + ((data.members || []).length === 1 ? '' : 's') + '.';
+          })
+          .catch(function (error) { msg.textContent = error.message || 'Could not load members.'; });
+      }
+      body.addEventListener('click', function (event) {
+        var email = event.target.getAttribute('data-save');
+        if (!email) return;
+        var select = body.querySelector('select[data-email="' + email.replace(/"/g, '\\"') + '"]');
+        var tier = select ? select.value : '';
+        msg.textContent = 'Saving…';
+        AURAFX_ADMIN.adminFetch('/api/admin/members/tier', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, tier: tier })
+        }).then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+          .then(function (result) {
+            if (!result.ok) { msg.textContent = result.data.error || 'The tier was not saved.'; return; }
+            msg.textContent = result.data.member.email + ' is now ' + result.data.member.tier + '.';
+          }).catch(function (error) { msg.textContent = error.message || 'The tier was not saved.'; });
+      });
+      document.getElementById('btnRefresh').addEventListener('click', load);
+      document.getElementById('btnLogout').addEventListener('click', function () { AURAFX_ADMIN.adminLogout(); });
+      AURAFX_ADMIN.requireAdmin().then(function (ok) { if (ok) load(); });
+    })();
+  </script>
+</body>
+</html>

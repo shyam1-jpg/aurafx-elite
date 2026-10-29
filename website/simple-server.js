@@ -154,6 +154,8 @@ try {
   console.warn('[AuraFX] member-desk not loaded:', e.message);
 }
 
+const { createAdminMembers } = require('./admin-members');
+const adminMembers = createAdminMembers({ store: memberDesk ? memberDesk.store : null });
 const { createDashboardLink } = require('./dashboard-link');
 const { smtpSettings, deliverSmtp } = require('./signal-alerts');
 const dashboardLink = createDashboardLink({
@@ -1055,6 +1057,17 @@ const server = http.createServer((req, res) => {
       adminAuth.clearSessionCookie(res);
     }
     return json(res, 200, { ok: true });
+  }
+  if (url === '/api/admin/members' || url === '/api/admin/members/tier') {
+    return adminMembers.handle(req, res, {
+      url,
+      json,
+      readBody,
+      isAdmin: () => adminAuthOk(req),
+      audit: (event, request, detail) => {
+        if (adminAuth) adminAuth.auditLog(event, request, detail);
+      }
+    });
   }
   if (url === '/api/dashboard/session' && req.method === 'POST') return handleDashboardSession(req, res);
   if (url === '/api/dashboard/session/redeem' && req.method === 'POST') return handleDashboardRedeem(req, res);

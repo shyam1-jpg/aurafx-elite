@@ -461,6 +461,17 @@ function createMembersStore(options) {
     return JSON.parse(JSON.stringify(next));
   }
 
+  function listPublic() {
+    load();
+    return rows.map((row) => ({
+      id: row.id,
+      email: row.email,
+      name: row.name,
+      tier: TIERS.includes(row.tier) ? row.tier : 'free',
+      created_at: row.created_at
+    }));
+  }
+
   function memberFromRequest(req) {
     load();
     const token = parseCookies(req)[COOKIE_NAME];
@@ -493,6 +504,7 @@ function createMembersStore(options) {
     sessionCookie,
     clearCookie,
     publicMember,
+    listPublic,
     findByEmail
   };
 }

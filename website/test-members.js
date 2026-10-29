@@ -385,6 +385,64 @@ function harness() {
   assert.ok(chartCss.includes('.chart-grid.n4'));
   assert.ok(/grid-template-columns:\s*1fr;/.test(chartCss));
 
+  const { createAdminMembers, STORAGE_NOTE } = require('./admin-members');
+  const adminAuth = require('./admin-auth');
+  assert.ok(adminAuth.ADMIN_HTML.includes('/owner-members.html'));
+  const adminStore = createMembersStore({ file: path.join(os.tmpdir(), 'aura-admin-' + process.pid + '.json') });
+  adminStore.register({ name: 'Free Tester', email: 'free.tester@example.com', password: 'free-pass-1', acceptRisk: true });
+  const listed = adminStore.listPublic();
+  assert.strictEqual(listed[0].tier, 'free');
+  assert.ok(!listed[0].hash && !listed[0].salt && !listed[0].journal);
+  const adminApi = createAdminMembers({ store: adminStore });
+  const denied = harness();
+  const deniedDone = await adminApi.handle(
+    { method: 'GET', headers: {}, url: '/api/admin/members' },
+    denied.res,
+    { url: '/api/admin/members', json: denied.json, readBody: async () => ({}), isAdmin: () => false }
+  );
+  assert.strictEqual(deniedDone, true);
+  assert.strictEqual(denied.res.status, 403);
+  const opened = harness();
+  await adminApi.handle(
+    { method: 'GET', headers: {} },
+    opened.res,
+    { url: '/api/admin/members', json: opened.json, readBody: async () => ({}), isAdmin: () => true }
+  );
+  assert.strictEqual(opened.res.status, 200);
+  assert.strictEqual(opened.res.body.members[0].email, 'free.tester@example.com');
+  assert.strictEqual(opened.res.body.storage, 'file');
+  assert.ok(/not in git/i.test(opened.res.body.note));
+  assert.strictEqual(opened.res.body.note, STORAGE_NOTE);
+  assert.ok(!JSON.stringify(opened.res.body).includes('free-pass-1'));
+  const changed = harness();
+  await adminApi.handle(
+    { method: 'POST', headers: {} },
+    changed.res,
+    {
+      url: '/api/admin/members/tier',
+      json: changed.json,
+      readBody: async () => ({ email: 'free.tester@example.com', tier: 'pro' }),
+      isAdmin: () => true,
+      audit: () => {}
+    }
+  );
+  assert.strictEqual(changed.res.status, 200);
+  assert.strictEqual(changed.res.body.member.tier, 'pro');
+  assert.ok(!changed.res.body.member.hash);
+  assert.strictEqual(adminStore.listPublic()[0].tier, 'pro');
+  const badTier = harness();
+  await adminApi.handle(
+    { method: 'POST', headers: {} },
+    badTier.res,
+    { url: '/api/admin/members/tier', json: badTier.json, readBody: async () => ({ email: 'free.tester@example.com', tier: 'vip' }), isAdmin: () => true }
+  );
+  assert.strictEqual(badTier.res.status, 400);
+  const ownerPage = fs.readFileSync(path.join(__dirname, 'public', 'owner-members.html'), 'utf8');
+  assert.ok(!/parslia/i.test(ownerPage));
+  assert.ok(ownerPage.includes('/api/admin/members'));
+  assert.ok(ownerPage.includes('signup.html'));
+  assert.ok(!/ADMIN_PASSWORD|password\s*[:=]\s*['\"]/.test(ownerPage));
+
   const pages = ['members.html', 'login.html', 'signup.html', 'index.html', 'pricing.html'];
   pages.forEach((name) => {
     const html = fs.readFileSync(path.join(__dirname, 'public', name), 'utf8');
