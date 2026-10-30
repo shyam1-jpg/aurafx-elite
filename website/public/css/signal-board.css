@@ -69,6 +69,13 @@
 }
 .signal-ask-answer { margin: .65rem 0 0; font-size: .86rem; line-height: 1.45; }
 .signal-lead { margin: .45rem 0 0; font-size: .8rem; line-height: 1.4; color: var(--muted); }
+.signal-context { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .55rem; }
+.signal-context span {
+  font-size: .72rem; color: var(--muted); border: 1px solid rgba(212, 175, 55, .22);
+  border-radius: 999px; padding: .12rem .5rem;
+}
+.signal-context strong { color: var(--text); font-weight: 650; }
+.signal-outlook { margin: .45rem 0 0; font-size: .8rem; line-height: 1.45; color: var(--text); }
 .signal-rationale { margin: .45rem 0; font-size: .84rem; line-height: 1.45; }
 .signal-meta { margin: .45rem 0 0; font-size: .75rem; }
 .signal-more { margin-top: .55rem; }

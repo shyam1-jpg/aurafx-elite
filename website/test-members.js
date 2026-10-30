@@ -376,7 +376,7 @@ function harness() {
   assert.ok(!/dashboardToken:\s*dashStore/.test(serverSrc), 'registration and email lookup must not mint a dashboard token');
   assert.ok(serverSrc.includes('dashboardLink.request'));
   assert.ok(serverSrc.includes('/api/dashboard/session/redeem'));
-  ['member-charts.js', 'members-app.js', 'pro-dashboard.js'].forEach((name) => {
+  ['member-charts.js', 'members-app.js', 'pro-dashboard.js', 'market-desk.js', 'market-desk-model.js'].forEach((name) => {
     const text = fs.readFileSync(path.join(__dirname, 'public', 'js', name), 'utf8');
     assert.ok(!/parslia/i.test(text), name);
     assert.ok(!/90%|guaranteed profit/i.test(text), name);
