@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="css/luxury.css" />
   <link rel="stylesheet" href="css/hub.css" />
   <script src="js/font-loader.js"></script>
+  <script src="js/chart-upload.js?v=1" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 </head>
 <body class="lux-body">
@@ -355,7 +356,7 @@
             <section class="card screenshot-card card-wide" aria-labelledby="screenshotHeading">
               <h2 id="screenshotHeading">Chart screenshot overlay</h2>
               <label for="chartUpload" class="upload-label">Upload chart image</label>
-              <input type="file" id="chartUpload" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp" />
+              <input type="file" id="chartUpload" accept=".png,.jpg,.jpeg,.webp,.heic,.heif,image/png,image/jpeg,image/webp,image/heic,image/heif" />
               <canvas id="chartCanvas" width="640" height="360" role="img" aria-label="Chart with illustrative zones"></canvas>
               <pre id="screenshotAnalysis" class="analysis-out">Upload a chart for illustrative zone overlays.</pre>
             </section>
@@ -414,7 +415,7 @@
   <script src="js/elite-calendar.js"></script>
   <script src="js/elite-command.js"></script>
   <script src="js/advanced-market-chart.js?v=1"></script>
-  <script src="js/pro-dashboard.js?v=11"></script>
+  <script src="js/pro-dashboard.js?v=12"></script>
   <script src="js/position-size.js?v=1"></script>
   <script src="js/signal-board.js?v=7"></script>
   <script src="js/market-desk-model.js?v=1"></script>
