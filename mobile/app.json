@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "AuraFX Elite Signals",
+    "slug": "aurafx-elite-signals",
+    "scheme": "aurafxelite",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0a0c12",
+    "ios": {
+      "bundleIdentifier": "com.aurafxelite.signals",
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "The free tier uses this identifier to request ads. AuraFX Elite does not sell it."
+      }
+    },
+    "android": {
+      "package": "com.aurafxelite.signals",
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0c12",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "backgroundColor": "#0a0c12"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#d4af37"
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ]
+    ],
+    "extra": {
+      "apiBase": "https://aurafxelite.com",
+      "supportEmail": "support@aurafxelite.com"
+    },
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
