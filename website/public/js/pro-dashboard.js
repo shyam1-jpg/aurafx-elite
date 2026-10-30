@@ -893,38 +893,7 @@
 
   $('btnSyncJournal')?.addEventListener('click', () => pushJournalCloud().catch((e) => alert(e.message)));
 
-  $('chartUpload')?.addEventListener('change', (ev) => {
-    const file = ev.target.files[0];
-    const out = $('screenshotAnalysis');
-    const c = $('chartCanvas');
-    if (!file) return;
-    if (!IMAGE_TYPES.includes(file.type) && !IMAGE_EXT.test(file.name)) {
-      if (out) out.textContent = 'Please upload a PNG, JPG, or WebP image.';
-      ev.target.value = '';
-      return;
-    }
-    const img = new Image();
-    img.onload = () => {
-      if (!c) return;
-      const ctx = c.getContext('2d');
-      c.width = Math.min(800, img.width);
-      c.height = Math.min(450, img.height);
-      ctx.drawImage(img, 0, 0, c.width, c.height);
-      const w = c.width;
-      const h = c.height;
-      ctx.strokeStyle = '#2ecc71';
-      ctx.strokeRect(w * 0.1, h * 0.7, w * 0.8, h * 0.05);
-      ctx.strokeStyle = '#e74c3c';
-      ctx.strokeRect(w * 0.1, h * 0.15, w * 0.8, h * 0.05);
-      if (out) out.textContent = 'Preview loaded — illustrative zones drawn (not financial advice).';
-      URL.revokeObjectURL(img.src);
-    };
-    img.onerror = () => {
-      if (out) out.textContent = 'Could not read that image — try another PNG, JPG, or WebP file.';
-      ev.target.value = '';
-    };
-    img.src = URL.createObjectURL(file);
-  });
+  // Chart upload handler lives in js/chart-upload.js (loaded early, independent of this script).
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'r' || e.key === 'R') {
