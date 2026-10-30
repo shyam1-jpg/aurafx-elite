@@ -1,5 +1,5 @@
 (function () {
-  var state = { section: 'analyst', data: null, sort: { key: 'instrument', dir: 1 }, instrument: 'XAUUSD' };
+  var state = { section: 'desk', data: null, sort: { key: 'instrument', dir: 1 }, instrument: 'XAUUSD' };
 
   function esc(value) {
     return String(value == null ? '' : value)
@@ -41,7 +41,8 @@
       return;
     }
     var name = state.section;
-    if (name === 'analyst') root.innerHTML = analyst();
+    if (name === 'desk') root.innerHTML = desk();
+    else if (name === 'analyst') root.innerHTML = analyst();
     else if (name === 'charts') root.innerHTML = charts();
     else if (name === 'scanner') root.innerHTML = scanner();
     else if (name === 'strength') root.innerHTML = strength();
@@ -52,6 +53,21 @@
     else if (name === 'watchlist') root.innerHTML = watchlist();
     else root.innerHTML = sessions();
     bind();
+  }
+
+  function desk() {
+    var full = gate('brief');
+    var live = state.data.live && state.data.live.signals ? state.data.live : null;
+    var board = full && live
+      ? live
+      : { signals: state.data.teaser || [], disclaimer: state.data.disclaimer, updated_at: state.data.delayed && state.data.delayed.updated_at };
+    state._deskBoard = board;
+    state._deskDepth = full ? 'full' : 'teaser';
+    return '<article class="mem-card"><h2>Analysis desk</h2><p>' +
+      (full
+        ? 'The live scan. Open a market for trend, key levels, momentum, volatility, confidence and the reason for the signal.'
+        : 'Free shows the bias, regime and session. Factor notes, structure levels and scenario conditions are on Pro and Elite.') +
+      '</p><div id="memberDesk" data-desk-source="members"></div></article>';
   }
 
   function analyst() {
@@ -254,6 +270,16 @@
         view();
       });
     });
+    var memberDesk = document.getElementById('memberDesk');
+    if (memberDesk && window.AuraMarketDesk) {
+      window.AuraMarketDesk.mount(memberDesk, {
+        board: state._deskBoard || { signals: [] },
+        depth: state._deskDepth || 'teaser',
+        variant: 'embedded',
+        tier: state.data.member && state.data.member.tier,
+        refresh: false
+      });
+    }
     var chartDesk = document.getElementById('chartDesk');
     if (chartDesk && window.AuraMemberCharts) {
       var rows = ((state.data.live && state.data.live.signals) || state.data.teaser || []);

@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="css/luxury.css" />
   <link rel="stylesheet" href="css/elite-command.css" />
   <link rel="stylesheet" href="css/hub.css" />
+  <link rel="stylesheet" href="css/market-desk.css?v=2" />
   <link rel="icon" href="assets/aura-icon-140.png?v=7" type="image/png" />
 
   <script src="js/font-loader.js"></script>
@@ -33,11 +34,15 @@
     <span class="lux-badge-elite">Live intelligence</span>
     <h1 class="lux-title" style="margin-top:1rem">Global <em>Market Terminal</em></h1>
     <p style="color:var(--muted);max-width:680px;margin:1rem auto;font-size:1.02rem">
-      Real-time gold, forex, and crypto prices from public market feeds. Session clocks, economic calendar,
-      and institutional-style panels — educational context only, not trading advice.
+      Real-time gold, forex, metals and commodity context. The analysis desk reads the rule engine for trend,
+      key levels, momentum, volatility and the current signal. Educational context only, not a price forecast.
     </p>
     <span class="edu-badge">Prices refresh every second · Source shown on strip</span>
   </header>
+
+  <section class="section" aria-labelledby="deskHeading">
+    <div id="auraMarketDesk" data-market-desk data-desk-variant="page"></div>
+  </section>
 
   <section class="section" style="max-width:1100px;margin:0 auto">
     <h2>Trading sessions (local time)</h2>
@@ -80,6 +85,8 @@
   <script src="js/markets-universe.js"></script>
   <script src="js/global-markets.js"></script>
   <script src="js/luxury-fx.js"></script>
+  <script src="js/market-desk-model.js?v=1"></script>
+  <script src="js/market-desk.js?v=3"></script>
   <script src="js/site-chrome.js"></script>
 </body>
 </html>

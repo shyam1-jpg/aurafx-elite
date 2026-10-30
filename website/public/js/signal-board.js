@@ -57,6 +57,34 @@
     return '<span class="signal-regime ' + name + '">' + esc(label) + '</span>';
   }
 
+  function contextHtml(signal) {
+    const bits = [];
+    if (signal.trend) bits.push(['Trend', signal.trend]);
+    const momentum = (signal.factors || []).find((factor) => factor.key === 'momentum');
+    if (momentum && momentum.state) bits.push(['Momentum', momentum.state]);
+    else if (signal.rsi != null) bits.push(['RSI', signal.rsi]);
+    if (signal.atr_ratio != null) bits.push(['Volatility', signal.atr_ratio + '× ATR']);
+    if (signal.support != null) bits.push(['Support', price(signal, signal.support)]);
+    if (signal.resistance != null) bits.push(['Resistance', price(signal, signal.resistance)]);
+    if (!bits.length) return '';
+    return '<div class="signal-context">' + bits.map((bit) =>
+      '<span>' + esc(bit[0]) + ' <strong>' + esc(bit[1]) + '</strong></span>'
+    ).join('') + '</div>';
+  }
+
+  function outlookHtml(signal) {
+    const action = signal.action || 'WAIT';
+    if (action === 'BUY' || action === 'SELL') {
+      const word = action === 'BUY' ? 'Buy' : 'Sell';
+      return '<p class="signal-outlook">Scenario: ' + esc(word) +
+        ' bias on this scan while the ' + esc(signal.regime || 'current') +
+        ' rules hold. This is not a forecast of the next price.</p>';
+    }
+    const why = (signal.blockers || []).find((line) => !/pause window|high-impact news/i.test(line))
+      || 'The publication rules are not met on this scan.';
+    return '<p class="signal-outlook">Scenario: Wait. ' + esc(why) + '</p>';
+  }
+
   function leadLine(signal) {
     if ((signal.action || 'WAIT') === 'WAIT') {
       const line = (signal.blockers || []).find((item) => !/pause window|high-impact news/i.test(item));
@@ -104,6 +132,8 @@
       (!compact && signal.confidence_basis ? '<p class="signal-confidence-basis">' + esc(signal.confidence_basis) + '</p>' : '') +
       (!compact && lead ? '<p class="signal-lead">' + esc(lead) + '</p>' : '') +
       levels +
+      (compact ? '' : contextHtml(signal)) +
+      (compact ? '' : outlookHtml(signal)) +
       blockerHtml(signal, compact) +
       details +
       '</article>';
