@@ -9,6 +9,7 @@
     "dev": "node simple-server.js",
     "test:ai": "node test-ai-intelligence.js",
     "test:signals": "node test-signal-engine.js",
+    "test:quotes": "node test-quotes-resilience.js",
     "backtest:signals": "node scripts/backtest-signals.js"
   },
   "engines": {
