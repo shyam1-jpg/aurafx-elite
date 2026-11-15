@@ -2,6 +2,10 @@
  * AuraFX — NO npm install needed. Only Node.js required.
  * Run: node simple-server.js
  */
+process.on('unhandledRejection', (reason) => {
+  const detail = (reason && reason.stack) || (reason && reason.message) || String(reason);
+  console.error('[AuraFX] unhandledRejection (process kept alive):', detail);
+});
 try { require('dotenv').config(); } catch (_) { /* optional — run without npm install */ }
 const http = require('http');
 const fs = require('fs');
