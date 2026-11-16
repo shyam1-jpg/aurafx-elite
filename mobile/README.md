@@ -77,8 +77,10 @@ The free tier shows a banner. A completed rewarded test ad unlocks factor notes 
 
 RevenueCat product ids:
 
-- `aurafx_pro_monthly` maps to the site Pro tier
-- `aurafx_pro_yearly` maps to the site Elite tier (yearly price)
+- `aurafx_pro_monthly` maps to site Pro at £19 per month
+- `aurafx_pro_yearly` maps to site Pro at £190 per year
+- `aurafx_elite_monthly` maps to site Elite at £49 per month
+- `aurafx_elite_yearly` maps to site Elite at £490 per year
 
 Keys are read from `EXPO_PUBLIC_REVENUECAT_IOS_KEY` and `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`. Leave them unset until the store products exist. Without a key, Upgrade explains that the paid tier is not granted.
 

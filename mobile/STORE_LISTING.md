@@ -23,7 +23,7 @@ AuraFX Elite Signals is a signal point for people who want fewer setups, not a c
 
 The list shows the public scan from AuraFX Elite. A row is a published buy or sell only when the rule engine publishes one. Everything else stays on no-trade, with the reason the scan recorded. Open a row for the levels, the confidence score, and the measured track record: win rate, average R, profit factor and max drawdown from closed signals. When the sample is empty, the app says so.
 
-The free app shows ads. A rewarded ad can open the factor notes for one signal. Pro and Elite remove ads. Subscriptions use the product ids `aurafx_pro_monthly` (site Pro) and `aurafx_pro_yearly` (site Elite). Prices in the app are the prices returned by the site and, once the store is connected, the store.
+The free app shows ads. A rewarded ad can open the factor notes for one signal. Pro and Elite remove ads. Subscriptions use four product ids mapped to the site tiers: `aurafx_pro_monthly` (£19), `aurafx_pro_yearly` (£190), `aurafx_elite_monthly` (£49), and `aurafx_elite_yearly` (£490). Prices in the app are the prices returned by the site and, once the store is connected, the store.
 
 Analysis only. Auto trading is off. Nothing in the app places an order.
 
@@ -38,8 +38,10 @@ Aura Elite FX provides AI-assisted market analysis, confidence scoring, backtest
 
 ## Subscription copy
 
-- `aurafx_pro_monthly` — Pro, monthly. Removes ads and includes extra signal detail. Length: 1 month, renews until cancelled.
-- `aurafx_pro_yearly` — Elite, yearly. Removes ads and includes extra signal detail. Length: 1 year, renews until cancelled.
+- `aurafx_pro_monthly` — Pro, £19 per month. Removes ads and includes extra signal detail. Length: 1 month, renews until cancelled.
+- `aurafx_pro_yearly` — Pro, £190 per year. Removes ads and includes extra signal detail. Length: 1 year, renews until cancelled.
+- `aurafx_elite_monthly` — Elite, £49 per month. Removes ads and includes extra signal detail. Length: 1 month, renews until cancelled.
+- `aurafx_elite_yearly` — Elite, £490 per year. Removes ads and includes extra signal detail. Length: 1 year, renews until cancelled.
 
 Manage or cancel in the App Store or Google Play account settings. Payment is charged by the store.
 
@@ -60,9 +62,9 @@ Finance app. Not a game and not a casino. Suggested rating 17+ because it discus
 1. Signals — published list, or a clear no-trade scan when the engine publishes nothing.
 2. Signal — levels, chart state, and measured stats from the track record.
 3. Markets — forex, metals and commodities with a watchlist.
-4. Upgrade — Free, Pro monthly, Elite yearly.
+4. Upgrade — Free, plus Pro and Elite monthly and yearly.
 5. Settings — risk warning, privacy, and support@aurafxelite.com.
 
 ## Reviewer notes
 
-Test ads use Google's sample app ids and test ad units. Purchases stay inactive until RevenueCat keys and the two product ids are created in App Store Connect and Play Console. Do not review this draft as a submitted binary.
+Test ads use Google's sample app ids and test ad units. Purchases stay inactive until RevenueCat keys and the four product ids are created in App Store Connect and Play Console. Do not review this draft as a submitted binary.
